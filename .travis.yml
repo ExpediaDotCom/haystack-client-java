@@ -1,0 +1,11 @@
+language: java
+
+env:
+  global:
+    - BRANCH=${TRAVIS_BRANCH}
+    - TAG=${TRAVIS_TAG}
+    - SHA=${TRAVIS_COMMIT}
+
+notifications:
+  email:
+    - haystack-notifications@expedia.com
