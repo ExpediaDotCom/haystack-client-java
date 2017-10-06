@@ -113,23 +113,23 @@ public class Tracer implements io.opentracing.Tracer {
         return this;
 		}
 
-		@Override
-		public SpanBuilder withTag(String key, String value) {
-			// TODO Auto-generated method stub
-			return this;
-		}
+      @Override
+      public SpanBuilder withTag(String key, String value) {
+          this.tags.put(key, value);
+          return this;
+      }
 
-		@Override
-		public SpanBuilder withTag(String key, boolean value) {
-			// TODO Auto-generated method stub
-			return this;
-		}
+      @Override
+      public SpanBuilder withTag(String key, boolean value) {
+          this.tags.put(key, value);
+          return this;
+      }
 
-		@Override
-		public SpanBuilder withTag(String key, Number value) {
-			// TODO Auto-generated method stub
-			return this;
-		}
+      @Override
+      public SpanBuilder withTag(String key, Number value) {
+          this.tags.put(key, value);
+          return this;
+      }
 
 		@Override
 		public SpanBuilder withStartTimestamp(long microseconds) {
