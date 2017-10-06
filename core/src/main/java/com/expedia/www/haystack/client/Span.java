@@ -91,7 +91,7 @@ public class Span implements io.opentracing.Span {
 	/**
 	 * @return the references
 	 */
-	public Collection<Reference> getReferences() {
+	public List<Reference> getReferences() {
 		return references;
 	}
 

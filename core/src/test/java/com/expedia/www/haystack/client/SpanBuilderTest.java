@@ -26,6 +26,24 @@ public class SpanBuilderTest {
 
 
     @Test
+    public void testReferences() {
+        Span parent = tracer.buildSpan("parent").startManual();
+        Span following = tracer.buildSpan("following").startManual();
+
+        Span child = tracer.buildSpan("child")
+            .asChildOf(parent)
+            .addReference(References.FOLLOWS_FROM, following.context())
+            .startManual();
+
+
+        Assert.assertEquals(2, child.getReferences().size());
+        Assert.assertEquals(parent.context(), child.getReferences().get(0).getContext());
+        Assert.assertEquals(References.CHILD_OF, child.getReferences().get(0).getReferenceType());
+        Assert.assertEquals(following.context(), child.getReferences().get(1).getContext());
+        Assert.assertEquals(References.FOLLOWS_FROM, child.getReferences().get(1).getReferenceType());
+    }
+
+    @Test
     public void testWithTags() {
         Span child = tracer.buildSpan("child")
             .withTag("string-key", "string-value")
