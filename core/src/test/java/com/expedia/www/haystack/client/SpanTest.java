@@ -1,32 +1,13 @@
-/*
- * Copyright 2016-2017 The OpenTracing Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
 package com.expedia.www.haystack.client;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * @Author Pavol Loffay
- */
-public class MockSpanTest {
+public class SpanTest {
 
     private Tracer tracer;
     private Span span;
@@ -35,23 +16,6 @@ public class MockSpanTest {
     public void setUp() throws Exception {
         tracer = new Tracer.Builder("TestService").build();
         span = tracer.buildSpan("TestOperation").startManual();
-    }
-
-    @Test
-    public void testReferencePropagation() {
-        span.setBaggageItem("junk", "trunk");
-        span.setBaggageItem("junk2", "trunk2");
-
-        Span child = tracer.buildSpan("childSpan").asChildOf(span).startManual();
-        child.setBaggageItem("foo", "baz");
-
-        // parent doesn't get propgated to
-        Assert.assertNull(span.getBaggageItem("foo"));
-
-        // child does
-        Assert.assertEquals("baz", child.getBaggageItem("foo"));
-        Assert.assertEquals("trunk", child.getBaggageItem("junk"));
-        Assert.assertEquals("trunk2", child.getBaggageItem("junk2"));
     }
 
     @Test

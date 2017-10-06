@@ -98,9 +98,13 @@ public class Tracer implements io.opentracing.Tracer {
             return this;
         }
 
-        // add me
+        if (!(referencedContext instanceof SpanContext)) {
+            // can't do much here, so ignore it
+            return this;
+        }
 
-			return this;
+        references.add(new Reference(referenceType, (SpanContext) referencedContext));
+        return this;
 		}
 
 		@Override
@@ -138,10 +142,38 @@ public class Tracer implements io.opentracing.Tracer {
         return tracer.makeActive(startManual());
 		}
 
-      private SpanContext createContext() {
+      private SpanContext createNewContext() {
           UUID randomId = UUID.randomUUID();
           UUID zero = new UUID(0l, 0l);
           return new SpanContext(randomId, randomId, zero);
+      }
+
+      private SpanContext createDependantContext() {
+          Reference parent = references.get(0);
+          for (Reference reference : references) {
+              if (References.CHILD_OF.equals(reference.getReferenceType())) {
+                  // first parent wins
+                  parent = reference;
+                  break;
+              }
+          }
+
+          Map<String, String> baggage = new HashMap<>();
+          for (Reference reference : references) {
+              baggage.putAll(reference.getContext().getBaggage());
+          }
+
+          return new SpanContext(parent.getContext().getTraceId(),
+                                 UUID.randomUUID(),
+                                 parent.getContext().getSpanId(),
+                                 baggage);
+      }
+
+      private SpanContext createContext() {
+          if (references.isEmpty()) {
+              return createNewContext();
+          }
+          return createDependantContext();
       }
 
       private long calculateStartTime() {
