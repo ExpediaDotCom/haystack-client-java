@@ -78,7 +78,7 @@
         <version>${opentracing.version}</version>
         <scope>test</scope>
       </dependency>
- 
+
       <dependency>
         <groupId>io.opentracing</groupId>
         <artifactId>opentracing-noop</artifactId>
@@ -86,7 +86,7 @@
         <scope>test</scope>
       </dependency>
 
-     <dependency>
+      <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>${junit.version}</version>
@@ -189,4 +189,4 @@
     </pluginManagement>
   </build>
 
-  </project>
+</project>

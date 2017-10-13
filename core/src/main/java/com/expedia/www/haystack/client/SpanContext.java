@@ -39,39 +39,39 @@ public class SpanContext implements io.opentracing.SpanContext {
         return new SpanContext(traceId, spanId, parentId, newBaggage);
     }
 
-	@Override
-	public Iterable<Entry<String, String>> baggageItems() {
-			return baggage.entrySet();
-	}
+    @Override
+    public Iterable<Entry<String, String>> baggageItems() {
+        return baggage.entrySet();
+    }
 
     public Map<String, String> getBaggage() {
         return baggage;
-	}
+    }
 
     public String getBaggageItem(String key) {
         return this.baggage.get(key);
-	}
+    }
 
 
 
-	/**
-	 * @return the traceId
-	 */
-	public UUID getTraceId() {
-		return traceId;
-	}
+    /**
+     * @return the traceId
+     */
+    public UUID getTraceId() {
+        return traceId;
+    }
 
-	/**
-	 * @return the spanId
-	 */
-	public UUID getSpanId() {
-		return spanId;
-	}
+    /**
+     * @return the spanId
+     */
+    public UUID getSpanId() {
+        return spanId;
+    }
 
-	/**
-	 * @return the parentId
-	 */
-	public UUID getParentId() {
-		return parentId;
-	}
+    /**
+     * @return the parentId
+     */
+    public UUID getParentId() {
+        return parentId;
+    }
 }

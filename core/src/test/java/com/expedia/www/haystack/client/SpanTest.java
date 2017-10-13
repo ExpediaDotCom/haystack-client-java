@@ -85,7 +85,7 @@ public class SpanTest {
         String stringValue = "value-value";
         Long longValue = new Long(3l);
         boolean boolValue = false;
-        
+
         span.setTag(null, stringValue);
         span.setTag(null, longValue);
         span.setTag(null, boolValue);
@@ -110,7 +110,7 @@ public class SpanTest {
         Assert.assertEquals(key, data.getMessage());
         Assert.assertEquals(value, data.getPayload());
     }
-    
+
     @Test
     public void testLogForEmptyConditions() {
         long timestamp = 1111l;

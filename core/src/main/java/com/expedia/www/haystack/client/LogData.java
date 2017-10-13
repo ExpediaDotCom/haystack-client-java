@@ -25,34 +25,34 @@ public class LogData {
         this.fields = fields;
         this.message = null;
         this.payload = null;
-	}
+    }
 
-	/**
-	 * @return the timestamp
-	 */
-	public Long getTimestamp() {
-		return timestamp;
-	}
+    /**
+     * @return the timestamp
+     */
+    public Long getTimestamp() {
+        return timestamp;
+    }
 
-	/**
-	 * @return the fields
-	 */
-	public Map<String, ?> getFields() {
-      return Collections.unmodifiableMap(fields);
-	}
+    /**
+     * @return the fields
+     */
+    public Map<String, ?> getFields() {
+        return Collections.unmodifiableMap(fields);
+    }
 
-	/**
-	 * @return the message
-	 */
-	public String getMessage() {
-		return message;
-	}
+    /**
+     * @return the message
+     */
+    public String getMessage() {
+        return message;
+    }
 
-	/**
-	 * @return the payload
-	 */
-	public Object getPayload() {
-		return payload;
-	}
+    /**
+     * @return the payload
+     */
+    public Object getPayload() {
+        return payload;
+    }
 
 }
