@@ -10,10 +10,7 @@ public class LogData {
     private final Object payload;
 
     public LogData(Long timestamp, String message) {
-        this.timestamp = timestamp;
-        this.message = message;
-        this.payload = null;
-        this.fields = null;
+        this(timestamp, message, null);
     }
 
     public LogData(Long timestamp, String message, Object payload) {
