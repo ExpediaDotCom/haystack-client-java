@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Span implements io.opentracing.Span {
     private final Tracer tracer;
+    private final Clock clock;
     private final AtomicReference<SpanContext> context = new AtomicReference<>();
     private final AtomicReference<String> operationName = new AtomicReference<>();
     private final Map<String, Object> tags;
@@ -21,9 +22,10 @@ public class Span implements io.opentracing.Span {
 
     private final AtomicReference<Boolean> finished = new AtomicReference<>(false);
     private final List<RuntimeException> errors;
-    
-    public Span(Tracer tracer, String operationName, SpanContext context, long startTime, Map<String, Object> tags, List<Reference> references) {
+
+    public Span(Tracer tracer, Clock clock, String operationName, SpanContext context, long startTime, Map<String, Object> tags, List<Reference> references) {
         this.tracer = tracer;
+        this.clock = clock;
         this.operationName.compareAndSet(null, operationName);
         this.context.compareAndSet(null, context);
         this.startTime.compareAndSet(null, startTime);
@@ -71,10 +73,10 @@ public class Span implements io.opentracing.Span {
         return Collections.unmodifiableCollection(errors);
     }
 
-	@Override
-	public void finish() {
-      finishTrace(System.nanoTime());
-	}
+    @Override
+    public void finish() {
+        finishTrace(clock.milliTime());
+    }
 
 	@Override
 	public void finish(long finishMicros) {

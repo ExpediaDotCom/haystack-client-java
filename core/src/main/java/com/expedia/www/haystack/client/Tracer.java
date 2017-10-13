@@ -14,12 +14,14 @@ import io.opentracing.propagation.Format;
 import io.opentracing.util.ThreadLocalActiveSpanSource;
 
 public class Tracer implements io.opentracing.Tracer {
+    private final Clock clock;
     private final String serviceName;
     private final ActiveSpanSource activeSource;
 
-    public Tracer(String serviceName, ActiveSpanSource activeSource) {
+    public Tracer(String serviceName, ActiveSpanSource activeSource, Clock clock) {
         this.serviceName = serviceName;
         this.activeSource = activeSource;
+        this.clock = clock;
     }
 
 	/**
@@ -29,10 +31,10 @@ public class Tracer implements io.opentracing.Tracer {
 		return serviceName;
 	}
 
-	@Override
-	public SpanBuilder buildSpan(String operationName) {
-      return new SpanBuilder(this, operationName);
-	}
+    @Override
+    public SpanBuilder buildSpan(String operationName) {
+        return new SpanBuilder(this, clock, operationName);
+    }
 
 
 	@Override
@@ -62,7 +64,7 @@ public class Tracer implements io.opentracing.Tracer {
 
       private final Tracer tracer;
       
-
+        private Clock clock;
         private Boolean ignoreActive;
         private String operationName;
         private Long startTime;
@@ -70,8 +72,9 @@ public class Tracer implements io.opentracing.Tracer {
         private final List<Reference> references;
         private final Map<String, Object> tags;
 
-      public SpanBuilder(Tracer tracer, String operationName) {
-          this.tracer = tracer;
+        public SpanBuilder(Tracer tracer, Clock clock, String operationName) {
+            this.tracer = tracer;
+            this.clock = clock;
             this.operationName = operationName;
             this.startTime = 0l;
             this.ignoreActive = false;
@@ -178,14 +181,14 @@ public class Tracer implements io.opentracing.Tracer {
 
       private long calculateStartTime() {
           if (startTime == 0) {
-              return System.nanoTime();
+              return clock.microTime();
           }
           return startTime;
       }
 
 		@Override
 		public Span startManual() {
-        return new Span(tracer, operationName, createContext(), calculateStartTime(), tags, references);
+        return new Span(tracer, clock, operationName, createContext(), calculateStartTime(), tags, references);
 		}
 
         @Override
@@ -198,6 +201,7 @@ public class Tracer implements io.opentracing.Tracer {
     public static final class Builder {
         private String serviceName;
         private ActiveSpanSource activeSpanSource = new ThreadLocalActiveSpanSource();
+        private Clock clock = new SystemClock();
 
         public Builder(String serviceName) {
             this.serviceName = serviceName;
@@ -208,8 +212,13 @@ public class Tracer implements io.opentracing.Tracer {
             return this;
         }
 
+        public Builder withClock(Clock clock) {
+            this.clock = clock;
+            return this;
+        }
+
         public Tracer build() {
-            return new Tracer(serviceName, activeSpanSource);
+            return new Tracer(serviceName, activeSpanSource, clock);
         }
 
     }
