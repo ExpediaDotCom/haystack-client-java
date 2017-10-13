@@ -148,7 +148,7 @@ public class Tracer implements io.opentracing.Tracer {
           return new SpanContext(randomId, randomId, zero);
       }
 
-      private SpanContext createDependantContext() {
+      private SpanContext createDependentContext() {
           Reference parent = references.get(0);
           for (Reference reference : references) {
               if (References.CHILD_OF.equals(reference.getReferenceType())) {
@@ -173,7 +173,7 @@ public class Tracer implements io.opentracing.Tracer {
           if (references.isEmpty()) {
               return createNewContext();
           }
-          return createDependantContext();
+          return createDependentContext();
       }
 
       private long calculateStartTime() {
