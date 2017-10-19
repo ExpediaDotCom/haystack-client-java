@@ -1,10 +1,13 @@
 package com.expedia.www.haystack.client;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import com.expedia.www.haystack.client.dispatchers.Dispatcher;
 
 import io.opentracing.ActiveSpan;
 import io.opentracing.ActiveSpanSource;
@@ -14,14 +17,35 @@ import io.opentracing.propagation.Format;
 import io.opentracing.util.ThreadLocalActiveSpanSource;
 
 public class Tracer implements io.opentracing.Tracer {
+    private final Dispatcher dispatcher;
     private final Clock clock;
     private final String serviceName;
     private final ActiveSpanSource activeSource;
 
-    public Tracer(String serviceName, ActiveSpanSource activeSource, Clock clock) {
+    public Tracer(String serviceName, ActiveSpanSource activeSource, Clock clock, Dispatcher dispatcher) {
         this.serviceName = serviceName;
         this.activeSource = activeSource;
         this.clock = clock;
+        this.dispatcher = dispatcher;
+    }
+
+    public void close() throws IOException {
+        dispatcher.close();
+    }
+
+    public void flush() throws IOException {
+        dispatcher.flush();
+    }
+
+    void dispatch(Span span) {
+        dispatcher.dispatch(span);
+    }
+
+    /**
+     * @return the dispatcher
+     */
+    public Dispatcher getDispatcher() {
+        return dispatcher;
     }
 
     /**
@@ -202,9 +226,11 @@ public class Tracer implements io.opentracing.Tracer {
         private String serviceName;
         private ActiveSpanSource activeSpanSource = new ThreadLocalActiveSpanSource();
         private Clock clock = new SystemClock();
+        private Dispatcher dispatcher;
 
-        public Builder(String serviceName) {
+        public Builder(String serviceName, Dispatcher dispatcher) {
             this.serviceName = serviceName;
+            this.dispatcher = dispatcher;
         }
 
         public Builder withActiveSpanSource(ActiveSpanSource source) {
@@ -218,7 +244,7 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         public Tracer build() {
-            return new Tracer(serviceName, activeSpanSource, clock);
+            return new Tracer(serviceName, activeSpanSource, clock, dispatcher);
         }
 
     }

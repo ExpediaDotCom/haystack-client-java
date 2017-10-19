@@ -6,15 +6,20 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.expedia.www.haystack.client.dispatchers.Dispatcher;
+import com.expedia.www.haystack.client.dispatchers.NoopDispatcher;
+
 import io.opentracing.References;
 
 public class SpanBuilderTest {
 
+    private Dispatcher dispatcher;
     private Tracer tracer;
 
     @Before
     public void setUp() throws Exception {
-        tracer = new Tracer.Builder("TestService").build();
+        dispatcher = new NoopDispatcher();
+        tracer = new Tracer.Builder("TestService", dispatcher).build();
     }
 
     @Test
