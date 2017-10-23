@@ -88,6 +88,7 @@ public class Span implements io.opentracing.Span {
         this.endTime.compareAndSet(null, finishMicros);
         this.duration.compareAndSet(null, endTime.get() - startTime.get());
         finished.compareAndSet(false, true);
+        tracer.dispatch(this);
     }
 
     /**
