@@ -197,6 +197,11 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         private SpanContext createContext() {
+            // handle active spans if needed
+            if (references.isEmpty() && !ignoreActive && tracer.activeSpan() != null) {
+                asChildOf(tracer.activeSpan());
+            }
+
             if (references.isEmpty()) {
                 return createNewContext();
             }
