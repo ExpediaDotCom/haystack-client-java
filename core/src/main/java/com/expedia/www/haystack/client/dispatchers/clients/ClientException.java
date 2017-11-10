@@ -3,7 +3,6 @@ package com.expedia.www.haystack.client.dispatchers.clients;
 /**
  * An Exception to indicate a client failure
  *
- * @author
  */
 public class ClientException extends Exception {
     public ClientException() {
