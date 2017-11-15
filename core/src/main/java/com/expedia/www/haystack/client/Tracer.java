@@ -8,25 +8,32 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
+import com.expedia.www.haystack.client.propagation.Extractor;
+import com.expedia.www.haystack.client.propagation.Injector;
+import com.expedia.www.haystack.client.propagation.PropagationRegistry;
+import com.expedia.www.haystack.client.propagation.TextMapPropagator;
 
 import io.opentracing.ActiveSpan;
 import io.opentracing.ActiveSpanSource;
 import io.opentracing.BaseSpan;
 import io.opentracing.References;
 import io.opentracing.propagation.Format;
+import io.opentracing.propagation.TextMap;
 import io.opentracing.util.ThreadLocalActiveSpanSource;
 
 public class Tracer implements io.opentracing.Tracer {
     private final Dispatcher dispatcher;
     private final Clock clock;
+    private final PropagationRegistry registry;
     private final String serviceName;
     private final ActiveSpanSource activeSource;
 
-    public Tracer(String serviceName, ActiveSpanSource activeSource, Clock clock, Dispatcher dispatcher) {
+    public Tracer(String serviceName, ActiveSpanSource activeSource, Clock clock, Dispatcher dispatcher, PropagationRegistry registry) {
         this.serviceName = serviceName;
         this.activeSource = activeSource;
         this.clock = clock;
         this.dispatcher = dispatcher;
+        this.registry = registry;
     }
 
     public void close() throws IOException {
@@ -63,14 +70,23 @@ public class Tracer implements io.opentracing.Tracer {
 
     @Override
     public <C> void inject(io.opentracing.SpanContext spanContext, Format<C> format, C carrier) {
-        // TODO Auto-generated method stub
+        final Injector<C> injector = registry.getInjector(format);
+        if (injector == null) {
+            throw new IllegalArgumentException(String.format("Unsupported format: %s", format));
+        } else if (!(spanContext instanceof SpanContext)) {
+            throw new IllegalArgumentException(String.format("Invalid SpanContext type: %s", spanContext));
+        }
 
+        injector.inject((SpanContext) spanContext, carrier);
     }
 
     @Override
     public <C> SpanContext extract(Format<C> format, C carrier) {
-        // TODO Auto-generated method stub
-        return null;
+        final Extractor<C> extractor = registry.getExtractor(format);
+        if (extractor == null) {
+            throw new IllegalArgumentException(String.format("Unsupported format: %s", format));
+        }
+        return extractor.extract(carrier);
     }
 
     @Override
@@ -232,10 +248,20 @@ public class Tracer implements io.opentracing.Tracer {
         private ActiveSpanSource activeSpanSource = new ThreadLocalActiveSpanSource();
         private Clock clock = new SystemClock();
         private Dispatcher dispatcher;
+        private PropagationRegistry registry = new PropagationRegistry();
 
         public Builder(String serviceName, Dispatcher dispatcher) {
             this.serviceName = serviceName;
             this.dispatcher = dispatcher;
+
+            TextMapPropagator textMapPropagator = new TextMapPropagator.Builder().build();
+            withFormat(Format.Builtin.TEXT_MAP, (Injector<TextMap>) textMapPropagator);
+            withFormat(Format.Builtin.TEXT_MAP, (Extractor<TextMap>) textMapPropagator);
+
+            TextMapPropagator httpPropagator = new TextMapPropagator.Builder().withURLCodex().build();
+            withFormat(Format.Builtin.HTTP_HEADERS, (Injector<TextMap>) httpPropagator);
+            withFormat(Format.Builtin.HTTP_HEADERS, (Extractor<TextMap>) httpPropagator);
+
         }
 
         public Builder withActiveSpanSource(ActiveSpanSource source) {
@@ -248,8 +274,29 @@ public class Tracer implements io.opentracing.Tracer {
             return this;
         }
 
+        public <T> Builder withFormat(Format<T> format, Injector<T> injector) {
+            registry.register(format, injector);
+            return this;
+        }
+
+        public <T> Builder withFormat(Format<T> format, Extractor<T> extractor) {
+            registry.register(format, extractor);
+            return this;
+        }
+
+        public <T> Builder withoutFormat(Format<T> format) {
+            registry.deregisterInjector(format);
+            registry.deregisterExtractor(format);
+            return this;
+        }
+
+        public Builder clearAllFormats() {
+            registry.clear();
+            return this;
+        }
+
         public Tracer build() {
-            return new Tracer(serviceName, activeSpanSource, clock, dispatcher);
+            return new Tracer(serviceName, activeSpanSource, clock, dispatcher, registry);
         }
 
     }
