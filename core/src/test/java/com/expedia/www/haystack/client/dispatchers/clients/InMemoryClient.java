@@ -4,34 +4,67 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.expedia.www.haystack.client.Span;
 
 public class InMemoryClient extends NoopClient {
-    private List<Span> spans;
+    private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryClient.class);
+
+    private Semaphore limiter;
+    private List<Span> total;
+    private List<Span> recieved;
+    private List<Span> flushed;
 
     public InMemoryClient() {
-        spans = new ArrayList<>();
+        this(Integer.MAX_VALUE);
+    }
+
+    public InMemoryClient(int limit) {
+        limiter = new Semaphore(limit);
+        total = new ArrayList<>();
+        recieved = new ArrayList<>();
+        flushed = new ArrayList<>();
     }
 
     @Override
     public boolean send(Span span) {
-        synchronized (this) {
-            spans.add(span);
+        LOGGER.info("Span sent to client: " + span);
+        try {
+            limiter.acquire();
+            total.add(span);
+            recieved.add(span);
             return true;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
     @Override
-    public void flush() throws IOException {
-        synchronized (this) {
-            spans.clear();
-        }
+    public void close() throws IOException {
+        LOGGER.info("Client closed");
+        flush();
     }
 
-    public List<Span> getReportedSpans() {
-        synchronized (this) {
-            return Collections.unmodifiableList(spans);
-        }
+    @Override
+    public void flush() throws IOException {
+        LOGGER.info("Client flushed");
+        flushed.addAll(recieved);
+        recieved.clear();
+    }
+
+    public List<Span> getTotalSpans() {
+        return Collections.unmodifiableList(total);
+    }
+
+    public List<Span> getFlushedSpans() {
+        return Collections.unmodifiableList(flushed);
+    }
+
+    public List<Span> getRecievedSpans() {
+        return Collections.unmodifiableList(recieved);
     }
 }
