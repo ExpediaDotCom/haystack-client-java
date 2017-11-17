@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.lang3.builder.RecursiveToStringStyle;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
 import com.expedia.www.haystack.client.propagation.Extractor;
 import com.expedia.www.haystack.client.propagation.Injector;
@@ -34,6 +37,13 @@ public class Tracer implements io.opentracing.Tracer {
         this.clock = clock;
         this.dispatcher = dispatcher;
         this.registry = registry;
+    }
+
+    @Override
+    public String toString() {
+        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
+            .setExcludeFieldNames("clock", "activeSource")
+            .toString();
     }
 
     public void close() throws IOException {
