@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.RecursiveToStringStyle;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
 import com.expedia.www.haystack.client.Span;
 
 public class ChainedDispatcher implements Dispatcher {
@@ -13,6 +16,12 @@ public class ChainedDispatcher implements Dispatcher {
     public ChainedDispatcher(Dispatcher... dispatchers) {
         this.dispatchers = new ArrayList<>();
         Collections.addAll(this.dispatchers, dispatchers);
+    }
+
+    @Override
+    public String toString() {
+        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
+            .toString();
     }
 
     @Override

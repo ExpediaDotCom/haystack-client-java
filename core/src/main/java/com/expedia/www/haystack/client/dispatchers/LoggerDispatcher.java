@@ -2,6 +2,8 @@ package com.expedia.www.haystack.client.dispatchers;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.builder.RecursiveToStringStyle;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +22,12 @@ public class LoggerDispatcher implements Dispatcher {
         } else {
             this.logger = logger;
         }
+    }
+
+    @Override
+    public String toString() {
+        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
+            .toString();
     }
 
     @Override

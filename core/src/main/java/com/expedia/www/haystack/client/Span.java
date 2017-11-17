@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.lang3.builder.RecursiveToStringStyle;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
 public class Span implements io.opentracing.Span {
     private final Tracer tracer;
     private final Clock clock;
@@ -46,6 +49,12 @@ public class Span implements io.opentracing.Span {
         }
     }
 
+    @Override
+    public String toString() {
+        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
+            .setExcludeFieldNames("tracer", "clock")
+            .toString();
+    }
 
     /**
      * Helper to record illegal access to span internals after <code>finish()</code>

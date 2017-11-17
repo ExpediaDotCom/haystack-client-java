@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import org.apache.commons.lang3.builder.RecursiveToStringStyle;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
 public class SpanContext implements io.opentracing.SpanContext {
 
     private final Map<String, String> baggage;
@@ -28,6 +31,11 @@ public class SpanContext implements io.opentracing.SpanContext {
         this.baggage = Collections.unmodifiableMap(baggage);
     }
 
+    @Override
+    public String toString() {
+        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
+            .toString();
+    }
 
     public SpanContext addBaggage(Map<String, String> newBaggage) {
         return new SpanContext(traceId, spanId, parentId, newBaggage);

@@ -3,6 +3,9 @@ package com.expedia.www.haystack.client;
 import java.util.Collections;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.RecursiveToStringStyle;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
 public class LogData {
     private final Long timestamp;
     private final Map<String, ?> fields;
@@ -25,6 +28,12 @@ public class LogData {
         this.fields = fields;
         this.message = null;
         this.payload = null;
+    }
+
+    @Override
+    public String toString() {
+        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
+            .toString();
     }
 
     /**

@@ -3,6 +3,9 @@ package com.expedia.www.haystack.client.propagation;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.RecursiveToStringStyle;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
 import io.opentracing.propagation.Format;
 
 /**
@@ -18,6 +21,12 @@ public class PropagationRegistry {
     public PropagationRegistry() {
         injectors = new HashMap<>();
         extractors = new HashMap<>();
+    }
+
+    @Override
+    public String toString() {
+        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
+            .toString();
     }
 
     public void clear() {

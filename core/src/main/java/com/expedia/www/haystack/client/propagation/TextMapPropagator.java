@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.lang3.builder.RecursiveToStringStyle;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
 import com.expedia.www.haystack.client.SpanContext;
 
 import io.opentracing.propagation.TextMap;
@@ -18,6 +21,12 @@ public class TextMapPropagator implements Injector<TextMap>, Extractor<TextMap> 
         this.convention = convention;
         this.keyCodex = keyCodex;
         this.valueCodex = valueCodex;
+    }
+
+    @Override
+    public String toString() {
+        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
+            .toString();
     }
 
     private String prefixKey(String prefix, String key) {
