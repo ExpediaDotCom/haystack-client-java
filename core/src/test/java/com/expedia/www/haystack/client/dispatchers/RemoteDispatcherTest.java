@@ -99,6 +99,17 @@ public class RemoteDispatcherTest {
         Assert.assertEquals(1, client.getFlushedSpans().size());
     }
 
+    @Test
+    public void testBuilderDefaults() throws IOException {
+        dispatcher = new RemoteDispatcher.Builder(client).build();
+        tracer = new Tracer.Builder("remote-dispatcher", dispatcher).build();
 
+        Span span = tracer.buildSpan("happy-path").startManual();
+        dispatcher.dispatch(span);
+        dispatcher.close();
 
+        Assert.assertEquals(0, client.getRecievedSpans().size());
+        Assert.assertEquals(1, client.getTotalSpans().size());
+        Assert.assertEquals(1, client.getFlushedSpans().size());
+    }
 }
