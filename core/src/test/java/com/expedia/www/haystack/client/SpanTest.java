@@ -114,6 +114,7 @@ public class SpanTest {
         Assert.assertEquals((Long) timestamp, data.getTimestamp());
         Assert.assertEquals(key, data.getMessage());
         Assert.assertEquals(value, data.getPayload());
+        Assert.assertEquals(0, data.getFields().size());
     }
 
     @Test
@@ -133,7 +134,6 @@ public class SpanTest {
         List<LogData> logs = span.getLogs();
         Assert.assertEquals(0, logs.size());
     }
-
 
     @Test
     public void testSetOperationNameAfterFinish() {
