@@ -33,6 +33,7 @@
     <mockito.version>1.9.5</mockito.version>
     <awaitility.version>3.0.0</awaitility.version>
     <commonslang3.version>3.7</commonslang3.version>
+    <grpc.version>1.7.0</grpc.version>
 
     <!--Plugin Properties -->
     <maven-jacoco-plugin.version>0.7.9</maven-jacoco-plugin.version>
@@ -77,6 +78,29 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
         <version>${commonslang3.version}</version>
+      </dependency>
+
+      <!-- grpc -->
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-netty</artifactId>
+        <version>${grpc.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-protobuf</artifactId>
+        <version>${grpc.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-stub</artifactId>
+        <version>${grpc.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.grpc</groupId>
+        <artifactId>grpc-testing</artifactId>
+        <version>${grpc.version}</version>
+        <scope>test</scope>
       </dependency>
 
       <!-- Test dependencies -->
@@ -169,6 +193,7 @@
                 <goal>run</goal>
               </goals>
               <configuration>
+                <protocArtifact>com.google.protobuf:protoc:3.0.0</protocArtifact>
                 <includeDirectories>
                   <include>${project.parent.basedir}/idl/proto</include>
                 </includeDirectories>
@@ -176,6 +201,15 @@
                   <include>${project.parent.basedir}/idl/proto</include>
                 </inputDirectories>
                 <outputDirectory>${project.basedir}/target/generated-sources</outputDirectory>
+                <outputTargets>
+                  <outputTarget>
+                    <type>java</type>
+                  </outputTarget>
+                  <outputTarget>
+                    <type>grpc-java</type>
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.0.1</pluginArtifact>
+                  </outputTarget>
+                </outputTargets>
               </configuration>
             </execution>
           </executions>
