@@ -44,4 +44,23 @@ public class LoggerDispatcher implements Dispatcher {
     public void close() throws IOException {
         // do nothing
     }
+
+    public static final class Builder {
+        private Logger logger;
+
+        public Builder withLogger(String loggerName) {
+            this.logger = LoggerFactory.getLogger(loggerName);
+            return this;
+        }
+
+        public Builder withLogger(Logger logger) {
+            this.logger = logger;
+            return this;
+        }
+
+        public LoggerDispatcher build() {
+            return new LoggerDispatcher(logger);
+        }
+    }
+
 }
