@@ -20,12 +20,17 @@ public class LogData {
         this.timestamp = timestamp;
         this.message = message;
         this.payload = payload;
-        this.fields = null;
+        this.fields = Collections.<String, Object>emptyMap();
     }
 
     public LogData(Long timestamp, Map<String, ?> fields) {
         this.timestamp = timestamp;
-        this.fields = fields;
+        if (fields != null) {
+            this.fields = Collections.<String, Object>unmodifiableMap(fields);
+        } else {
+            this.fields = Collections.<String, Object>emptyMap();
+        }
+
         this.message = null;
         this.payload = null;
     }
@@ -47,7 +52,7 @@ public class LogData {
      * @return the fields
      */
     public Map<String, ?> getFields() {
-        return Collections.unmodifiableMap(fields);
+        return fields;
     }
 
     /**
