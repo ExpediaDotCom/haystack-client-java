@@ -137,6 +137,7 @@ public class RemoteDispatcher implements Dispatcher {
 
         public Builder(Client client) {
             this.client = client;
+            acceptQueue = new ArrayBlockingQueue<>(1000);
             flushInterval = TimeUnit.MINUTES.toMillis(1);
             shutdownTimeout = TimeUnit.MINUTES.toMillis(1);
             executor = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
