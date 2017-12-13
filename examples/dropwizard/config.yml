@@ -1,0 +1,40 @@
+template: Hello, %s!
+defaultName: Stranger
+
+tracer:
+  serviceName: HelloWorld
+  enabled: true
+  dispatchers:
+    - type: logger
+      loggerName: dispatcher
+    - type: remote
+      client:
+        type: logger
+        loggerName: client
+        format:
+          type: protobuf
+
+logging:
+  level: INFO
+  loggers:
+    group: DEBUG
+
+    # capture logger dispatcher interactions to a seperate file
+    dispatcher:
+      level: DEBUG
+      additive: false
+      appenders:
+        - type: file
+          currentLogFilename: ./logs/dispatcher.log
+          archivedLogFilenamePattern: ./logs/dispatcher-%d.log.gz
+          archivedFileCount: 5
+
+    # capture logger client interactions to a seperate file
+    client:
+      level: DEBUG
+      additive: false
+      appenders:
+        - type: file
+          currentLogFilename: ./logs/client.log
+          archivedLogFilenamePattern: ./logs/client-%d.log.gz
+          archivedFileCount: 5
