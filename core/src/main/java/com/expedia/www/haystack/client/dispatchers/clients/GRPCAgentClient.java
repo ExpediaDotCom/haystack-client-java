@@ -25,44 +25,48 @@ public class GRPCAgentClient implements Client {
     private final ManagedChannel channel;
     private final SpanAgentStub stub;
     private final long shutdownTimeoutMS;
+    private final StreamObserver<DispatchResult> observer;
 
-    public GRPCAgentClient(Format<com.expedia.open.tracing.Span> format, ManagedChannel channel, SpanAgentStub stub, long shutdownTimeoutMS) {
+    public GRPCAgentClient(Format<com.expedia.open.tracing.Span> format, ManagedChannel channel, SpanAgentStub stub, StreamObserver<DispatchResult> observer, long shutdownTimeoutMS) {
         this.format = format;
         this.channel = channel;
         this.stub = stub;
         this.shutdownTimeoutMS = shutdownTimeoutMS;
+        this.observer = observer;
+    }
+
+    public static class GRPCAgentClientStreamObserver implements StreamObserver<DispatchResult> {
+        @Override
+        public void onCompleted() {
+            LOGGER.info("Dispatching span completed");
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            LOGGER.error("Dispatching span failed with error: {}", t);
+        }
+
+        @Override
+        public void onNext(DispatchResult value) {
+            switch (value.getCode()) {
+            case SUCCESS:
+                // do nothing
+                break;
+            case RATE_LIMIT_ERROR:
+                LOGGER.error("Rate limit error recieved from agent");
+                break;
+            case UNKNOWN_ERROR:
+                LOGGER.error("Unknown error recieved from agent");
+                break;
+            default:
+                LOGGER.error("Unknown result recieved from agent: {}", value.getCode());
+            }
+        }
     }
 
     @Override
     public boolean send(Span span) throws ClientException {
-        stub.dispatch(format.format(span), new StreamObserver<DispatchResult>() {
-                @Override
-                public void onCompleted() {
-                    LOGGER.info("Dispatching span ({}) completed", span);
-                }
-
-                @Override
-                public void onError(Throwable t) {
-                    LOGGER.error("Dispatching span ({}) failed with error: {}", span, t);
-                }
-
-                @Override
-                public void onNext(DispatchResult value) {
-                    switch (value.getCode()) {
-                    case SUCCESS:
-                        // do nothing
-                        break;
-                    case RATE_LIMIT_ERROR:
-                        LOGGER.error("Rate limit error recieved from agent");
-                        break;
-                    case UNKNOWN_ERROR:
-                        LOGGER.error("Unknown error recieved from agent");
-                        break;
-                    default:
-                        LOGGER.error("Unknown result recieved from agent: {}", value.getCode());
-                    }
-                }
-            });
+        stub.dispatch(format.format(span), observer);
         // always true
         return true;
     }
@@ -91,6 +95,8 @@ public class GRPCAgentClient implements Client {
     public static final class Builder {
         private Format<com.expedia.open.tracing.Span> format;
 
+        private StreamObserver<DispatchResult> observer;
+
         // Options to build a channel
         private String host;
         private int port;
@@ -106,6 +112,7 @@ public class GRPCAgentClient implements Client {
 
         private Builder() {
             this.format = new ProtoBufFormat();
+            this.observer = new GRPCAgentClientStreamObserver();
         }
 
         public Builder(ManagedChannel channel) {
@@ -121,6 +128,11 @@ public class GRPCAgentClient implements Client {
 
         public Builder withFormat(Format<com.expedia.open.tracing.Span> format) {
             this.format = format;
+            return this;
+        }
+
+        public Builder withObserver(StreamObserver<DispatchResult> observer) {
+            this.observer = observer;
             return this;
         }
 
@@ -164,7 +176,7 @@ public class GRPCAgentClient implements Client {
 
             SpanAgentStub stub = SpanAgentGrpc.newStub(managedChannel);
 
-            return new GRPCAgentClient(format, managedChannel, stub, shutdownTimeoutMS);
+            return new GRPCAgentClient(format, managedChannel, stub, observer, shutdownTimeoutMS);
         }
     }
 }
