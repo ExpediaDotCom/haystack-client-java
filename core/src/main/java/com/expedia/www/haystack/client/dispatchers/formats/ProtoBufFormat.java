@@ -84,13 +84,13 @@ public class ProtoBufFormat implements Format<com.expedia.open.tracing.Span> {
             builder.setVStr((String) value);
         } else if (value instanceof Double || value instanceof Float) {
             builder.setType(TagType.DOUBLE);
-            builder.setVDouble((Double) value);
+            builder.setVDouble(((Number) value).doubleValue());
+        } else if (value instanceof Long || value instanceof Integer || value instanceof Short) {
+            builder.setType(TagType.LONG);
+            builder.setVLong(((Number) value).longValue());
         } else if (value instanceof Boolean) {
             builder.setType(TagType.BOOL);
             builder.setVBool((Boolean) value);
-        } else if (value instanceof Long || value instanceof Integer || value instanceof Short) {
-            builder.setType(TagType.LONG);
-            builder.setVLong((Long) value);
         } else {
             builder.setType(TagType.BINARY);
 

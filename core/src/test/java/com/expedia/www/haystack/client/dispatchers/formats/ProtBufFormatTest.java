@@ -17,6 +17,25 @@ import com.google.common.collect.ImmutableMap;
 public class ProtBufFormatTest {
     private Tracer tracer;
 
+    private void verifyTag(final Tag tag) {
+        switch (tag.getType()) {
+            case BOOL:
+                assertEquals(true, tag.getVBool());
+                break;
+            case DOUBLE:
+                assertEquals((double) 2, tag.getVDouble(), 0);
+                break;
+            case LONG:
+                assertEquals((long) 1, tag.getVLong());
+                break;
+            case STRING:
+                assertEquals("value1", tag.getVStr());
+                break;
+            default:
+                Assert.fail("Unknown tag encountered");
+        }
+    }
+
     @Before
     public void setup() {
         tracer = new Tracer.Builder("protobuf-format-tests", new InMemoryDispatcher())
@@ -26,34 +45,24 @@ public class ProtBufFormatTest {
     @Test
     public void testLogTypes() throws Exception {
         Span span = tracer.buildSpan("log-types").startManual();
-        span.log(ImmutableMap.of("string", "value1",
-                                 "boolean", true,
-                                 "long", (long) 1,
-                                 "double", (double) 2));
+        span.log(ImmutableMap.<String, Object>builder()
+                 .put("string", "value1")
+                 .put("boolean", true)
+                 .put("long", 1L)
+                 .put("int", 1)
+                 .put("short", Short.parseShort("1"))
+                 .put("double", Double.valueOf(2d))
+                 .put("float", Float.parseFloat("2.0000"))
+                 .build());
 
         com.expedia.open.tracing.Span protoSpan = new ProtoBufFormat().format(span);
         assertEquals(1, protoSpan.getLogsCount());
 
         Log log = protoSpan.getLogs(0);
-        assertEquals(4, log.getFieldsCount());
+        assertEquals(7, log.getFieldsCount());
 
-        for (Tag tag : log.getFieldsList()) {
-            switch (tag.getType()) {
-            case BOOL:
-                assertEquals(Boolean.valueOf(true), tag.getVBool());
-                break;
-            case DOUBLE:
-                assertEquals((double) 2, tag.getVDouble(), 0);
-                break;
-            case LONG:
-                assertEquals((long) 1, tag.getVLong());
-                break;
-            case STRING:
-                assertEquals("value1", tag.getVStr());
-                break;
-            default:
-                Assert.fail("Unknown tag encountered");
-            }
+        for (final Tag tag : log.getFieldsList()) {
+            verifyTag(tag);
         }
     }
 
@@ -63,28 +72,16 @@ public class ProtBufFormatTest {
         span.setTag("string", "value1");
         span.setTag("boolean", true);
         span.setTag("long", (long) 1);
-        span.setTag("double", (double) 2);
+        span.setTag("int", 1);
+        span.setTag("short", Short.parseShort("1"));
+        span.setTag("double", Double.valueOf(2d));
+        span.setTag("float", Float.parseFloat("2.0000"));
 
         com.expedia.open.tracing.Span protoSpan = new ProtoBufFormat().format(span);
-        assertEquals(4, protoSpan.getTagsCount());
+        assertEquals(7, protoSpan.getTagsCount());
 
-        for (Tag tag : protoSpan.getTagsList()) {
-            switch (tag.getType()) {
-            case BOOL:
-                assertEquals(Boolean.valueOf(true), tag.getVBool());
-                break;
-            case DOUBLE:
-                assertEquals((double) 2, tag.getVDouble(), 0);
-                break;
-            case LONG:
-                assertEquals((long) 1, tag.getVLong());
-                break;
-            case STRING:
-                assertEquals("value1", tag.getVStr());
-                break;
-            default:
-                Assert.fail("Unknown tag encountered");
-            }
+        for (final Tag tag : protoSpan.getTagsList()) {
+            verifyTag(tag);
         }
     }
 
