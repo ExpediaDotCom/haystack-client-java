@@ -21,6 +21,7 @@
     <module>proto</module>
     <module>core</module>
     <module>integrations</module>
+    <module>examples</module>
   </modules>
 
   <properties>
