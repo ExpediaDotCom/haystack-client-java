@@ -1,0 +1,3 @@
+com.expedia.haystack.dropwizard.configuration.AgentClientFactory
+com.expedia.haystack.dropwizard.configuration.LoggerClientFactory
+com.expedia.haystack.dropwizard.configuration.NoopClientFactory

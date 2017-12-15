@@ -1,0 +1,2 @@
+com.expedia.haystack.dropwizard.configuration.ProtoBufFormatFactory
+com.expedia.haystack.dropwizard.configuration.StringFormatFactory
