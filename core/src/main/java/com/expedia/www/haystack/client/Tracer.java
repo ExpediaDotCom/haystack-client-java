@@ -247,6 +247,7 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         @Override
+        @Deprecated
         public Span start() {
             return startManual();
         }

@@ -223,6 +223,7 @@ public class Span implements io.opentracing.Span {
     }
 
     @Override
+    @Deprecated
     public Span log(long timestampMicroseconds, String eventName, Object payload) {
         if (eventName == null) {
             return this;
@@ -233,6 +234,7 @@ public class Span implements io.opentracing.Span {
     }
 
     @Override
+    @Deprecated
     public Span log(String eventName, Object payload) {
         return log(System.nanoTime(), eventName, payload);
     }
