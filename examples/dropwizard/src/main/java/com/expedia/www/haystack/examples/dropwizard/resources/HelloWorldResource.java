@@ -10,6 +10,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
+import com.expedia.haystack.annotations.DisableTracing;
 import com.expedia.www.haystack.examples.dropwizard.api.Saying;
 
 @Path("/hello-world")
@@ -31,4 +32,13 @@ public class HelloWorldResource {
         final String value = String.format(template, name.orElse(defaultName));
         return new Saying(counter.incrementAndGet(), value);
     }
+
+    @GET
+    @Timed
+    @Path("/ignored")
+    @DisableTracing
+    public Saying sayHelloNotTracked(@QueryParam("name") Optional<String> name) {
+        return sayHello(name);
+    }
+
 }

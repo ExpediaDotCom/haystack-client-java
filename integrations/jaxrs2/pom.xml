@@ -22,6 +22,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.expedia.www</groupId>
+      <artifactId>haystack-client-annotations</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>javax.ws.rs-api</artifactId>
     </dependency>
