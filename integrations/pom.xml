@@ -18,6 +18,7 @@
     <name>Client integrations for Haystack.</name>
 
     <modules>
+      <module>annotations</module>
       <module>dropwizard</module>
       <module>jaxrs2</module>
     </modules>

@@ -2,6 +2,7 @@ package com.expedia.www.haystack.examples.dropwizard;
 
 import com.expedia.haystack.jaxrs2.feature.HaystackFeature;
 import com.expedia.www.haystack.examples.dropwizard.resources.HelloWorldResource;
+import com.expedia.www.haystack.examples.dropwizard.resources.UntracedResource;
 import com.expedia.www.haystack.examples.dropwizard.health.TemplateHealthCheck;
 
 import io.dropwizard.Application;
@@ -34,6 +35,9 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
                                                                    configuration.getDefaultName());
 
         environment.jersey().register(resource);
+
+        environment.jersey().register(new UntracedResource(configuration.getTemplate(),
+                                                           configuration.getDefaultName()));
 
         final TemplateHealthCheck healthCheck = new TemplateHealthCheck(configuration.getTemplate());
         environment.healthChecks().register("template", healthCheck);

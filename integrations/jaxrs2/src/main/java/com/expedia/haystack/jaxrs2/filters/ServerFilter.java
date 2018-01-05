@@ -13,6 +13,8 @@ import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.expedia.haystack.annotations.DisableTracing;
+
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.propagation.Format;
@@ -38,6 +40,12 @@ public class ServerFilter implements ContainerRequestFilter, ContainerResponseFi
 
     @Override
     public void filter(ContainerRequestContext context) throws IOException {
+        if (resourceInfo.getResourceMethod().getAnnotation(DisableTracing.class) != null
+            || resourceInfo.getResourceClass().getAnnotation(DisableTracing.class) != null) {
+            // do nothing if the class or the method is annotated to not trace
+            return;
+        }
+
         try {
             Tracer.SpanBuilder builder = tracer.buildSpan(getOperationName(context, resourceInfo))
                 .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)

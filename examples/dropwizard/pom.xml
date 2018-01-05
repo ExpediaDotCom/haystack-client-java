@@ -46,6 +46,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.expedia.www</groupId>
+        <artifactId>haystack-client-annotations</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.google.protobuf</groupId>
         <artifactId>protobuf-java</artifactId>
         <scope>runtime</scope>
