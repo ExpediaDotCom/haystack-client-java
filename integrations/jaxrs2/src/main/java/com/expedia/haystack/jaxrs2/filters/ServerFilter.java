@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.expedia.haystack.annotations.DisableTracing;
+import com.expedia.haystack.annotations.Traced;
 
 import io.opentracing.Span;
 import io.opentracing.Tracer;
@@ -40,9 +41,8 @@ public class ServerFilter implements ContainerRequestFilter, ContainerResponseFi
 
     @Override
     public void filter(ContainerRequestContext context) throws IOException {
-        if (resourceInfo.getResourceMethod().getAnnotation(DisableTracing.class) != null
-            || resourceInfo.getResourceClass().getAnnotation(DisableTracing.class) != null) {
-            // do nothing if the class or the method is annotated to not trace
+        if (!shouldFilter(context, resourceInfo)) {
+            // do nothing if the filter doesn't apply
             return;
         }
 
@@ -61,6 +61,21 @@ public class ServerFilter implements ContainerRequestFilter, ContainerResponseFi
         }
     }
 
+  /**
+   * Helper to determine if the filter applies in the current context or not.
+   *
+   * @param context Context provided on the request
+   * @param resourceInfo Resource Info injected via @Context
+   * @return <code>true</code> if this filter should apply to the current context
+   */
+    protected boolean shouldFilter(ContainerRequestContext context, ResourceInfo resourceInfo) {
+        if (resourceInfo.getResourceMethod().getAnnotation(DisableTracing.class) != null
+            || resourceInfo.getResourceClass().getAnnotation(DisableTracing.class) != null) {
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Extension point used to supply the operation name for tracing.
      *
@@ -69,11 +84,26 @@ public class ServerFilter implements ContainerRequestFilter, ContainerResponseFi
      * @return the name used for this operation
      */
     protected String getOperationName(ContainerRequestContext context, ResourceInfo resourceInfo) {
+        final Traced methodAnnotation = resourceInfo.getResourceMethod().getAnnotation(Traced.class);
+        if (methodAnnotation != null) {
+            return methodAnnotation.name();
+        }
+
+        final Traced classAnnotation = resourceInfo.getResourceClass().getAnnotation(Traced.class);
+        if (classAnnotation != null) {
+            return classAnnotation.name();
+        }
+
         return String.format("%s:%s", context.getMethod(), resourceInfo.getResourceClass().getCanonicalName());
     }
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+        if (!shouldFilter(requestContext, resourceInfo)) {
+            // do nothing if the filter doesn't apply
+            return;
+        }
+
         try {
             Span span = (Span) requestContext.getProperty(SERVER_SPAN_CONTEXT_KEY);
             if (span != null) {

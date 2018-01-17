@@ -11,6 +11,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
 import com.expedia.haystack.annotations.DisableTracing;
+import com.expedia.haystack.annotations.Traced;
 import com.expedia.www.haystack.examples.dropwizard.api.Saying;
 
 @Path("/hello-world")
@@ -38,6 +39,14 @@ public class HelloWorldResource {
     @Path("/ignored")
     @DisableTracing
     public Saying sayHelloNotTracked(@QueryParam("name") Optional<String> name) {
+        return sayHello(name);
+    }
+
+    @GET
+    @Timed
+    @Path("/dolly")
+    @Traced(name="hello-dolly")
+    public Saying sayHelloDolly(@QueryParam("name") Optional<String> name) {
         return sayHello(name);
     }
 
