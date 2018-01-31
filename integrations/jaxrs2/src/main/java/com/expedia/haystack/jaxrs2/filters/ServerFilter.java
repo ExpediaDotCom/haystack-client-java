@@ -69,7 +69,10 @@ public class ServerFilter implements ContainerRequestFilter, ContainerResponseFi
    * @return <code>true</code> if this filter should apply to the current context
    */
     protected boolean shouldFilter(ContainerRequestContext context, ResourceInfo resourceInfo) {
-        if (resourceInfo.getResourceMethod().getAnnotation(DisableTracing.class) != null
+        if (resourceInfo == null
+            || resourceInfo.getResourceMethod() == null
+            || resourceInfo.getResourceMethod().getAnnotation(DisableTracing.class) != null
+            || resourceInfo.getResourceClass() == null
             || resourceInfo.getResourceClass().getAnnotation(DisableTracing.class) != null) {
             return false;
         }
@@ -84,17 +87,23 @@ public class ServerFilter implements ContainerRequestFilter, ContainerResponseFi
      * @return the name used for this operation
      */
     protected String getOperationName(ContainerRequestContext context, ResourceInfo resourceInfo) {
-        final Traced methodAnnotation = resourceInfo.getResourceMethod().getAnnotation(Traced.class);
-        if (methodAnnotation != null) {
-            return methodAnnotation.name();
+        if (resourceInfo.getResourceMethod() != null) {
+            final Traced methodAnnotation = resourceInfo.getResourceMethod().getAnnotation(Traced.class);
+            if (methodAnnotation != null) {
+                return methodAnnotation.name();
+            }
         }
 
-        final Traced classAnnotation = resourceInfo.getResourceClass().getAnnotation(Traced.class);
-        if (classAnnotation != null) {
-            return classAnnotation.name();
+        if (resourceInfo.getResourceClass() != null) {
+            final Traced classAnnotation = resourceInfo.getResourceClass().getAnnotation(Traced.class);
+            if (classAnnotation != null) {
+                return classAnnotation.name();
+            }
+
+            return String.format("%s:%s", context.getMethod(), resourceInfo.getResourceClass().getCanonicalName());
         }
 
-        return String.format("%s:%s", context.getMethod(), resourceInfo.getResourceClass().getCanonicalName());
+        return String.format("%s", context.getMethod());
     }
 
     @Override
