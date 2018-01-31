@@ -174,7 +174,12 @@ public class ServerFilterTest {
 
     private void test_sad_path(Class<?> resource, String methodName, String method, String url) throws Exception {
         Mockito.<Class<?>>when(resourceInfo.getResourceClass()).thenReturn(resource);
-        when(resourceInfo.getResourceMethod()).thenReturn(resource.getMethod(methodName));
+
+        if (resource != null && methodName != null) {
+            when(resourceInfo.getResourceMethod()).thenReturn(resource.getMethod(methodName));
+        } else {
+            when(resourceInfo.getResourceMethod()).thenReturn(null);
+        }
 
         when(containerRequestContext.getMethod()).thenReturn(method);
 
@@ -202,6 +207,16 @@ public class ServerFilterTest {
     @Test
     public void testDisabledResoureMethod() throws Exception {
         test_sad_path(DisabledResource.class, "get", "GET", "http://localhost/ignoredmethod");
+    }
+
+    @Test
+    public void testMissingResourceClass() throws Exception {
+        test_sad_path(null, null, "GET", "http://localhost/favicon.ico");
+    }
+
+    @Test
+    public void testMissingResourceMethod() throws Exception {
+        test_sad_path(TracedResource.class, null, "GET", "http://localhost/favicon.ico");
     }
 
 }
