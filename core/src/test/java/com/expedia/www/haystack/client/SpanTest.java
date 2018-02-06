@@ -20,13 +20,13 @@ public class SpanTest {
     public void setUp() throws Exception {
         dispatcher = new NoopDispatcher();
         tracer = new Tracer.Builder("TestService", dispatcher).build();
-        span = tracer.buildSpan("TestOperation").startManual();
+        span = tracer.buildSpan("TestOperation").start();
     }
 
     @Test
     public void testDuration() {
         String expected = "op-name";
-        Span span = tracer.buildSpan(expected).withStartTimestamp(1l).startManual();
+        Span span = tracer.buildSpan(expected).withStartTimestamp(1l).start();
 
         span.finish(2l);
 
@@ -39,7 +39,7 @@ public class SpanTest {
     public void testOperationName() {
         String expected = "op-name";
         String modString = "other-op-name";
-        Span span = tracer.buildSpan(expected).startManual();
+        Span span = tracer.buildSpan(expected).start();
         Assert.assertEquals(expected, span.getOperatioName());
         span.setOperationName(modString);
         Assert.assertEquals(modString, span.getOperatioName());
@@ -48,7 +48,7 @@ public class SpanTest {
     @Test
     public void testServiceName() {
         String expected = "service-name";
-        Span span = new Tracer.Builder(expected, dispatcher).build().buildSpan(expected).startManual();
+        Span span = new Tracer.Builder(expected, dispatcher).build().buildSpan(expected).start();
         Assert.assertEquals(expected, span.getServiceName());
     }
 
@@ -101,30 +101,10 @@ public class SpanTest {
     }
 
     @Test
-    public void testLogForString() {
-        long timestamp = 1111l;
-        String key = "key-name";
-        String value = "value-value";
-
-        span.log(timestamp, key, value);
-
-        List<LogData> logs = span.getLogs();
-        Assert.assertEquals(1, logs.size());
-        LogData data = logs.get(0);
-        Assert.assertEquals((Long) timestamp, data.getTimestamp());
-        Assert.assertEquals(key, data.getMessage());
-        Assert.assertEquals(value, data.getPayload());
-        Assert.assertEquals(0, data.getFields().size());
-    }
-
-    @Test
     public void testLogForEmptyConditions() {
         long timestamp = 1111l;
         String key = null;
-        String value = "value-value";
 
-        span.log(timestamp, key, value);
-        span.log(key, value);
         span.log(key);
         span.log(timestamp, key);
 

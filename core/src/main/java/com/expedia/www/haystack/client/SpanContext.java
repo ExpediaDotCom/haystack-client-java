@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
@@ -29,6 +30,22 @@ public class SpanContext implements io.opentracing.SpanContext {
         this.spanId = spanId;
         this.parentId = parentId;
         this.baggage = Collections.unmodifiableMap(baggage);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(traceId, spanId, parentId, baggage);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        SpanContext context = (SpanContext) obj;
+        return Objects.equals(traceId, context.getTraceId())
+            && Objects.equals(spanId, context.getSpanId())
+            && Objects.equals(parentId, context.getParentId())
+            && Objects.equals(baggage, context.getBaggage());
     }
 
     @Override

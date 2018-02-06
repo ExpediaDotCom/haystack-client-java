@@ -223,30 +223,18 @@ public class Span implements io.opentracing.Span {
     }
 
     @Override
-    @Deprecated
-    public Span log(long timestampMicroseconds, String eventName, Object payload) {
-        if (eventName == null) {
+    public Span log(long timestampMicroseconds, String event) {
+        if (event == null) {
             return this;
         }
-        finishedCheck("Setting a log event (%s:%s:%s) on a finished span", timestampMicroseconds, eventName, payload);
-        logs.add(new LogData(timestampMicroseconds, eventName, payload));
+        finishedCheck("Setting a log event (%s:%s) on a finished span", timestampMicroseconds, event);
+        logs.add(new LogData(timestampMicroseconds, event));
         return this;
     }
 
     @Override
-    @Deprecated
-    public Span log(String eventName, Object payload) {
-        return log(System.nanoTime(), eventName, payload);
-    }
-
-    @Override
-    public Span log(long timestampMicroseconds, String eventName) {
-        return log(timestampMicroseconds, eventName, null);
-    }
-
-    @Override
-    public Span log(String eventName) {
-        return log(System.nanoTime(), eventName, null);
+    public Span log(String event) {
+        return log(System.nanoTime(), event);
     }
 
     public List<LogData> getLogs() {

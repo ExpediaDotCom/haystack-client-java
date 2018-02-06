@@ -24,7 +24,7 @@ public class SpanBuilderTest {
 
     @Test
     public void testBasic() {
-        Span span = tracer.buildSpan("test-operation").startManual();
+        Span span = tracer.buildSpan("test-operation").start();
 
         Assert.assertEquals("test-operation", span.getOperatioName());
     }
@@ -32,20 +32,18 @@ public class SpanBuilderTest {
 
     @Test
     public void testReferences() {
-        Span parent = tracer.buildSpan("parent").startManual();
-        Span following = tracer.buildSpan("following").startManual();
+        Span parent = tracer.buildSpan("parent").start();
+        Span following = tracer.buildSpan("following").start();
 
         Span child = tracer.buildSpan("child")
             .asChildOf(parent)
             .addReference(References.FOLLOWS_FROM, following.context())
-            .startManual();
+            .start();
 
 
         Assert.assertEquals(2, child.getReferences().size());
-        Assert.assertEquals(parent.context(), child.getReferences().get(0).getContext());
-        Assert.assertEquals(References.CHILD_OF, child.getReferences().get(0).getReferenceType());
-        Assert.assertEquals(following.context(), child.getReferences().get(1).getContext());
-        Assert.assertEquals(References.FOLLOWS_FROM, child.getReferences().get(1).getReferenceType());
+        Assert.assertEquals(child.getReferences().get(0), new Reference(References.CHILD_OF, parent.context()));
+        Assert.assertEquals(child.getReferences().get(1), new Reference(References.FOLLOWS_FROM, following.context()));
     }
 
     @Test
@@ -54,7 +52,7 @@ public class SpanBuilderTest {
             .withTag("string-key", "string-value")
             .withTag("boolean-key", false)
             .withTag("number-key", 1l)
-            .startManual();
+            .start();
 
         Map<String, ?> tags = child.getTags();
 
