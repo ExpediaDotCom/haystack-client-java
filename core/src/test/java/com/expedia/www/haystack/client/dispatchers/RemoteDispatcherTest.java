@@ -33,7 +33,7 @@ public class RemoteDispatcherTest {
 
     @Test
     public void testFlushTimer() {
-        Span span = tracer.buildSpan("happy-path").startManual();
+        Span span = tracer.buildSpan("happy-path").start();
         dispatcher.dispatch(span);
 
         Awaitility.await()
@@ -49,7 +49,7 @@ public class RemoteDispatcherTest {
     public void testCloseDrainsTheQueue() throws IOException {
         final int createdSpans = queueSize;
         for (int i = 0; i < createdSpans; i++) {
-            Span span = tracer.buildSpan("close-span-" + i).startManual();
+            Span span = tracer.buildSpan("close-span-" + i).start();
             dispatcher.dispatch(span);
         }
         dispatcher.close();
@@ -74,7 +74,7 @@ public class RemoteDispatcherTest {
 
         final int createdSpans = queueSize + 20;
         for (int i = 0; i < createdSpans; i++) {
-            Span span = tracer.buildSpan("blocked-span-" + i).startManual();
+            Span span = tracer.buildSpan("blocked-span-" + i).start();
             dispatcher.dispatch(span);
         }
 
@@ -87,11 +87,11 @@ public class RemoteDispatcherTest {
 
     @Test
     public void testClosedDispatcherRejectsAdditionalSpans() throws IOException {
-        Span span = tracer.buildSpan("happy-path").startManual();
+        Span span = tracer.buildSpan("happy-path").start();
         dispatcher.dispatch(span);
         dispatcher.close();
 
-        span = tracer.buildSpan("rejected-span").startManual();
+        span = tracer.buildSpan("rejected-span").start();
         dispatcher.dispatch(span);
 
         Assert.assertEquals(0, client.getRecievedSpans().size());
@@ -104,7 +104,7 @@ public class RemoteDispatcherTest {
         dispatcher = new RemoteDispatcher.Builder(client).build();
         tracer = new Tracer.Builder("remote-dispatcher", dispatcher).build();
 
-        Span span = tracer.buildSpan("happy-path").startManual();
+        Span span = tracer.buildSpan("happy-path").start();
         dispatcher.dispatch(span);
         dispatcher.close();
 

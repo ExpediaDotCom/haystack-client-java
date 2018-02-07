@@ -48,7 +48,7 @@ public class GRPCAgentClientTest {
 
     @Test
     public void testDispatch() throws Exception {
-        final Span span = tracer.buildSpan("happy-path").startManual();
+        final Span span = tracer.buildSpan("happy-path").start();
         span.finish();
 
         final ArgumentCaptor<com.expedia.open.tracing.Span> spanCapture = ArgumentCaptor.forClass(com.expedia.open.tracing.Span.class);

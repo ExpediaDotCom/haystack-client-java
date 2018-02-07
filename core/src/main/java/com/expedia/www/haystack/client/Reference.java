@@ -1,5 +1,7 @@
 package com.expedia.www.haystack.client;
 
+import java.util.Objects;
+
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
@@ -10,6 +12,20 @@ public class Reference {
     public Reference(String referenceType, SpanContext context) {
         this.referenceType = referenceType;
         this.context = context;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Reference reference = (Reference) obj;
+        return Objects.equals(referenceType, reference.getReferenceType())
+            && Objects.equals(context, reference.getContext());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(referenceType, context);
     }
 
     @Override

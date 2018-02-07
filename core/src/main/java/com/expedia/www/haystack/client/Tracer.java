@@ -16,24 +16,24 @@ import com.expedia.www.haystack.client.propagation.Injector;
 import com.expedia.www.haystack.client.propagation.PropagationRegistry;
 import com.expedia.www.haystack.client.propagation.TextMapPropagator;
 
-import io.opentracing.ActiveSpan;
-import io.opentracing.ActiveSpanSource;
-import io.opentracing.BaseSpan;
 import io.opentracing.References;
+import io.opentracing.Scope;
+import io.opentracing.ScopeManager;
+import io.opentracing.Span;
 import io.opentracing.propagation.Format;
 import io.opentracing.propagation.TextMap;
-import io.opentracing.util.ThreadLocalActiveSpanSource;
+import io.opentracing.util.ThreadLocalScopeManager;
 
 public class Tracer implements io.opentracing.Tracer {
     private final Dispatcher dispatcher;
     private final Clock clock;
     private final PropagationRegistry registry;
     private final String serviceName;
-    private final ActiveSpanSource activeSource;
+    private final ScopeManager scopeManager;
 
-    public Tracer(String serviceName, ActiveSpanSource activeSource, Clock clock, Dispatcher dispatcher, PropagationRegistry registry) {
+    public Tracer(String serviceName, ScopeManager scopeManager, Clock clock, Dispatcher dispatcher, PropagationRegistry registry) {
         this.serviceName = serviceName;
-        this.activeSource = activeSource;
+        this.scopeManager = scopeManager;
         this.clock = clock;
         this.dispatcher = dispatcher;
         this.registry = registry;
@@ -54,7 +54,7 @@ public class Tracer implements io.opentracing.Tracer {
         dispatcher.flush();
     }
 
-    void dispatch(Span span) {
+    void dispatch(com.expedia.www.haystack.client.Span span) {
         dispatcher.dispatch(span);
     }
 
@@ -100,18 +100,17 @@ public class Tracer implements io.opentracing.Tracer {
     }
 
     @Override
-    public ActiveSpan activeSpan() {
-        return activeSource.activeSpan();
+    public Span activeSpan() {
+        final Scope scope = scopeManager.active();
+        return (scope == null ? null : scope.span());
     }
 
     @Override
-    public ActiveSpan makeActive(io.opentracing.Span span) {
-        return activeSource.makeActive(span);
+    public ScopeManager scopeManager() {
+        return scopeManager;
     }
 
-
     public static class SpanBuilder implements io.opentracing.Tracer.SpanBuilder {
-
         private final Tracer tracer;
 
         private Clock clock;
@@ -138,7 +137,7 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         @Override
-        public SpanBuilder asChildOf(BaseSpan<?> parent) {
+        public SpanBuilder asChildOf(Span parent) {
             if (parent == null) {
                 return this;
             }
@@ -191,8 +190,8 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         @Override
-        public ActiveSpan startActive() {
-            return tracer.makeActive(startManual());
+        public Scope startActive(boolean finishSpanOnClose) {
+            return tracer.scopeManager().activate(start(), finishSpanOnClose);
         }
 
         private SpanContext createNewContext() {
@@ -242,21 +241,21 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         @Override
-        public Span startManual() {
-            return new Span(tracer, clock, operationName, createContext(), calculateStartTime(), tags, references);
+        @Deprecated
+        public com.expedia.www.haystack.client.Span startManual() {
+            return start();
         }
 
         @Override
-        @Deprecated
-        public Span start() {
-            return startManual();
+        public com.expedia.www.haystack.client.Span start() {
+            return new com.expedia.www.haystack.client.Span(tracer, clock, operationName, createContext(), calculateStartTime(), tags, references);
         }
     }
 
 
     public static final class Builder {
         private String serviceName;
-        private ActiveSpanSource activeSpanSource = new ThreadLocalActiveSpanSource();
+        private ScopeManager scopeManager = new ThreadLocalScopeManager();
         private Clock clock = new SystemClock();
         private Dispatcher dispatcher;
         private PropagationRegistry registry = new PropagationRegistry();
@@ -275,8 +274,8 @@ public class Tracer implements io.opentracing.Tracer {
 
         }
 
-        public Builder withActiveSpanSource(ActiveSpanSource source) {
-            this.activeSpanSource = source;
+        public Builder withScopeManager(ScopeManager scope) {
+            this.scopeManager = scope;
             return this;
         }
 
@@ -307,7 +306,7 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         public Tracer build() {
-            return new Tracer(serviceName, activeSpanSource, clock, dispatcher, registry);
+            return new Tracer(serviceName, scopeManager, clock, dispatcher, registry);
         }
 
     }

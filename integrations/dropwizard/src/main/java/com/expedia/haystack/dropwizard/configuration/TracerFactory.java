@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 
-import io.opentracing.NoopTracerFactory;
+import io.opentracing.noop.NoopTracerFactory;
 
 public class TracerFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(TracerFactory.class);

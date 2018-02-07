@@ -1,7 +1,6 @@
 package com.expedia.haystack.dropwizard.configuration;
 
 import javax.annotation.Nullable;
-import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;

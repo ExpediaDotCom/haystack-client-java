@@ -61,13 +61,6 @@ public class ProtoBufFormat implements Format<com.expedia.open.tracing.Span> {
             builder.addAllFields(log.getFields().entrySet().stream()
                                  .map(e -> buildTag(e.getKey(), e.getValue()))
                                  .collect(Collectors.toList()));
-        } else {
-            if (log.getMessage() != null) {
-                builder.addFields(buildTag("event", log.getMessage()));
-            }
-            if (log.getPayload() != null) {
-                builder.addFields(buildTag("payload", log.getPayload()));
-            }
         }
         return builder.build();
     }
