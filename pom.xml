@@ -9,6 +9,14 @@
   <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Haystack Java Client Parent POM</name>
+  <description>Haystack Java Client Parent POM</description>
+  <url>https://github.com/ExpediaDotCom/haystack-client-java/tree/master</url>
+
+  <scm>
+    <connection>scm:git:git://github.com/ExpediaDotCom/haystack-client-java.git</connection>
+    <developerConnection>scm:git:ssh://github.com/ExpediaDotCom/haystack-client-java.git</developerConnection>
+    <url>http://github.com/ExpediaDotCom/haystack-client-java</url>
+  </scm>
 
   <licenses>
     <license>
@@ -16,6 +24,15 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
+
+  <developers>
+    <developer>
+      <id>haystack</id>
+      <name>Haystack Team</name>
+      <email>haystack@expedia.com</email>
+      <url>https://github.com/ExpediaDotCom/haystack</url>
+    </developer>
+  </developers>
 
   <modules>
     <module>proto</module>
@@ -44,11 +61,11 @@
     <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
     <maven-protobuf-plugin.version>3.3.0.1</maven-protobuf-plugin.version>
     <maven-release-plugin.version>2.5.2</maven-release-plugin.version>
+    <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+    <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
+    <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
+    <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
   </properties>
-
-  <scm>
-    <developerConnection>scm:git:https://github.com/ExpediaDotCom/haystack-client-java.git</developerConnection>
-  </scm>
 
   <dependencyManagement>
     <dependencies>
@@ -149,6 +166,17 @@
     </dependencies>
   </dependencyManagement>
 
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+
   <build>
     <pluginManagement>
       <plugins>
@@ -221,6 +249,58 @@
               </configuration>
             </execution>
           </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>${maven-source-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <goals>
+                <goal>jar-no-fork</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${maven-javadoc-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>attach-javadocs</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>${maven-gpg-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>sign-artifacts</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>sign</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <version>${nexus-staging-maven-plugin.version}</version>
+          <extensions>true</extensions>
+          <configuration>
+            <serverId>ossrh</serverId>
+            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+          </configuration>
         </plugin>
 
         <plugin>
