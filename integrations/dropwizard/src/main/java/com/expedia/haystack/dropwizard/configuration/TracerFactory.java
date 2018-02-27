@@ -3,6 +3,7 @@ package com.expedia.haystack.dropwizard.configuration;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
@@ -19,6 +20,10 @@ import io.opentracing.noop.NoopTracerFactory;
 
 public class TracerFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(TracerFactory.class);
+
+    @Valid
+    @NotNull
+    private MetricsFactory metrics = new NoopMetricsFactory();
 
     @Valid
     private boolean enabled = true;
@@ -45,7 +50,7 @@ public class TracerFactory {
             dispatcher = dispatchers.get(0).build();
         }
 
-        final Tracer.Builder builder = new Tracer.Builder(serviceName, dispatcher);
+        final Tracer.Builder builder = new Tracer.Builder(metrics.build(), serviceName, dispatcher);
         return builder.build();
     }
 
@@ -55,6 +60,16 @@ public class TracerFactory {
             .add("serviceName", serviceName)
             .add("dispatchers", dispatchers)
             .toString();
+    }
+
+    @JsonProperty
+    public MetricsFactory getMetrics() {
+        return metrics;
+    }
+
+    @JsonProperty
+    public void setMetrics(MetricsFactory metrics) {
+        this.metrics = metrics;
     }
 
     @JsonProperty

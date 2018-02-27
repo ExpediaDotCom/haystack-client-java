@@ -12,6 +12,7 @@ import com.expedia.open.tracing.Tag;
 import com.expedia.www.haystack.client.Span;
 import com.expedia.www.haystack.client.Tracer;
 import com.expedia.www.haystack.client.dispatchers.InMemoryDispatcher;
+import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 import com.google.common.collect.ImmutableMap;
 
 public class ProtBufFormatTest {
@@ -38,8 +39,8 @@ public class ProtBufFormatTest {
 
     @Before
     public void setup() {
-        tracer = new Tracer.Builder("protobuf-format-tests", new InMemoryDispatcher())
-            .build();
+        NoopMetricsRegistry metrics = new NoopMetricsRegistry();
+        tracer = new Tracer.Builder(metrics, "protobuf-format-tests", new InMemoryDispatcher.Builder(metrics).build()).build();
     }
 
     @Test

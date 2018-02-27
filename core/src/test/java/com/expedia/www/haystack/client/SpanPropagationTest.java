@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.expedia.www.haystack.client.dispatchers.InMemoryDispatcher;
+import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 
 import io.opentracing.References;
 import io.opentracing.Scope;
@@ -18,8 +19,9 @@ public class SpanPropagationTest {
 
     @Before
     public void setUp() throws Exception {
-        dispatcher = new InMemoryDispatcher();
-        tracer = new Tracer.Builder("TestService", dispatcher).build();
+        NoopMetricsRegistry metrics = new NoopMetricsRegistry();
+        dispatcher = new InMemoryDispatcher.Builder(metrics).build();
+        tracer = new Tracer.Builder(metrics, "TestService", dispatcher).build();
     }
 
     @Test

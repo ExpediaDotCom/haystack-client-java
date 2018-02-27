@@ -1,7 +1,8 @@
 package com.expedia.www.haystack.client.dispatchers.clients;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -10,8 +11,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.expedia.www.haystack.client.Span;
+import com.expedia.www.haystack.client.metrics.Counter;
+import com.expedia.www.haystack.client.metrics.Gauge;
+import com.expedia.www.haystack.client.metrics.Metrics;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
+import com.expedia.www.haystack.client.metrics.Tag;
+import com.expedia.www.haystack.client.metrics.Timer;
+import com.expedia.www.haystack.client.metrics.Timer.Sample;
 
-public class InMemoryClient extends NoopClient {
+public class InMemoryClient implements Client {
     private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryClient.class);
 
     private Semaphore limiter;
@@ -19,41 +27,57 @@ public class InMemoryClient extends NoopClient {
     private List<Span> recieved;
     private List<Span> flushed;
 
-    public InMemoryClient() {
-        this(Integer.MAX_VALUE);
-    }
+    private final Timer sendTimer;
+    private final Counter sendExceptionCounter;
+    private final Timer closeTimer;
+    private final Timer flushTimer;
 
-    public InMemoryClient(int limit) {
+    public InMemoryClient(Metrics metrics, int limit) {
         limiter = new Semaphore(limit);
         total = new ArrayList<>();
         recieved = new ArrayList<>();
         flushed = new ArrayList<>();
+
+        this.sendTimer = Timer.builder("send").register(metrics);
+        this.sendExceptionCounter = Counter.builder("send").tag(new Tag("state", "exception")).register(metrics);
+        this.closeTimer = Timer.builder("close").register(metrics);
+        this.flushTimer = Timer.builder("flush").register(metrics);
+
+        // held in the registry a reference; but we don't need a local reference
+        Gauge.builder("total", total, Collection::size).register(metrics);
+        Gauge.builder("recieved", recieved, Collection::size).register(metrics);
+        Gauge.builder("flushed", flushed, Collection::size).register(metrics);
     }
 
     @Override
     public boolean send(Span span) {
         LOGGER.info("Span sent to client: " + span);
-        try {
+        try (Sample timer = sendTimer.start()) {
             limiter.acquire();
             total.add(span);
             recieved.add(span);
             return true;
         } catch (InterruptedException e) {
+            sendExceptionCounter.increment();
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public void close() throws IOException {
-        LOGGER.info("Client closed");
-        flush();
+    public void close() {
+        try (Sample timer = closeTimer.start()) {
+            LOGGER.info("Client closed");
+            flush();
+        }
     }
 
     @Override
-    public void flush() throws IOException {
-        LOGGER.info("Client flushed");
-        flushed.addAll(recieved);
-        recieved.clear();
+    public void flush() {
+        try (Sample timer = flushTimer.start()) {
+            LOGGER.info("Client flushed");
+            flushed.addAll(recieved);
+            recieved.clear();
+        }
     }
 
     public List<Span> getTotalSpans() {
@@ -66,5 +90,28 @@ public class InMemoryClient extends NoopClient {
 
     public List<Span> getRecievedSpans() {
         return Collections.unmodifiableList(recieved);
+    }
+
+    public static final class Builder {
+        private final Metrics metrics;
+        private int limit;
+
+        public Builder(MetricsRegistry registry) {
+            this(new Metrics(registry, "com.expedia.www.haystack.client.dispatchers.Client", Arrays.asList(new Tag("type", "inmemory"))));
+        }
+
+        public Builder(Metrics metrics) {
+            this.metrics = metrics;
+            this.limit = Integer.MAX_VALUE;
+        }
+
+        public Builder withLimit(int limit) {
+            this.limit = limit;
+            return this;
+        }
+
+        public InMemoryClient build() {
+            return new InMemoryClient(metrics, limit);
+        }
     }
 }

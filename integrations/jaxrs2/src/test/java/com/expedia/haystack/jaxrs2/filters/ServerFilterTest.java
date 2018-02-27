@@ -1,7 +1,6 @@
 package com.expedia.haystack.jaxrs2.filters;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,6 +31,7 @@ import com.expedia.haystack.annotations.Traced;
 import com.expedia.www.haystack.client.Span;
 import com.expedia.www.haystack.client.Tracer;
 import com.expedia.www.haystack.client.dispatchers.InMemoryDispatcher;
+import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 
 import io.opentracing.tag.Tags;
 
@@ -54,8 +54,9 @@ public class ServerFilterTest {
 
     @Before
     public void init() throws Exception {
-        dispatcher = new InMemoryDispatcher();
-        tracer = new Tracer.Builder("server-filter-tests", dispatcher).build();
+        NoopMetricsRegistry metrics = new NoopMetricsRegistry();
+        dispatcher = new InMemoryDispatcher.Builder(metrics).build();
+        tracer = new Tracer.Builder(metrics, "server-filter-tests", dispatcher).build();
     }
 
     public static class Filter extends ServerFilter {

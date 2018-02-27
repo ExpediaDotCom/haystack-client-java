@@ -90,7 +90,7 @@ public class AgentClientFactory extends BaseClientFactory {
 
     @Override
     public Client build() {
-        GRPCAgentClient.Builder grpcBuilder = new GRPCAgentClient.Builder(host, port);
+        GRPCAgentClient.Builder grpcBuilder = new GRPCAgentClient.Builder(getMetrics().build(), host, port);
         grpcBuilder.withFormat((Format<Span>) getFormat().build());
 
         if (keepAliveTimeMS != null) {

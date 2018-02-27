@@ -11,6 +11,12 @@ import com.expedia.www.haystack.client.Span;
 public interface Client extends Closeable, Flushable {
 
 
+    @Override
+    public void close() throws ClientException;
+
+    @Override
+    public void flush() throws ClientException;
+
     /**
      * All clients should control how they send spans to somewhere
      *

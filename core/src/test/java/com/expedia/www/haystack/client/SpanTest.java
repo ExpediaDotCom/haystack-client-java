@@ -9,17 +9,21 @@ import org.junit.Test;
 
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
 import com.expedia.www.haystack.client.dispatchers.NoopDispatcher;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
+import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 
 public class SpanTest {
 
     private Tracer tracer;
     private Span span;
     private Dispatcher dispatcher;
+    private MetricsRegistry metrics;
 
     @Before
     public void setUp() throws Exception {
+        metrics = new NoopMetricsRegistry();
         dispatcher = new NoopDispatcher();
-        tracer = new Tracer.Builder("TestService", dispatcher).build();
+        tracer = new Tracer.Builder(metrics, "TestService", dispatcher).build();
         span = tracer.buildSpan("TestOperation").start();
     }
 
@@ -48,7 +52,7 @@ public class SpanTest {
     @Test
     public void testServiceName() {
         String expected = "service-name";
-        Span span = new Tracer.Builder(expected, dispatcher).build().buildSpan(expected).start();
+        Span span = new Tracer.Builder(metrics, expected, dispatcher).build().buildSpan(expected).start();
         Assert.assertEquals(expected, span.getServiceName());
     }
 

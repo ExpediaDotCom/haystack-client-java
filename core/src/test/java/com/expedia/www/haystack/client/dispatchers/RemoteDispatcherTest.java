@@ -11,8 +11,12 @@ import org.junit.Test;
 import com.expedia.www.haystack.client.Span;
 import com.expedia.www.haystack.client.Tracer;
 import com.expedia.www.haystack.client.dispatchers.clients.InMemoryClient;
+import com.expedia.www.haystack.client.metrics.LoggingMetricsRegistry;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
+import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 
 public class RemoteDispatcherTest {
+    private MetricsRegistry metrics;
     private Dispatcher dispatcher;
     private Tracer tracer;
     private InMemoryClient client;
@@ -21,14 +25,15 @@ public class RemoteDispatcherTest {
 
     @Before
     public void setUp() {
-        client = new InMemoryClient();
+        metrics = new LoggingMetricsRegistry();
+        client = new InMemoryClient.Builder(metrics).build();
 
-        dispatcher = new RemoteDispatcher.Builder(client)
+        dispatcher = new RemoteDispatcher.Builder(metrics, client)
             .withFlushIntervalMillis(flushInterval)
             .withBlockingQueueLimit(queueSize)
             .build();
 
-        tracer = new Tracer.Builder("remote-dispatcher", dispatcher).build();
+        tracer = new Tracer.Builder(metrics, "remote-dispatcher", dispatcher).build();
     }
 
     @Test
@@ -62,15 +67,15 @@ public class RemoteDispatcherTest {
     @Test
     public void testWhenClientBlocks() throws IOException {
         // client allows zero messages and blocks
-        client = new InMemoryClient(0);
+        client = new InMemoryClient.Builder(metrics).withLimit(0).build();
 
-        dispatcher = new RemoteDispatcher.Builder(client)
+        dispatcher = new RemoteDispatcher.Builder(metrics, client)
             .withFlushIntervalMillis(flushInterval)
             .withShutdownTimeoutMillis(flushInterval * 2)
             .withBlockingQueueLimit(queueSize)
             .build();
 
-        tracer = new Tracer.Builder("remote-dispatcher", dispatcher).build();
+        tracer = new Tracer.Builder(metrics, "remote-dispatcher", dispatcher).build();
 
         final int createdSpans = queueSize + 20;
         for (int i = 0; i < createdSpans; i++) {
@@ -101,8 +106,8 @@ public class RemoteDispatcherTest {
 
     @Test
     public void testBuilderDefaults() throws IOException {
-        dispatcher = new RemoteDispatcher.Builder(client).build();
-        tracer = new Tracer.Builder("remote-dispatcher", dispatcher).build();
+        dispatcher = new RemoteDispatcher.Builder(metrics, client).build();
+        tracer = new Tracer.Builder(metrics, "remote-dispatcher", dispatcher).build();
 
         Span span = tracer.buildSpan("happy-path").start();
         dispatcher.dispatch(span);

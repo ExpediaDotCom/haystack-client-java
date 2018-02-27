@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.expedia.www.haystack.client.dispatchers.NoopDispatcher;
+import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 
 import io.opentracing.propagation.Format;
 import io.opentracing.propagation.TextMap;
@@ -20,7 +21,7 @@ public class TracerPropagationTest {
 
     @Before
     public void setUp() throws Exception {
-        tracer = new Tracer.Builder("TestTracer", new NoopDispatcher()).build();
+        tracer = new Tracer.Builder(new NoopMetricsRegistry(), "TestTracer", new NoopDispatcher()).build();
     }
 
     @Test(expected=IllegalArgumentException.class)
