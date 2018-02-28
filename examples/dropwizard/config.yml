@@ -3,14 +3,20 @@ defaultName: Stranger
 
 tracer:
   serviceName: HelloWorld
+  metrics:
+    type: micrometer
   enabled: true
   dispatchers:
     - type: logger
       loggerName: dispatcher
     - type: remote
+      metrics:
+        type: micrometer
       client:
         type: logger
         loggerName: client
+        metrics:
+          type: micrometer
         format:
           type: protobuf
 

@@ -51,6 +51,19 @@
         <version>${project.version}</version>
       </dependency>
 
+    <!-- Metrics for haystack-client -->
+    <dependency>
+      <groupId>com.expedia.www</groupId>
+      <artifactId>haystack-client-micrometer</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- Explicitly pull in a version of the base provider because marked optional -->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-core</artifactId>
+    </dependency>
+
       <dependency>
         <groupId>com.google.protobuf</groupId>
         <artifactId>protobuf-java</artifactId>
