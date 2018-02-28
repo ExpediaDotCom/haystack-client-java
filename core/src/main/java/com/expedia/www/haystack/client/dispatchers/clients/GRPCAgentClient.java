@@ -93,15 +93,15 @@ public class GRPCAgentClient implements Client {
                 break;
             case RATE_LIMIT_ERROR:
                 ratelimitCounter.increment();
-                LOGGER.error("Rate limit error recieved from agent");
+                LOGGER.error("Rate limit error received from agent");
                 break;
             case UNKNOWN_ERROR:
                 unknownCounter.increment();
-                LOGGER.error("Unknown error recieved from agent");
+                LOGGER.error("Unknown error received from agent");
                 break;
             default:
                 badresultCounter.increment();
-                LOGGER.error("Unknown result recieved from agent: {}", value.getCode());
+                LOGGER.error("Unknown result received from agent: {}", value.getCode());
             }
         }
     }

@@ -24,7 +24,7 @@ public class InMemoryClient implements Client {
 
     private Semaphore limiter;
     private List<Span> total;
-    private List<Span> recieved;
+    private List<Span> received;
     private List<Span> flushed;
 
     private final Timer sendTimer;
@@ -35,7 +35,7 @@ public class InMemoryClient implements Client {
     public InMemoryClient(Metrics metrics, int limit) {
         limiter = new Semaphore(limit);
         total = new ArrayList<>();
-        recieved = new ArrayList<>();
+        received = new ArrayList<>();
         flushed = new ArrayList<>();
 
         this.sendTimer = Timer.builder("send").register(metrics);
@@ -45,7 +45,7 @@ public class InMemoryClient implements Client {
 
         // held in the registry a reference; but we don't need a local reference
         Gauge.builder("total", total, Collection::size).register(metrics);
-        Gauge.builder("recieved", recieved, Collection::size).register(metrics);
+        Gauge.builder("received", received, Collection::size).register(metrics);
         Gauge.builder("flushed", flushed, Collection::size).register(metrics);
     }
 
@@ -55,7 +55,7 @@ public class InMemoryClient implements Client {
         try (Sample timer = sendTimer.start()) {
             limiter.acquire();
             total.add(span);
-            recieved.add(span);
+            received.add(span);
             return true;
         } catch (InterruptedException e) {
             sendExceptionCounter.increment();
@@ -75,8 +75,8 @@ public class InMemoryClient implements Client {
     public void flush() {
         try (Sample timer = flushTimer.start()) {
             LOGGER.info("Client flushed");
-            flushed.addAll(recieved);
-            recieved.clear();
+            flushed.addAll(received);
+            received.clear();
         }
     }
 
@@ -88,8 +88,8 @@ public class InMemoryClient implements Client {
         return Collections.unmodifiableList(flushed);
     }
 
-    public List<Span> getRecievedSpans() {
-        return Collections.unmodifiableList(recieved);
+    public List<Span> getReceivedSpans() {
+        return Collections.unmodifiableList(received);
     }
 
     public static final class Builder {

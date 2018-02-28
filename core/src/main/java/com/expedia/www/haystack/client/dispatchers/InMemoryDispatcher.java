@@ -19,7 +19,7 @@ import com.expedia.www.haystack.client.metrics.Timer.Sample;
 public class InMemoryDispatcher implements Dispatcher {
     private Semaphore limiter;
     private List<Span> reported;
-    private List<Span> recieved;
+    private List<Span> received;
     private List<Span> flushed;
 
     private final Counter closeCounter;
@@ -29,12 +29,12 @@ public class InMemoryDispatcher implements Dispatcher {
     public InMemoryDispatcher(Metrics metrics, int limit) {
         limiter = new Semaphore(limit);
         reported = new ArrayList<>();
-        recieved = new ArrayList<>();
+        received = new ArrayList<>();
         flushed = new ArrayList<>();
 
         // held in the registry a reference; but we don't need a local reference
         Gauge.builder("reported", reported, Collection::size).register(metrics);
-        Gauge.builder("recieved", recieved, Collection::size).register(metrics);
+        Gauge.builder("received", received, Collection::size).register(metrics);
         Gauge.builder("flushed", flushed, Collection::size).register(metrics);
 
         this.flushTimer = Timer.builder("flush").register(metrics);
@@ -58,7 +58,7 @@ public class InMemoryDispatcher implements Dispatcher {
                 }
 
                 reported.add(span);
-                recieved.add(span);
+                received.add(span);
             }
         }
     }
@@ -85,9 +85,9 @@ public class InMemoryDispatcher implements Dispatcher {
         }
     }
 
-    public List<Span> getRecievedSpans() {
+    public List<Span> getReceivedSpans() {
         synchronized (this) {
-            return Collections.unmodifiableList(recieved);
+            return Collections.unmodifiableList(received);
         }
     }
 

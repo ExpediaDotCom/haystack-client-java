@@ -45,7 +45,7 @@ public class RemoteDispatcherTest {
             .atMost(flushInterval * 2, TimeUnit.MILLISECONDS)
             .until(() -> client.getFlushedSpans().size() > 0);
 
-        Assert.assertEquals(0, client.getRecievedSpans().size());
+        Assert.assertEquals(0, client.getReceivedSpans().size());
         Assert.assertEquals(1, client.getFlushedSpans().size());
         Assert.assertEquals(1, client.getTotalSpans().size());
     }
@@ -59,7 +59,7 @@ public class RemoteDispatcherTest {
         }
         dispatcher.close();
 
-        Assert.assertEquals(0, client.getRecievedSpans().size());
+        Assert.assertEquals(0, client.getReceivedSpans().size());
         Assert.assertEquals(createdSpans, client.getTotalSpans().size());
         Assert.assertEquals(createdSpans, client.getFlushedSpans().size());
     }
@@ -87,7 +87,7 @@ public class RemoteDispatcherTest {
 
         Assert.assertEquals(0, client.getTotalSpans().size());
         Assert.assertEquals(0, client.getFlushedSpans().size());
-        Assert.assertEquals(0, client.getRecievedSpans().size());
+        Assert.assertEquals(0, client.getReceivedSpans().size());
     }
 
     @Test
@@ -99,7 +99,7 @@ public class RemoteDispatcherTest {
         span = tracer.buildSpan("rejected-span").start();
         dispatcher.dispatch(span);
 
-        Assert.assertEquals(0, client.getRecievedSpans().size());
+        Assert.assertEquals(0, client.getReceivedSpans().size());
         Assert.assertEquals(1, client.getTotalSpans().size());
         Assert.assertEquals(1, client.getFlushedSpans().size());
     }
@@ -113,7 +113,7 @@ public class RemoteDispatcherTest {
         dispatcher.dispatch(span);
         dispatcher.close();
 
-        Assert.assertEquals(0, client.getRecievedSpans().size());
+        Assert.assertEquals(0, client.getReceivedSpans().size());
         Assert.assertEquals(1, client.getTotalSpans().size());
         Assert.assertEquals(1, client.getFlushedSpans().size());
     }
