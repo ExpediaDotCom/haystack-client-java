@@ -185,7 +185,7 @@ public class RemoteDispatcher implements Dispatcher {
         private ScheduledExecutorService executor;
 
         public Builder(MetricsRegistry registry, Client client) {
-            this(new Metrics(registry, "com.expedia.www.haystack.client.Dispatcher", Arrays.asList(new Tag("type", "remote"))), client);
+            this(new Metrics(registry, Dispatcher.class.getName(), Arrays.asList(new Tag("type", "remote"))), client);
         }
 
         public Builder(Metrics metrics, Client client) {

@@ -66,7 +66,7 @@ public class LoggerDispatcher implements Dispatcher {
         private Logger logger;
 
         public Builder(MetricsRegistry registry) {
-            this(new Metrics(registry, "com.expedia.www.haystack.client.Dispatcher", Arrays.asList(new Tag("type", "logger"))));
+            this(new Metrics(registry, Dispatcher.class.getName(), Arrays.asList(new Tag("type", "logger"))));
         }
 
         public Builder(Metrics metrics) {

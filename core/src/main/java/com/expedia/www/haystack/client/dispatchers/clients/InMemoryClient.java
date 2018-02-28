@@ -97,7 +97,7 @@ public class InMemoryClient implements Client {
         private int limit;
 
         public Builder(MetricsRegistry registry) {
-            this(new Metrics(registry, "com.expedia.www.haystack.client.dispatchers.Client", Arrays.asList(new Tag("type", "inmemory"))));
+            this(new Metrics(registry, Client.class.getName(), Arrays.asList(new Tag("type", "inmemory"))));
         }
 
         public Builder(Metrics metrics) {

@@ -61,7 +61,7 @@ public class LoggerClient implements Client {
         private String loggerName;
 
         public Builder(MetricsRegistry registry, Format<?> format) {
-            this(new Metrics(registry, "com.expedia.www.haystack.client.dispatchers.Client", Arrays.asList(new Tag("type", "logger"))), format);
+            this(new Metrics(registry, Client.class.getName(), Arrays.asList(new Tag("type", "logger"))), format);
         }
 
         public Builder(Metrics metrics, Format<?> format) {

@@ -317,7 +317,7 @@ public class Tracer implements io.opentracing.Tracer {
         private Metrics metrics;
 
         public Builder(MetricsRegistry registry, String serviceName, Dispatcher dispatcher) {
-            this(new Metrics(registry, "com.expedia.www.haystack.client.Tracer", Collections.emptyList()), serviceName, dispatcher);
+            this(new Metrics(registry, Tracer.class.getName(), Collections.emptyList()), serviceName, dispatcher);
         }
 
         public Builder(Metrics metrics, String serviceName, Dispatcher dispatcher) {

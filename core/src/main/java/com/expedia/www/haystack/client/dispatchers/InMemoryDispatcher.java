@@ -101,7 +101,7 @@ public class InMemoryDispatcher implements Dispatcher {
         }
 
         public Builder(MetricsRegistry registry) {
-            this(new Metrics(registry, "com.expedia.www.haystack.client.Dispatcher", Collections.singletonList(new Tag("type", "inmemory"))));
+            this(new Metrics(registry, Dispatcher.class.getName(), Collections.singletonList(new Tag("type", "inmemory"))));
         }
 
         public Builder withLimit(int limit) {

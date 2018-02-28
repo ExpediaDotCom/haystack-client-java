@@ -169,7 +169,7 @@ public class GRPCAgentClient implements Client {
         private long shutdownTimeoutMS = TimeUnit.SECONDS.toMillis(30);
 
         private Builder(MetricsRegistry registry) {
-            this(new Metrics(registry, "com.expedia.www.haystack.client.dispatchers.Client", Arrays.asList(new Tag("type", "grpc"))));
+            this(new Metrics(registry, Client.class.getName(), Arrays.asList(new Tag("type", "grpc"))));
         }
 
         private Builder(Metrics metrics) {
