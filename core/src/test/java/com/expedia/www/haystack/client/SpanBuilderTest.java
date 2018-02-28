@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
 import com.expedia.www.haystack.client.dispatchers.NoopDispatcher;
+import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 
 import io.opentracing.References;
 
@@ -19,7 +20,7 @@ public class SpanBuilderTest {
     @Before
     public void setUp() throws Exception {
         dispatcher = new NoopDispatcher();
-        tracer = new Tracer.Builder("TestService", dispatcher).build();
+        tracer = new Tracer.Builder(new NoopMetricsRegistry(), "TestService", dispatcher).build();
     }
 
     @Test

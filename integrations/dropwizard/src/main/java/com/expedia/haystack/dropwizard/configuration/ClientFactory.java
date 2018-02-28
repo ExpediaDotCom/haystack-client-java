@@ -11,4 +11,3 @@ import io.dropwizard.jackson.Discoverable;
 public interface ClientFactory extends Discoverable {
     Client build();
 }
-

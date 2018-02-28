@@ -21,6 +21,7 @@
       <module>annotations</module>
       <module>dropwizard</module>
       <module>jaxrs2</module>
+      <module>micrometer</module>
     </modules>
 
     <properties>

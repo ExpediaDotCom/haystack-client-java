@@ -1,0 +1,2 @@
+com.expedia.haystack.dropwizard.configuration.NoopMetricsFactory
+com.expedia.haystack.dropwizard.configuration.MicrometerMetricsFactory

@@ -27,7 +27,7 @@ public class LoggerClientFactory extends BaseClientFactory {
 
     @Override
     public Client build() {
-        LoggerClient.Builder builder = new LoggerClient.Builder(getFormat().build());
+        LoggerClient.Builder builder = new LoggerClient.Builder(getMetrics().build(), getFormat().build());
         if (loggerName != null) {
             builder.withLogger(loggerName);
         }

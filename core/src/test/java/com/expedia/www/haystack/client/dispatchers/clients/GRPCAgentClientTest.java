@@ -16,6 +16,7 @@ import com.expedia.open.tracing.agent.api.SpanAgentGrpc;
 import com.expedia.www.haystack.client.Span;
 import com.expedia.www.haystack.client.Tracer;
 import com.expedia.www.haystack.client.dispatchers.InMemoryDispatcher;
+import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcServerRule;
@@ -32,12 +33,12 @@ public class GRPCAgentClientTest {
 
     @Before
     public void setup() throws Exception {
+        NoopMetricsRegistry metrics = new NoopMetricsRegistry();
         // register the service
         grpcServerRule.getServiceRegistry().addService(serviceImpl);
         // build a client with the in-process channel
-        client = new GRPCAgentClient.Builder(grpcServerRule.getChannel()).build();
-
-        tracer = new Tracer.Builder("grpc-agent-tests", new InMemoryDispatcher()).build();
+        client = new GRPCAgentClient.Builder(metrics, grpcServerRule.getChannel()).build();
+        tracer = new Tracer.Builder(metrics, "grpc-agent-tests", new InMemoryDispatcher.Builder(metrics).build()).build();
     }
 
     @After

@@ -15,6 +15,10 @@ public class RemoteDispatcherFactory implements DispatcherFactory {
 
     @Valid
     @NotNull
+    private MetricsFactory metrics = new NoopMetricsFactory();
+
+    @Valid
+    @NotNull
     private ClientFactory client;
 
     @Nullable
@@ -35,7 +39,7 @@ public class RemoteDispatcherFactory implements DispatcherFactory {
 
     @Override
     public Dispatcher build() {
-        RemoteDispatcher.Builder builder = new RemoteDispatcher.Builder(client.build());
+        RemoteDispatcher.Builder builder = new RemoteDispatcher.Builder(metrics.build(), client.build());
         if (maxQueueSize != null) {
             builder.withBlockingQueueLimit(maxQueueSize);
         }
@@ -49,6 +53,16 @@ public class RemoteDispatcherFactory implements DispatcherFactory {
             builder.withShutdownTimeoutMillis(shutdownTimoutMs);
         }
         return builder.build();
+    }
+
+    @JsonProperty
+    public MetricsFactory getMetrics() {
+        return metrics;
+    }
+
+    @JsonProperty
+    public void setMetrics(MetricsFactory metrics) {
+        this.metrics = metrics;
     }
 
     /**

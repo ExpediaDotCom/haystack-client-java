@@ -4,7 +4,7 @@ package com.expedia.www.haystack.client.dispatchers.clients;
  * An Exception to indicate a client failure
  *
  */
-public class ClientException extends Exception {
+public class ClientException extends RuntimeException {
     public ClientException() {
         super();
     }

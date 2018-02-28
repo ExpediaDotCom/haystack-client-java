@@ -11,8 +11,12 @@ import org.junit.Test;
 import com.expedia.www.haystack.client.Span;
 import com.expedia.www.haystack.client.Tracer;
 import com.expedia.www.haystack.client.dispatchers.clients.InMemoryClient;
+import com.expedia.www.haystack.client.metrics.LoggingMetricsRegistry;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
+import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 
 public class RemoteDispatcherTest {
+    private MetricsRegistry metrics;
     private Dispatcher dispatcher;
     private Tracer tracer;
     private InMemoryClient client;
@@ -21,14 +25,15 @@ public class RemoteDispatcherTest {
 
     @Before
     public void setUp() {
-        client = new InMemoryClient();
+        metrics = new LoggingMetricsRegistry();
+        client = new InMemoryClient.Builder(metrics).build();
 
-        dispatcher = new RemoteDispatcher.Builder(client)
+        dispatcher = new RemoteDispatcher.Builder(metrics, client)
             .withFlushIntervalMillis(flushInterval)
             .withBlockingQueueLimit(queueSize)
             .build();
 
-        tracer = new Tracer.Builder("remote-dispatcher", dispatcher).build();
+        tracer = new Tracer.Builder(metrics, "remote-dispatcher", dispatcher).build();
     }
 
     @Test
@@ -40,7 +45,7 @@ public class RemoteDispatcherTest {
             .atMost(flushInterval * 2, TimeUnit.MILLISECONDS)
             .until(() -> client.getFlushedSpans().size() > 0);
 
-        Assert.assertEquals(0, client.getRecievedSpans().size());
+        Assert.assertEquals(0, client.getReceivedSpans().size());
         Assert.assertEquals(1, client.getFlushedSpans().size());
         Assert.assertEquals(1, client.getTotalSpans().size());
     }
@@ -54,7 +59,7 @@ public class RemoteDispatcherTest {
         }
         dispatcher.close();
 
-        Assert.assertEquals(0, client.getRecievedSpans().size());
+        Assert.assertEquals(0, client.getReceivedSpans().size());
         Assert.assertEquals(createdSpans, client.getTotalSpans().size());
         Assert.assertEquals(createdSpans, client.getFlushedSpans().size());
     }
@@ -62,15 +67,15 @@ public class RemoteDispatcherTest {
     @Test
     public void testWhenClientBlocks() throws IOException {
         // client allows zero messages and blocks
-        client = new InMemoryClient(0);
+        client = new InMemoryClient.Builder(metrics).withLimit(0).build();
 
-        dispatcher = new RemoteDispatcher.Builder(client)
+        dispatcher = new RemoteDispatcher.Builder(metrics, client)
             .withFlushIntervalMillis(flushInterval)
             .withShutdownTimeoutMillis(flushInterval * 2)
             .withBlockingQueueLimit(queueSize)
             .build();
 
-        tracer = new Tracer.Builder("remote-dispatcher", dispatcher).build();
+        tracer = new Tracer.Builder(metrics, "remote-dispatcher", dispatcher).build();
 
         final int createdSpans = queueSize + 20;
         for (int i = 0; i < createdSpans; i++) {
@@ -82,7 +87,7 @@ public class RemoteDispatcherTest {
 
         Assert.assertEquals(0, client.getTotalSpans().size());
         Assert.assertEquals(0, client.getFlushedSpans().size());
-        Assert.assertEquals(0, client.getRecievedSpans().size());
+        Assert.assertEquals(0, client.getReceivedSpans().size());
     }
 
     @Test
@@ -94,21 +99,21 @@ public class RemoteDispatcherTest {
         span = tracer.buildSpan("rejected-span").start();
         dispatcher.dispatch(span);
 
-        Assert.assertEquals(0, client.getRecievedSpans().size());
+        Assert.assertEquals(0, client.getReceivedSpans().size());
         Assert.assertEquals(1, client.getTotalSpans().size());
         Assert.assertEquals(1, client.getFlushedSpans().size());
     }
 
     @Test
     public void testBuilderDefaults() throws IOException {
-        dispatcher = new RemoteDispatcher.Builder(client).build();
-        tracer = new Tracer.Builder("remote-dispatcher", dispatcher).build();
+        dispatcher = new RemoteDispatcher.Builder(metrics, client).build();
+        tracer = new Tracer.Builder(metrics, "remote-dispatcher", dispatcher).build();
 
         Span span = tracer.buildSpan("happy-path").start();
         dispatcher.dispatch(span);
         dispatcher.close();
 
-        Assert.assertEquals(0, client.getRecievedSpans().size());
+        Assert.assertEquals(0, client.getReceivedSpans().size());
         Assert.assertEquals(1, client.getTotalSpans().size());
         Assert.assertEquals(1, client.getFlushedSpans().size());
     }

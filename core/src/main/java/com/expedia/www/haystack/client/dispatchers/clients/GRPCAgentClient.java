@@ -1,6 +1,6 @@
 package com.expedia.www.haystack.client.dispatchers.clients;
 
-import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -12,6 +12,12 @@ import com.expedia.open.tracing.agent.api.SpanAgentGrpc.SpanAgentStub;
 import com.expedia.www.haystack.client.Span;
 import com.expedia.www.haystack.client.dispatchers.formats.Format;
 import com.expedia.www.haystack.client.dispatchers.formats.ProtoBufFormat;
+import com.expedia.www.haystack.client.metrics.Counter;
+import com.expedia.www.haystack.client.metrics.Metrics;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
+import com.expedia.www.haystack.client.metrics.Tag;
+import com.expedia.www.haystack.client.metrics.Timer;
+import com.expedia.www.haystack.client.metrics.Timer.Sample;
 
 import io.grpc.ManagedChannel;
 import io.grpc.netty.NegotiationType;
@@ -27,22 +33,55 @@ public class GRPCAgentClient implements Client {
     private final long shutdownTimeoutMS;
     private final StreamObserver<DispatchResult> observer;
 
-    public GRPCAgentClient(Format<com.expedia.open.tracing.Span> format, ManagedChannel channel, SpanAgentStub stub, StreamObserver<DispatchResult> observer, long shutdownTimeoutMS) {
+    private final Timer sendTimer;
+    private final Counter sendExceptionCounter;
+    private final Timer closeTimer;
+    private final Counter closeTimeoutCounter;
+    private final Counter closeInterruptedCounter;
+    private final Counter closeExceptionCounter;
+    private final Counter flushCounter;
+
+    public GRPCAgentClient(Metrics metrics, Format<com.expedia.open.tracing.Span> format, ManagedChannel channel, SpanAgentStub stub, StreamObserver<DispatchResult> observer, long shutdownTimeoutMS) {
         this.format = format;
         this.channel = channel;
         this.stub = stub;
         this.shutdownTimeoutMS = shutdownTimeoutMS;
         this.observer = observer;
+
+        this.sendTimer = Timer.builder("send").register(metrics);
+        this.sendExceptionCounter = Counter.builder("send").tag(new Tag("state", "exception")).register(metrics);
+        this.closeTimer = Timer.builder("close").register(metrics);
+        this.closeTimeoutCounter = Counter.builder("close").tag(new Tag("state", "timeout")).register(metrics);
+        this.closeInterruptedCounter = Counter.builder("close").tag(new Tag("state", "interrupted")).register(metrics);
+        this.closeExceptionCounter = Counter.builder("close").tag(new Tag("state", "exception")).register(metrics);
+        this.flushCounter = Counter.builder("flush").register(metrics);
+
     }
 
     public static class GRPCAgentClientStreamObserver implements StreamObserver<DispatchResult> {
+        private Counter onCompletedCounter;
+        private Counter onErrorCounter;
+        private Counter ratelimitCounter;
+        private Counter unknownCounter;
+        private Counter badresultCounter;
+
+        public GRPCAgentClientStreamObserver(Metrics metrics) {
+            this.onCompletedCounter = Counter.builder("observer").tag(new Tag("state", "completed")).register(metrics);
+            this.onErrorCounter = Counter.builder("observer").tag(new Tag("state", "error")).register(metrics);
+            this.ratelimitCounter = Counter.builder("observer").tag(new Tag("state", "ratelimited")).register(metrics);
+            this.unknownCounter = Counter.builder("observer").tag(new Tag("state", "unknown")).register(metrics);
+            this.badresultCounter = Counter.builder("observer").tag(new Tag("state", "badresult")).register(metrics);
+        }
+
         @Override
         public void onCompleted() {
+            onCompletedCounter.increment();
             LOGGER.info("Dispatching span completed");
         }
 
         @Override
         public void onError(Throwable t) {
+            onErrorCounter.increment();
             LOGGER.error("Dispatching span failed with error: {}", t);
         }
 
@@ -53,49 +92,68 @@ public class GRPCAgentClient implements Client {
                 // do nothing
                 break;
             case RATE_LIMIT_ERROR:
-                LOGGER.error("Rate limit error recieved from agent");
+                ratelimitCounter.increment();
+                LOGGER.error("Rate limit error received from agent");
                 break;
             case UNKNOWN_ERROR:
-                LOGGER.error("Unknown error recieved from agent");
+                unknownCounter.increment();
+                LOGGER.error("Unknown error received from agent");
                 break;
             default:
-                LOGGER.error("Unknown result recieved from agent: {}", value.getCode());
+                badresultCounter.increment();
+                LOGGER.error("Unknown result received from agent: {}", value.getCode());
             }
         }
     }
 
     @Override
     public boolean send(Span span) throws ClientException {
-        stub.dispatch(format.format(span), observer);
+        try (Sample timer = sendTimer.start()) {
+            stub.dispatch(format.format(span), observer);
+        } catch (Exception e) {
+            sendExceptionCounter.increment();
+            throw new ClientException(e.getMessage(), e);
+        }
         // always true
         return true;
     }
 
     @Override
-    public void close() throws IOException {
-        channel.shutdown();
-        try {
-            if (!channel.awaitTermination(shutdownTimeoutMS, TimeUnit.SECONDS)) {
-                channel.shutdownNow();
-                LOGGER.warn("Channel failed to terminate, forcibly closing it.");
+    public void close() {
+        try (Sample timer = closeTimer.start()) {
+            channel.shutdown();
+            try {
                 if (!channel.awaitTermination(shutdownTimeoutMS, TimeUnit.SECONDS)) {
-                    LOGGER.error("Channel failed to terminate.");
+                    channel.shutdownNow();
+                    closeTimeoutCounter.increment();
+                    LOGGER.warn("Channel failed to terminate, forcibly closing it.");
+                    if (!channel.awaitTermination(shutdownTimeoutMS, TimeUnit.SECONDS)) {
+                        closeTimeoutCounter.increment();
+                        LOGGER.error("Channel failed to terminate.");
+                    }
                 }
+            } catch (InterruptedException e) {
+                closeInterruptedCounter.increment();
+                LOGGER.error("Unable to close the channel.", e);
             }
-        } catch (InterruptedException e) {
-            LOGGER.error("Unable to close the channel.", e);
+        } catch (Exception e) {
+            closeExceptionCounter.increment();
+            LOGGER.error("Unexpected exception caught on client shutdown.", e);
+            throw e;
         }
     }
 
     @Override
-    public void flush() throws IOException {
-        // do nothing
+    public void flush() {
+        flushCounter.increment();
     }
 
     public static final class Builder {
         private Format<com.expedia.open.tracing.Span> format;
 
         private StreamObserver<DispatchResult> observer;
+
+        private Metrics metrics;
 
         // Options to build a channel
         private String host;
@@ -110,18 +168,35 @@ public class GRPCAgentClient implements Client {
 
         private long shutdownTimeoutMS = TimeUnit.SECONDS.toMillis(30);
 
-        private Builder() {
-            this.format = new ProtoBufFormat();
-            this.observer = new GRPCAgentClientStreamObserver();
+        private Builder(MetricsRegistry registry) {
+            this(new Metrics(registry, Client.class.getName(), Arrays.asList(new Tag("type", "grpc"))));
         }
 
-        public Builder(ManagedChannel channel) {
-            this();
+        private Builder(Metrics metrics) {
+            this.format = new ProtoBufFormat();
+            this.observer = new GRPCAgentClientStreamObserver(metrics);
+            this.metrics = metrics;
+
+        }
+
+        public Builder(MetricsRegistry metrics, ManagedChannel channel) {
+            this(metrics);
             this.channel = channel;
         }
 
-        public Builder(String host, int port) {
-            this();
+        public Builder(Metrics metrics, ManagedChannel channel) {
+            this(metrics);
+            this.channel = channel;
+        }
+
+        public Builder(MetricsRegistry metrics, String host, int port) {
+            this(metrics);
+            this.host = host;
+            this.port = port;
+        }
+
+        public Builder(Metrics metrics, String host, int port) {
+            this(metrics);
             this.host = host;
             this.port = port;
         }
@@ -176,7 +251,7 @@ public class GRPCAgentClient implements Client {
 
             SpanAgentStub stub = SpanAgentGrpc.newStub(managedChannel);
 
-            return new GRPCAgentClient(format, managedChannel, stub, observer, shutdownTimeoutMS);
+            return new GRPCAgentClient(metrics, format, managedChannel, stub, observer, shutdownTimeoutMS);
         }
     }
 }

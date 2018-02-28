@@ -2,6 +2,7 @@ package com.expedia.www.haystack.client;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,12 @@ import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
+import com.expedia.www.haystack.client.metrics.Counter;
+import com.expedia.www.haystack.client.metrics.Metrics;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
+import com.expedia.www.haystack.client.metrics.Tag;
+import com.expedia.www.haystack.client.metrics.Timer;
+import com.expedia.www.haystack.client.metrics.Timer.Sample;
 import com.expedia.www.haystack.client.propagation.Extractor;
 import com.expedia.www.haystack.client.propagation.Injector;
 import com.expedia.www.haystack.client.propagation.PropagationRegistry;
@@ -31,12 +38,41 @@ public class Tracer implements io.opentracing.Tracer {
     private final String serviceName;
     private final ScopeManager scopeManager;
 
-    public Tracer(String serviceName, ScopeManager scopeManager, Clock clock, Dispatcher dispatcher, PropagationRegistry registry) {
+    private final Counter spansCreatedCounter;
+
+    private final Timer dispatchTimer;
+
+    private final Timer closeTimer;
+    private final Counter closeExceptionCounter;
+
+    private final Timer flushTimer;
+    private final Counter flushExceptionCounter;
+
+    private final Timer injectTimer;
+    private final Counter injectFailureCounter;
+
+    private final Timer extractTimer;
+    private final Counter extractFailureCounter;
+
+    public Tracer(String serviceName, ScopeManager scopeManager, Clock clock, Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics) {
         this.serviceName = serviceName;
         this.scopeManager = scopeManager;
         this.clock = clock;
         this.dispatcher = dispatcher;
         this.registry = registry;
+
+        this.dispatchTimer = Timer.builder("dispatch").register(metrics);
+        this.closeTimer = Timer.builder("close").register(metrics);
+        this.closeExceptionCounter = Counter.builder("close").tag(new Tag("state", "exception")).register(metrics);
+        this.flushTimer = Timer.builder("flush").register(metrics);
+        this.flushExceptionCounter = Counter.builder("flush").tag(new Tag("state", "exception")).register(metrics);
+
+        this.spansCreatedCounter = Counter.builder("spans").register(metrics);
+
+        this.injectTimer = Timer.builder("inject").register(metrics);
+        this.injectFailureCounter = Counter.builder("inject").tag(new Tag("state", "exception")).register(metrics);
+        this.extractTimer = Timer.builder("extract").register(metrics);
+        this.extractFailureCounter = Counter.builder("extract").tag(new Tag("state", "exception")).register(metrics);
     }
 
     @Override
@@ -47,15 +83,27 @@ public class Tracer implements io.opentracing.Tracer {
     }
 
     public void close() throws IOException {
-        dispatcher.close();
+        try (Sample timer = closeTimer.start()) {
+            dispatcher.close();
+        } catch(IOException e) {
+            closeExceptionCounter.increment();
+            throw e;
+        }
     }
 
     public void flush() throws IOException {
-        dispatcher.flush();
+        try (Sample timer = flushTimer.start()) {
+            dispatcher.flush();
+        } catch(IOException e) {
+            flushExceptionCounter.increment();
+            throw e;
+        }
     }
 
     void dispatch(com.expedia.www.haystack.client.Span span) {
-        dispatcher.dispatch(span);
+        try (Sample timer = dispatchTimer.start()) {
+            dispatcher.dispatch(span);
+        }
     }
 
     /**
@@ -80,23 +128,30 @@ public class Tracer implements io.opentracing.Tracer {
 
     @Override
     public <C> void inject(io.opentracing.SpanContext spanContext, Format<C> format, C carrier) {
-        final Injector<C> injector = registry.getInjector(format);
-        if (injector == null) {
-            throw new IllegalArgumentException(String.format("Unsupported format: %s", format));
-        } else if (!(spanContext instanceof SpanContext)) {
-            throw new IllegalArgumentException(String.format("Invalid SpanContext type: %s", spanContext));
-        }
+        try (Sample sample = injectTimer.start()) {
+            final Injector<C> injector = registry.getInjector(format);
+            if (injector == null) {
+                injectFailureCounter.increment();
+                throw new IllegalArgumentException(String.format("Unsupported format: %s", format));
+            } else if (!(spanContext instanceof SpanContext)) {
+                injectFailureCounter.increment();
+                throw new IllegalArgumentException(String.format("Invalid SpanContext type: %s", spanContext));
+            }
 
-        injector.inject((SpanContext) spanContext, carrier);
+            injector.inject((SpanContext) spanContext, carrier);
+        }
     }
 
     @Override
     public <C> SpanContext extract(Format<C> format, C carrier) {
-        final Extractor<C> extractor = registry.getExtractor(format);
-        if (extractor == null) {
-            throw new IllegalArgumentException(String.format("Unsupported format: %s", format));
+        try (Sample sample = extractTimer.start()) {
+            final Extractor<C> extractor = registry.getExtractor(format);
+            if (extractor == null) {
+                extractFailureCounter.increment();
+                throw new IllegalArgumentException(String.format("Unsupported format: %s", format));
+            }
+            return extractor.extract(carrier);
         }
-        return extractor.extract(carrier);
     }
 
     @Override
@@ -110,9 +165,8 @@ public class Tracer implements io.opentracing.Tracer {
         return scopeManager;
     }
 
-    public static class SpanBuilder implements io.opentracing.Tracer.SpanBuilder {
+    public class SpanBuilder implements io.opentracing.Tracer.SpanBuilder {
         private final Tracer tracer;
-
         private Clock clock;
         private Boolean ignoreActive;
         private String operationName;
@@ -121,7 +175,7 @@ public class Tracer implements io.opentracing.Tracer {
         private final List<Reference> references;
         private final Map<String, Object> tags;
 
-        public SpanBuilder(Tracer tracer, Clock clock, String operationName) {
+        protected SpanBuilder(Tracer tracer, Clock clock, String operationName) {
             this.tracer = tracer;
             this.clock = clock;
             this.operationName = operationName;
@@ -248,6 +302,7 @@ public class Tracer implements io.opentracing.Tracer {
 
         @Override
         public com.expedia.www.haystack.client.Span start() {
+            spansCreatedCounter.increment();
             return new com.expedia.www.haystack.client.Span(tracer, clock, operationName, createContext(), calculateStartTime(), tags, references);
         }
     }
@@ -259,10 +314,16 @@ public class Tracer implements io.opentracing.Tracer {
         private Clock clock = new SystemClock();
         private Dispatcher dispatcher;
         private PropagationRegistry registry = new PropagationRegistry();
+        private Metrics metrics;
 
-        public Builder(String serviceName, Dispatcher dispatcher) {
+        public Builder(MetricsRegistry registry, String serviceName, Dispatcher dispatcher) {
+            this(new Metrics(registry, Tracer.class.getName(), Collections.emptyList()), serviceName, dispatcher);
+        }
+
+        public Builder(Metrics metrics, String serviceName, Dispatcher dispatcher) {
             this.serviceName = serviceName;
             this.dispatcher = dispatcher;
+            this.metrics = metrics;
 
             TextMapPropagator textMapPropagator = new TextMapPropagator.Builder().build();
             withFormat(Format.Builtin.TEXT_MAP, (Injector<TextMap>) textMapPropagator);
@@ -306,7 +367,7 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         public Tracer build() {
-            return new Tracer(serviceName, scopeManager, clock, dispatcher, registry);
+            return new Tracer(serviceName, scopeManager, clock, dispatcher, registry, metrics);
         }
 
     }
