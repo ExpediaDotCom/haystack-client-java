@@ -11,12 +11,12 @@ public interface Timer {
 
     /**
      * Updates the statistics kept by the counter with the specified
-     * amount in microseconds.
+     * amount in nanoseconds.
      *
      * @param amount Duration of a single event being measured by this timer.
      */
     default void record(long duration) {
-        record(duration, TimeUnit.MILLISECONDS);
+        record(duration, TimeUnit.NANOSECONDS);
     }
 
     /**
