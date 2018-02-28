@@ -13,12 +13,17 @@ public class MetricsFactoryTest extends BaseFactoryTest<MetricsFactory> {
     @Test
     public void isDiscoverable() throws Exception {
         // Make sure the types we specified in META-INF gets picked up
-        isDiscoverable(ImmutableList.of(NoopMetricsFactory.class));
+        isDiscoverable(ImmutableList.of(NoopMetricsFactory.class, MicrometerMetricsFactory.class));
     }
 
     @Test
-    public void testBuildStringFormat() throws Exception {
+    public void testNoopMetricsFactory() throws Exception {
         testFactory(factory, "yaml/metrics/noop.yml", NoopMetricsFactory.class);
+    }
+
+    @Test
+    public void testMicrometerMetricsFactory() throws Exception {
+        testFactory(factory, "yaml/metrics/micrometer.yml", MicrometerMetricsFactory.class);
     }
 }
 

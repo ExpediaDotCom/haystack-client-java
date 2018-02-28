@@ -54,6 +54,7 @@
     <commonslang3.version>3.7</commonslang3.version>
     <grpc.version>1.7.0</grpc.version>
     <jaxrs.version>2.1</jaxrs.version>
+    <micrometer.version>1.0.1</micrometer.version>
 
     <!--Plugin Properties -->
     <maven-jacoco-plugin.version>0.7.9</maven-jacoco-plugin.version>
@@ -140,6 +141,13 @@
         <groupId>javax.ws.rs</groupId>
         <artifactId>javax.ws.rs-api</artifactId>
         <version>${jaxrs.version}</version>
+      </dependency>
+
+      <!-- metrics -->
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-core</artifactId>
+        <version>${micrometer.version}</version>
       </dependency>
 
       <!-- Test dependencies -->
