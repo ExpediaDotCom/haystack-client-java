@@ -16,9 +16,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * A factory for configuring and building {@link GRPCAgentClient} instances.
- * 
+ *
  * Configaruation options are as follows:
- * <table>
+ * <table summary="Configuration values and default values" >
  * <tr>
  *  <td>Name</td>
  *  <td>Default</td>
@@ -27,13 +27,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  *
  * <tr>
  *  <td>host</td>
- *  <td>localhost</td>
+ *  <td>haystack-agent</td>
  *  <td>The host to create a GRPC channel to</td>
  * </tr>
  *
  * <tr>
  *  <td>port</td>
- *  <td>None</td>
+ *  <td>34000</td>
  *  <td>The port to sue when creating a GRPC channel</td>
  * </tr>
  *
@@ -68,12 +68,12 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 public class AgentClientFactory extends BaseClientFactory {
 
     @NotEmpty
-    private String host = "localhost";
+    private String host = "haystack-agent";
 
     @NotNull
     @Min(1)
     @Max(65535)
-    private Integer port;
+    private Integer port = 34000;
 
     @Nullable
     private Long keepAliveTimeMS;
