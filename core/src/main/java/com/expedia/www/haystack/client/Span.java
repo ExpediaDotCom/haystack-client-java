@@ -84,7 +84,7 @@ public class Span implements io.opentracing.Span {
 
     @Override
     public void finish() {
-        finishTrace(clock.milliTime());
+        finishTrace(clock.microTime());
     }
 
     @Override
