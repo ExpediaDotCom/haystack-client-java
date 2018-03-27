@@ -33,8 +33,8 @@ import io.opentracing.util.ThreadLocalScopeManager;
 
 public class Tracer implements io.opentracing.Tracer {
     private final Dispatcher dispatcher;
-    private final Clock clock;
-    private final PropagationRegistry registry;
+    protected final Clock clock;
+    protected final PropagationRegistry registry;
     private final String serviceName;
     private final ScopeManager scopeManager;
 
@@ -122,6 +122,7 @@ public class Tracer implements io.opentracing.Tracer {
 
     @Override
     public SpanBuilder buildSpan(String operationName) {
+        spansCreatedCounter.increment();
         return new SpanBuilder(this, clock, operationName);
     }
 
@@ -165,15 +166,15 @@ public class Tracer implements io.opentracing.Tracer {
         return scopeManager;
     }
 
-    public class SpanBuilder implements io.opentracing.Tracer.SpanBuilder {
-        private final Tracer tracer;
-        private Clock clock;
-        private Boolean ignoreActive;
-        private String operationName;
-        private Long startTime;
+    public static class SpanBuilder implements io.opentracing.Tracer.SpanBuilder {
+        protected final Tracer tracer;
+        protected Clock clock;
+        protected Boolean ignoreActive;
+        protected String operationName;
+        protected Long startTime;
 
-        private final List<Reference> references;
-        private final Map<String, Object> tags;
+        protected final List<Reference> references;
+        protected final Map<String, Object> tags;
 
         protected SpanBuilder(Tracer tracer, Clock clock, String operationName) {
             this.tracer = tracer;
@@ -248,13 +249,17 @@ public class Tracer implements io.opentracing.Tracer {
             return tracer.scopeManager().activate(start(), finishSpanOnClose);
         }
 
-        private SpanContext createNewContext() {
+        protected SpanContext createNewContext() {
             UUID randomId = UUID.randomUUID();
             UUID zero = new UUID(0l, 0l);
-            return new SpanContext(randomId, randomId, zero);
+            return createContext(randomId, randomId, zero, Collections.<String, String>emptyMap());
         }
 
-        private SpanContext createDependentContext() {
+        protected SpanContext createContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage) {
+            return new SpanContext(traceId, spanId, parentId, baggage);
+        }
+
+        protected SpanContext createDependentContext() {
             Reference parent = references.get(0);
             for (Reference reference : references) {
                 if (References.CHILD_OF.equals(reference.getReferenceType())) {
@@ -269,13 +274,13 @@ public class Tracer implements io.opentracing.Tracer {
                 baggage.putAll(reference.getContext().getBaggage());
             }
 
-            return new SpanContext(parent.getContext().getTraceId(),
-                                   UUID.randomUUID(),
-                                   parent.getContext().getSpanId(),
-                                   baggage);
+            return createContext(parent.getContext().getTraceId(),
+                                 UUID.randomUUID(),
+                                 parent.getContext().getSpanId(),
+                                 baggage);
         }
 
-        private SpanContext createContext() {
+        protected SpanContext createContext() {
             // handle active spans if needed
             if (references.isEmpty() && !ignoreActive && tracer.activeSpan() != null) {
                 asChildOf(tracer.activeSpan());
@@ -302,19 +307,18 @@ public class Tracer implements io.opentracing.Tracer {
 
         @Override
         public com.expedia.www.haystack.client.Span start() {
-            spansCreatedCounter.increment();
             return new com.expedia.www.haystack.client.Span(tracer, clock, operationName, createContext(), calculateStartTime(), tags, references);
         }
     }
 
 
-    public static final class Builder {
-        private String serviceName;
-        private ScopeManager scopeManager = new ThreadLocalScopeManager();
-        private Clock clock = new SystemClock();
-        private Dispatcher dispatcher;
-        private PropagationRegistry registry = new PropagationRegistry();
-        private Metrics metrics;
+    public static class Builder {
+        protected String serviceName;
+        protected ScopeManager scopeManager = new ThreadLocalScopeManager();
+        protected Clock clock = new SystemClock();
+        protected Dispatcher dispatcher;
+        protected PropagationRegistry registry = new PropagationRegistry();
+        protected Metrics metrics;
 
         public Builder(MetricsRegistry registry, String serviceName, Dispatcher dispatcher) {
             this(new Metrics(registry, Tracer.class.getName(), Collections.emptyList()), serviceName, dispatcher);
