@@ -1,5 +1,6 @@
 package com.expedia.www.haystack.client;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import org.junit.Test;
 
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
 import com.expedia.www.haystack.client.dispatchers.NoopDispatcher;
+import com.expedia.www.haystack.client.dispatchers.InMemoryDispatcher;
 import com.expedia.www.haystack.client.metrics.MetricsRegistry;
 import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 
@@ -165,5 +167,32 @@ public class SpanTest {
         } catch (RuntimeException ex) {
         }
         Assert.assertEquals(1, span.getErrors().size());
+    }
+
+    @Test
+    public void testFinishAfterFinish() {
+        InMemoryDispatcher dispatcher = new InMemoryDispatcher.Builder(metrics).build();
+        tracer = new Tracer.Builder(metrics, "remote-dispatcher", dispatcher).build();
+
+        Span span = tracer.buildSpan("operation").start();
+
+        span.finish();
+
+        try {
+            span.finish();
+            Assert.fail();
+        } catch (RuntimeException ex) {
+        }
+
+        try {
+            dispatcher.flush();
+        } catch (IOException ex) {
+            Assert.fail();
+        }
+
+        Assert.assertEquals(1, span.getErrors().size());
+        Assert.assertEquals(0, dispatcher.getReportedSpans().size());
+        Assert.assertEquals(1, dispatcher.getFlushedSpans().size());
+        Assert.assertEquals(1, dispatcher.getReceivedSpans().size());
     }
 }
