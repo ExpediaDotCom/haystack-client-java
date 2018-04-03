@@ -111,7 +111,7 @@ public class TextMapPropagator implements Injector<TextMap>, Extractor<TextMap> 
     }
 
 
-    public static final class Builder {
+    public static class Builder {
         private TextMapCodex keyCodex = new TextMapCodex();
         private TextMapCodex valueCodex = new TextMapCodex();
         private KeyConvention convention = new DefaultKeyConvention();
@@ -119,6 +119,11 @@ public class TextMapPropagator implements Injector<TextMap>, Extractor<TextMap> 
         public Builder withURLCodex() {
             this.keyCodex = new TextMapURLCodex();
             this.valueCodex = new TextMapURLCodex();
+            return this;
+        }
+
+        public Builder withKeyConvention(KeyConvention convention) {
+            this.convention = convention;
             return this;
         }
 
