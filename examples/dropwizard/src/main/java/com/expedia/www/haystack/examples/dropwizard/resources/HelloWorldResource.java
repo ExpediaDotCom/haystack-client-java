@@ -25,9 +25,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.opentracing.Traced;
+
 import com.codahale.metrics.annotation.Timed;
-import com.expedia.haystack.annotations.DisableTracing;
-import com.expedia.haystack.annotations.Traced;
 import com.expedia.www.haystack.examples.dropwizard.api.Saying;
 
 @Path("/hello-world")
@@ -53,7 +53,7 @@ public class HelloWorldResource {
     @GET
     @Timed
     @Path("/ignored")
-    @DisableTracing
+    @Traced(false)
     public Saying sayHelloNotTracked(@QueryParam("name") Optional<String> name) {
         return sayHello(name);
     }
@@ -61,7 +61,7 @@ public class HelloWorldResource {
     @GET
     @Timed
     @Path("/dolly")
-    @Traced(name="hello-dolly")
+    @Traced(operationName="hello-dolly")
     public Saying sayHelloDolly(@QueryParam("name") Optional<String> name) {
         return sayHello(name);
     }

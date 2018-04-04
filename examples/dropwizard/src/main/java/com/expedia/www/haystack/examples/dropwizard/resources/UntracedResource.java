@@ -20,11 +20,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.expedia.haystack.annotations.DisableTracing;
+import org.eclipse.microprofile.opentracing.Traced;
 
-@DisableTracing
 @Path("/do-not-trace-me")
 @Produces(MediaType.APPLICATION_JSON)
+@Traced(false)
 public class UntracedResource extends HelloWorldResource {
 
     public UntracedResource(String template, String defaultName) {
