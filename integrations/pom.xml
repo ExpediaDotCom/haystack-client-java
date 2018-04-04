@@ -18,30 +18,7 @@
     <name>Client integrations for Haystack.</name>
 
     <modules>
-      <module>annotations</module>
       <module>dropwizard</module>
-      <module>jaxrs2</module>
       <module>micrometer</module>
     </modules>
-
-    <properties>
-      <jersey.version>2.1</jersey.version>
-    </properties>
-
-    <dependencyManagement>
-      <dependencies>
-        <dependency>
-          <groupId>org.glassfish.jersey.test-framework</groupId>
-          <artifactId>jersey-test-framework-core</artifactId>
-          <version>${jersey.version}</version>
-        </dependency>
-
-        <dependency>
-          <groupId>org.glassfish.jersey.test-framework.providers</groupId>
-          <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
-          <version>${jersey.version}</version>
-        </dependency>
-      </dependencies>
-    </dependencyManagement>
-
 </project>

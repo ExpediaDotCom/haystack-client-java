@@ -16,8 +16,11 @@
  */
 package com.expedia.www.haystack.examples.dropwizard;
 
+import java.util.EnumSet;
+
+import javax.servlet.DispatcherType;
+
 import com.codahale.metrics.MetricRegistry;
-import com.expedia.haystack.jaxrs2.feature.HaystackFeature;
 import com.expedia.www.haystack.examples.dropwizard.health.TemplateHealthCheck;
 import com.expedia.www.haystack.examples.dropwizard.resources.HelloWorldResource;
 import com.expedia.www.haystack.examples.dropwizard.resources.UntracedResource;
@@ -31,6 +34,9 @@ import io.micrometer.core.instrument.config.NamingConvention;
 import io.micrometer.core.instrument.dropwizard.DropwizardConfig;
 import io.micrometer.core.instrument.dropwizard.DropwizardMeterRegistry;
 import io.micrometer.core.instrument.util.HierarchicalNameMapper;
+import io.opentracing.Tracer;
+import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
+import io.opentracing.contrib.jaxrs2.server.SpanFinishingFilter;
 
 public class HelloWorldApplication extends Application<HelloWorldConfiguration> {
 
@@ -74,8 +80,12 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
         // register all haystack-client metrics into the built-in registry
         Metrics.addRegistry(new BridgeDropwizardMeterRegistry(SimpleDropwizardConfig.DEFAULT, environment.metrics()));
 
-        final HaystackFeature haystackFeature = new HaystackFeature(configuration.getTracer().build());
-        environment.jersey().register(haystackFeature);
+        Tracer tracer = configuration.getTracer().build();
+        final ServerTracingDynamicFeature tracingFeature = new ServerTracingDynamicFeature.Builder(tracer).build();
+        environment.jersey().register(tracingFeature);
+
+        environment.servlets().addFilter("SpanFinishingFilter", new SpanFinishingFilter(tracer))
+            .addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
 
         final HelloWorldResource resource = new HelloWorldResource(configuration.getTemplate(),
                                                                    configuration.getDefaultName());

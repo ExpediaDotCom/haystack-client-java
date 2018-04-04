@@ -23,6 +23,8 @@
 
     <properties>
         <dropwizard.version>1.2.2</dropwizard.version>
+        <version.io.opentracing.contrib-jaxrs2>0.1.4</version.io.opentracing.contrib-jaxrs2>
+        <version.io.microprofile-opentracing>1.0</version.io.microprofile-opentracing>
         <mainClass>com.expedia.www.haystack.examples.dropwizard.HelloWorldApplication</mainClass>
     </properties>
 
@@ -46,10 +48,16 @@
       </dependency>
 
       <dependency>
-        <groupId>com.expedia.www</groupId>
-        <artifactId>haystack-client-annotations</artifactId>
-        <version>${project.version}</version>
+        <groupId>io.opentracing.contrib</groupId>
+        <artifactId>opentracing-jaxrs2</artifactId>
+        <version>${version.io.opentracing.contrib-jaxrs2}</version>
       </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.microprofile.opentracing</groupId>
+      <artifactId>microprofile-opentracing-api</artifactId>
+      <version>${version.io.microprofile-opentracing}</version>
+    </dependency>
 
     <!-- Metrics for haystack-client -->
     <dependency>
