@@ -3,13 +3,15 @@
 [![License](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg)](https://github.com/ExpediaDotCom/haystack/blob/master/LICENSE)
 
 # haystack-client-java
-Haystack bindings for the OpenTracing API
+Haystack bindings for the OpenTracing API. Clients use this library to send trace data to a Haystack server.
 
 
-## How to build the code?
+## How to build the code
 
-Since this repo contains haystack-idl as the submodule, so use the following to clone the repo
-* git clone --recursive git@github.com:ExpediaDotCom/haystack-agent.git .
+Since this repository contains `haystack-idl` as a submodule, you must use the following command line to clone the repository:
+```
+git clone --recursive git@github.com:ExpediaDotCom/haystack-client-java.git .
+```
 
 ### Prerequisites
 
