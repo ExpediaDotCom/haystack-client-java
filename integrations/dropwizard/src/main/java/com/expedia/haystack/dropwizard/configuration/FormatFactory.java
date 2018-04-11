@@ -22,10 +22,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import io.dropwizard.jackson.Discoverable;
+import io.dropwizard.setup.Environment;
 
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
 public interface FormatFactory extends Discoverable {
 
-    Format<?> build();
+    Format<?> build(Environment environment);
 
 }

@@ -27,8 +27,11 @@ import com.expedia.open.tracing.Span;
 import com.expedia.www.haystack.client.dispatchers.clients.Client;
 import com.expedia.www.haystack.client.dispatchers.clients.GRPCAgentClient;
 import com.expedia.www.haystack.client.dispatchers.formats.Format;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import io.dropwizard.setup.Environment;
 
 /**
  * A factory for configuring and building {@link GRPCAgentClient} instances.
@@ -105,9 +108,9 @@ public class AgentClientFactory extends BaseClientFactory {
     }
 
     @Override
-    public Client build() {
-        GRPCAgentClient.Builder grpcBuilder = new GRPCAgentClient.Builder(getMetrics().build(), host, port);
-        grpcBuilder.withFormat((Format<Span>) getFormat().build());
+    public Client build(Environment environment, MetricsRegistry metrics) {
+        GRPCAgentClient.Builder grpcBuilder = new GRPCAgentClient.Builder(metrics, host, port);
+        grpcBuilder.withFormat((Format<Span>) getFormat().build(environment));
 
         if (keepAliveTimeMS != null) {
             grpcBuilder.withKeepAliveTimeMS(keepAliveTimeMS);

@@ -14,13 +14,29 @@
  *       limitations under the License.
  *
  */
-package com.expedia.www.haystack.client.metrics;
+package com.expedia.www.haystack.client.metrics.micrometer;
 
-import io.micrometer.core.instrument.Metrics;
+import com.expedia.www.haystack.client.metrics.Counter;
 
-public class GlobalMetricsRegistry extends MicrometerMetricsRegistry {
+public class MicrometerCounter implements Counter {
+    private final io.micrometer.core.instrument.Counter delegate;
 
-    public GlobalMetricsRegistry() {
-        super(Metrics.globalRegistry);
+    public MicrometerCounter(io.micrometer.core.instrument.Counter delegate) {
+        this.delegate = delegate;
+    }
+
+    @Override
+    public void increment(double amount) {
+        delegate.increment(amount);
+    }
+
+    @Override
+    public void decrement(double amount) {
+        increment(-1 * amount);
+    }
+
+    @Override
+    public double count() {
+        return delegate.count();
     }
 }

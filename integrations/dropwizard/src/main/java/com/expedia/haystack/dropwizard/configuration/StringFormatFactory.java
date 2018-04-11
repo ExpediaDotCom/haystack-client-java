@@ -20,9 +20,12 @@ import com.expedia.www.haystack.client.dispatchers.formats.Format;
 import com.expedia.www.haystack.client.dispatchers.formats.StringFormat;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import io.dropwizard.setup.Environment;
+
 @JsonTypeName("string")
 public class StringFormatFactory implements FormatFactory {
-    public Format<?> build() {
+    @Override
+    public Format<?> build(Environment environment) {
         return new StringFormat();
     }
 }

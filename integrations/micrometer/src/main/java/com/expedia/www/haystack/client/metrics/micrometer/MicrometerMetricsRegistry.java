@@ -14,13 +14,18 @@
  *       limitations under the License.
  *
  */
-package com.expedia.www.haystack.client.metrics;
+package com.expedia.www.haystack.client.metrics.micrometer;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.concurrent.TimeUnit;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
+
+import com.expedia.www.haystack.client.metrics.Counter;
+import com.expedia.www.haystack.client.metrics.Gauge;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
+import com.expedia.www.haystack.client.metrics.Tag;
+import com.expedia.www.haystack.client.metrics.Timer;
 
 import io.micrometer.core.instrument.MeterRegistry;
 

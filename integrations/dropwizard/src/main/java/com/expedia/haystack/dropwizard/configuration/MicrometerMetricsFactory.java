@@ -16,10 +16,12 @@
  */
 package com.expedia.haystack.dropwizard.configuration;
 
-import com.expedia.www.haystack.client.metrics.GlobalMetricsRegistry;
 import com.expedia.www.haystack.client.metrics.MetricsRegistry;
 import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
+import com.expedia.www.haystack.client.metrics.micrometer.GlobalMetricsRegistry;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import io.dropwizard.setup.Environment;
 
 /**
  * A factory for configuring and building {@link NoopMetricsRegistry} instances.
@@ -32,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 public class MicrometerMetricsFactory implements MetricsFactory {
 
     @Override
-    public MetricsRegistry build() {
+    public MetricsRegistry build(Environment environment) {
         return new GlobalMetricsRegistry();
     }
 }

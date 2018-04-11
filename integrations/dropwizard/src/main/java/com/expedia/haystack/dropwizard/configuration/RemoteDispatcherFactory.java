@@ -23,16 +23,14 @@ import javax.validation.constraints.NotNull;
 
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
 import com.expedia.www.haystack.client.dispatchers.RemoteDispatcher;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import io.dropwizard.setup.Environment;
+
 @JsonTypeName("remote")
 public class RemoteDispatcherFactory implements DispatcherFactory {
-
-    @Valid
-    @NotNull
-    private MetricsFactory metrics = new NoopMetricsFactory();
-
     @Valid
     @NotNull
     private ClientFactory client;
@@ -54,8 +52,8 @@ public class RemoteDispatcherFactory implements DispatcherFactory {
     private Long shutdownTimoutMs;
 
     @Override
-    public Dispatcher build() {
-        RemoteDispatcher.Builder builder = new RemoteDispatcher.Builder(metrics.build(), client.build());
+    public Dispatcher build(Environment environment, MetricsRegistry metrics) {
+        RemoteDispatcher.Builder builder = new RemoteDispatcher.Builder(metrics, client.build(environment, metrics));
         if (maxQueueSize != null) {
             builder.withBlockingQueueLimit(maxQueueSize);
         }
@@ -69,16 +67,6 @@ public class RemoteDispatcherFactory implements DispatcherFactory {
             builder.withShutdownTimeoutMillis(shutdownTimoutMs);
         }
         return builder.build();
-    }
-
-    @JsonProperty
-    public MetricsFactory getMetrics() {
-        return metrics;
-    }
-
-    @JsonProperty
-    public void setMetrics(MetricsFactory metrics) {
-        this.metrics = metrics;
     }
 
     /**

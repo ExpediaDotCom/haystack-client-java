@@ -14,27 +14,19 @@
  *       limitations under the License.
  *
  */
-package com.expedia.www.haystack.client.metrics;
+package com.expedia.www.haystack.client.metrics.dropwizard;
 
-public class MicrometerCounter implements Counter {
-    private final io.micrometer.core.instrument.Counter delegate;
+import com.expedia.www.haystack.client.metrics.Gauge;
 
-    public MicrometerCounter(io.micrometer.core.instrument.Counter delegate) {
+public class DropwizardGauge implements Gauge {
+    private final com.codahale.metrics.Gauge<Double> delegate;
+
+    public DropwizardGauge(com.codahale.metrics.Gauge<Double> delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public void increment(double amount) {
-        delegate.increment(amount);
-    }
-
-    @Override
-    public void decrement(double amount) {
-        increment(-1 * amount);
-    }
-
-    @Override
-    public double count() {
-        return delegate.count();
+    public double value() {
+        return delegate.getValue();
     }
 }

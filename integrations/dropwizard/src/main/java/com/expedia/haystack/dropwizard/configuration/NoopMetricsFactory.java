@@ -20,6 +20,8 @@ import com.expedia.www.haystack.client.metrics.MetricsRegistry;
 import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import io.dropwizard.setup.Environment;
+
 /**
  * A factory for configuring and building {@link NoopMetricsRegistry} instances.
  *
@@ -31,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 public class NoopMetricsFactory implements MetricsFactory {
 
     @Override
-    public MetricsRegistry build() {
+    public MetricsRegistry build(Environment environment) {
         return new NoopMetricsRegistry();
     }
 }

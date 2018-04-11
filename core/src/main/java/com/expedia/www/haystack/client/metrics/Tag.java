@@ -16,6 +16,8 @@
  */
 package com.expedia.www.haystack.client.metrics;
 
+import java.util.Objects;
+
 public class Tag {
     private String key;
     private String value;
@@ -31,6 +33,23 @@ public class Tag {
 
     public String value() {
         return value;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(key, value);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        Tag rhs = (Tag) obj;
+        return Objects.equals(key, rhs.key()) &&
+            Objects.equals(value, rhs.value());
     }
 }
 

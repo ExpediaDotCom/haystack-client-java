@@ -14,13 +14,18 @@
  *       limitations under the License.
  *
  */
-package com.expedia.www.haystack.client.metrics;
+package com.expedia.www.haystack.client.metrics.micrometer;
 
 import static java.util.Collections.emptyList;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+
+import com.expedia.www.haystack.client.metrics.Counter;
+import com.expedia.www.haystack.client.metrics.Gauge;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
+import com.expedia.www.haystack.client.metrics.Timer;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 

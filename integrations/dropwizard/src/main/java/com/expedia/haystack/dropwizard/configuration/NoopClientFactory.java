@@ -18,11 +18,14 @@ package com.expedia.haystack.dropwizard.configuration;
 
 import com.expedia.www.haystack.client.dispatchers.clients.Client;
 import com.expedia.www.haystack.client.dispatchers.clients.NoopClient;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import io.dropwizard.setup.Environment;
 
 /**
  * A factory for configuring and building {@link NoopClient} instances.
- * 
+ *
  * All configaruation is ignored by the client.
  *
  * See {@link BaseClientFactory} for more options, if any.
@@ -37,7 +40,7 @@ public class NoopClientFactory extends BaseClientFactory {
     }
 
 	@Override
-	public Client build() {
+	public Client build(Environment environment, MetricsRegistry metrics) {
       return new NoopClient();
 	}
 

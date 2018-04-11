@@ -41,5 +41,9 @@ public class MetricsFactoryTest extends BaseFactoryTest<MetricsFactory> {
     public void testMicrometerMetricsFactory() throws Exception {
         testFactory(factory, "yaml/metrics/micrometer.yml", MicrometerMetricsFactory.class);
     }
-}
 
+    @Test
+    public void testDropwizardMetricsFactory() throws Exception {
+        testFactory(factory, "yaml/metrics/dropwizard.yml", DropwizardMetricsFactory.class);
+    }
+}

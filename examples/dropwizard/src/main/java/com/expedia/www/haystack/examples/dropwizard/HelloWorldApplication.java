@@ -20,7 +20,6 @@ import java.util.EnumSet;
 
 import javax.servlet.DispatcherType;
 
-import com.codahale.metrics.MetricRegistry;
 import com.expedia.www.haystack.examples.dropwizard.health.TemplateHealthCheck;
 import com.expedia.www.haystack.examples.dropwizard.resources.HelloWorldResource;
 import com.expedia.www.haystack.examples.dropwizard.resources.UntracedResource;
@@ -29,11 +28,13 @@ import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.micrometer.core.instrument.Clock;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.config.NamingConvention;
-import io.micrometer.core.instrument.dropwizard.DropwizardConfig;
-import io.micrometer.core.instrument.dropwizard.DropwizardMeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.micrometer.core.instrument.util.HierarchicalNameMapper;
+import io.micrometer.jmx.JmxConfig;
+import io.micrometer.jmx.JmxMeterRegistry;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
 import io.opentracing.contrib.jaxrs2.server.SpanFinishingFilter;
@@ -49,27 +50,6 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
         return "hello-world";
     }
 
-    private static class BridgeDropwizardMeterRegistry extends DropwizardMeterRegistry {
-        public BridgeDropwizardMeterRegistry(DropwizardConfig config, MetricRegistry registry) {
-            super(config, registry, HierarchicalNameMapper.DEFAULT, Clock.SYSTEM);
-            this.config().namingConvention(NamingConvention.dot);
-        }
-
-        @Override
-        protected Double nullGaugeValue() {
-            return Double.NaN;
-        }
-    }
-
-    private static interface SimpleDropwizardConfig extends DropwizardConfig {
-        SimpleDropwizardConfig DEFAULT = k -> null;
-
-        @Override
-        default String prefix() {
-            return "hello-world";
-        }
-    }
-
     @Override
     public void initialize(final Bootstrap<HelloWorldConfiguration> bootstrap) {
     }
@@ -77,10 +57,12 @@ public class HelloWorldApplication extends Application<HelloWorldConfiguration> 
     @Override
     public void run(final HelloWorldConfiguration configuration,
                     final Environment environment) {
-        // register all haystack-client metrics into the built-in registry
-        Metrics.addRegistry(new BridgeDropwizardMeterRegistry(SimpleDropwizardConfig.DEFAULT, environment.metrics()));
+        // required to actually get micrometer metrics somewhere and in a standard name format
+        MeterRegistry registry = new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM);
+        registry.config().namingConvention(NamingConvention.identity);
+        Metrics.addRegistry(registry);
 
-        Tracer tracer = configuration.getTracer().build();
+        Tracer tracer = configuration.getTracer().build(environment);
         final ServerTracingDynamicFeature tracingFeature = new ServerTracingDynamicFeature.Builder(tracer).build();
         environment.jersey().register(tracingFeature);
 
