@@ -4,6 +4,8 @@ defaultName: Stranger
 tracer:
   serviceName: HelloWorld
   enabled: true
+  metrics:
+    type: micrometer
   dispatchers:
     - type: logger
       loggerName: dispatcher

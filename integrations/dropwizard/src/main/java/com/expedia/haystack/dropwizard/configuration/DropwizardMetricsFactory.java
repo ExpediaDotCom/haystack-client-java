@@ -16,17 +16,28 @@
  */
 package com.expedia.haystack.dropwizard.configuration;
 
-import com.expedia.www.haystack.client.dispatchers.Dispatcher;
-import com.expedia.www.haystack.client.metrics.MetricsRegistry;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import javax.annotation.Nullable;
 
-import io.dropwizard.jackson.Discoverable;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
+import com.expedia.www.haystack.client.metrics.dropwizard.DropwizardMetricsRegistry;
+import com.expedia.www.haystack.client.metrics.dropwizard.NameMapper;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 import io.dropwizard.setup.Environment;
 
-@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
-public interface DispatcherFactory extends Discoverable {
+/**
+ * A factory for configuring and building {@link DropwizardMetricsRegistry} instances.
+ *
+ * See {@link MetricsFactory} for more options, if any.
+ */
+@JsonTypeName("dropwizard")
+public class DropwizardMetricsFactory implements MetricsFactory {
 
-    Dispatcher build(Environment environment, MetricsRegistry metrics);
+    @Nullable
+    private NameMapper nameMapper = NameMapper.DEFAULT;
+
+    @Override
+    public MetricsRegistry build(Environment environment) {
+        return new DropwizardMetricsRegistry(environment.metrics(), nameMapper);
+    }
 }

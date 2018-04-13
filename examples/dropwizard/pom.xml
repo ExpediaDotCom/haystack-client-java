@@ -59,17 +59,25 @@
       <version>${version.io.microprofile-opentracing}</version>
     </dependency>
 
-    <!-- Metrics for haystack-client -->
+    <!-- Dropwizard based metrics for haystack-client -->
+    <dependency>
+      <groupId>com.expedia.www</groupId>
+      <artifactId>haystack-client-dropwizard-metrics</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- Micrometer based metrics for haystack-client -->
     <dependency>
       <groupId>com.expedia.www</groupId>
       <artifactId>haystack-client-micrometer</artifactId>
       <version>${project.version}</version>
     </dependency>
 
-    <!-- Explicitly pull in a version of the base provider because marked optional -->
+    <!-- Explicitly pull in a provider for micrometer-->
     <dependency>
       <groupId>io.micrometer</groupId>
-      <artifactId>micrometer-core</artifactId>
+      <artifactId>micrometer-registry-jmx</artifactId>
+      <version>${micrometer.version}</version>
     </dependency>
 
       <dependency>

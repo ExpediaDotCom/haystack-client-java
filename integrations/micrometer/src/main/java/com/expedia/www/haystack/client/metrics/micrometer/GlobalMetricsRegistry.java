@@ -14,19 +14,13 @@
  *       limitations under the License.
  *
  */
-package com.expedia.haystack.dropwizard.configuration;
+package com.expedia.www.haystack.client.metrics.micrometer;
 
-import com.expedia.www.haystack.client.dispatchers.Dispatcher;
-import com.expedia.www.haystack.client.metrics.MetricsRegistry;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import io.micrometer.core.instrument.Metrics;
 
-import io.dropwizard.jackson.Discoverable;
-import io.dropwizard.setup.Environment;
+public class GlobalMetricsRegistry extends MicrometerMetricsRegistry {
 
-@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
-public interface DispatcherFactory extends Discoverable {
-
-    Dispatcher build(Environment environment, MetricsRegistry metrics);
+    public GlobalMetricsRegistry() {
+        super(Metrics.globalRegistry);
+    }
 }

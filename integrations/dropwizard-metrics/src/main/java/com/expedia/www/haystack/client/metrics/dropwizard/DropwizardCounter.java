@@ -14,19 +14,30 @@
  *       limitations under the License.
  *
  */
-package com.expedia.haystack.dropwizard.configuration;
+package com.expedia.www.haystack.client.metrics.dropwizard;
 
-import com.expedia.www.haystack.client.dispatchers.Dispatcher;
-import com.expedia.www.haystack.client.metrics.MetricsRegistry;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.codahale.metrics.Meter;
+import com.expedia.www.haystack.client.metrics.Counter;
 
-import io.dropwizard.jackson.Discoverable;
-import io.dropwizard.setup.Environment;
+public class DropwizardCounter implements Counter {
+    private final Meter delegate;
 
-@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
-public interface DispatcherFactory extends Discoverable {
+    public DropwizardCounter(Meter delegate) {
+        this.delegate = delegate;
+    }
 
-    Dispatcher build(Environment environment, MetricsRegistry metrics);
+    @Override
+    public void increment(double amount) {
+        delegate.mark((long) amount);
+    }
+
+    @Override
+    public void decrement(double amount) {
+        delegate.mark((long) (-1 * amount));
+    }
+
+    @Override
+    public double count() {
+        return delegate.getCount();
+    }
 }

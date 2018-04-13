@@ -28,10 +28,12 @@ import org.slf4j.LoggerFactory;
 import com.expedia.www.haystack.client.Tracer;
 import com.expedia.www.haystack.client.dispatchers.ChainedDispatcher;
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 
+import io.dropwizard.setup.Environment;
 import io.opentracing.noop.NoopTracerFactory;
 
 public class TracerFactory {
@@ -39,7 +41,7 @@ public class TracerFactory {
 
     @Valid
     @NotNull
-    private MetricsFactory metrics = new NoopMetricsFactory();
+    private MetricsFactory metrics = new DropwizardMetricsFactory();
 
     @Valid
     private boolean enabled = true;
@@ -51,22 +53,25 @@ public class TracerFactory {
     @NotEmpty
     private List<DispatcherFactory> dispatchers = ImmutableList.of(new RemoteDispatcherFactory());
 
-    public io.opentracing.Tracer build() {
+    public io.opentracing.Tracer build(Environment environment) {
         if (!enabled) {
             return NoopTracerFactory.create();
         }
+
+        MetricsRegistry registry = metrics.build(environment);
+
         Dispatcher dispatcher;
         if (dispatchers.size() > 1) {
             ChainedDispatcher.Builder builder = new ChainedDispatcher.Builder();
             for (DispatcherFactory factory : dispatchers) {
-                builder.withDispatcher(factory.build());
+                builder.withDispatcher(factory.build(environment, registry));
             }
             dispatcher = builder.build();
         } else {
-            dispatcher = dispatchers.get(0).build();
+            dispatcher = dispatchers.get(0).build(environment, registry);
         }
 
-        final Tracer.Builder builder = new Tracer.Builder(metrics.build(), serviceName, dispatcher);
+        final Tracer.Builder builder = new Tracer.Builder(registry, serviceName, dispatcher);
         return builder.build();
     }
 

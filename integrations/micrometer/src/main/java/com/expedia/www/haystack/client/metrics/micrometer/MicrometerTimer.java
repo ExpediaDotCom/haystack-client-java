@@ -14,9 +14,11 @@
  *       limitations under the License.
  *
  */
-package com.expedia.www.haystack.client.metrics;
+package com.expedia.www.haystack.client.metrics.micrometer;
 
 import java.util.concurrent.TimeUnit;
+
+import com.expedia.www.haystack.client.metrics.Timer;
 
 import io.micrometer.core.instrument.MeterRegistry;
 

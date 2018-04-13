@@ -14,7 +14,9 @@
  *       limitations under the License.
  *
  */
-package com.expedia.www.haystack.client.metrics;
+package com.expedia.www.haystack.client.metrics.micrometer;
+
+import com.expedia.www.haystack.client.metrics.Gauge;
 
 public class MicrometerGauge<T> implements Gauge {
     private final io.micrometer.core.instrument.Gauge delegate;

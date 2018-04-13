@@ -18,13 +18,16 @@ package com.expedia.haystack.dropwizard.configuration;
 
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
 import com.expedia.www.haystack.client.dispatchers.NoopDispatcher;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import io.dropwizard.setup.Environment;
 
 @JsonTypeName("noop")
 public class NoopDispatcherFactory implements DispatcherFactory {
 
     @Override
-    public Dispatcher build() {
+    public Dispatcher build(Environment environment, MetricsRegistry metrics) {
         return new NoopDispatcher();
     }
 

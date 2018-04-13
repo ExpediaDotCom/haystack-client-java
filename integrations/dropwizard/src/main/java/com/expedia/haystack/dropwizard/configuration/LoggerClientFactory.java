@@ -20,12 +20,15 @@ import javax.annotation.Nullable;
 
 import com.expedia.www.haystack.client.dispatchers.clients.Client;
 import com.expedia.www.haystack.client.dispatchers.clients.LoggerClient;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import io.dropwizard.setup.Environment;
+
 /**
  * A factory for configuring and building {@link LoggerClient} instances.
- * 
+ *
  * Configaruation for the logger used is possible; by default it uses the logger for the {@link LoggerClient}.
  *
  * See {@link BaseClientFactory} for more options, if any.
@@ -42,8 +45,8 @@ public class LoggerClientFactory extends BaseClientFactory {
     }
 
     @Override
-    public Client build() {
-        LoggerClient.Builder builder = new LoggerClient.Builder(getMetrics().build(), getFormat().build());
+    public Client build(Environment environment, MetricsRegistry metrics) {
+        LoggerClient.Builder builder = new LoggerClient.Builder(metrics, getFormat().build(environment));
         if (loggerName != null) {
             builder.withLogger(loggerName);
         }

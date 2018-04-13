@@ -21,38 +21,26 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.expedia.www.haystack.client.dispatchers.LoggerDispatcher;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import io.dropwizard.setup.Environment;
+
 @JsonTypeName("logger")
 public class LoggerDispatcherFactory implements DispatcherFactory {
-
-    @NotNull
-    @Valid
-    private MetricsFactory metrics = new NoopMetricsFactory();
-
     @Nullable
     private String loggerName;
 
     @Override
-    public LoggerDispatcher build() {
-        LoggerDispatcher.Builder loggerBuilder = new LoggerDispatcher.Builder(metrics.build());
+    public LoggerDispatcher build(Environment environment, MetricsRegistry metrics) {
+        LoggerDispatcher.Builder loggerBuilder = new LoggerDispatcher.Builder(metrics);
 
         if (loggerName != null) {
             loggerBuilder.withLogger(loggerName);
         }
 
         return loggerBuilder.build();
-    }
-
-    @JsonProperty
-    public MetricsFactory getMetrics() {
-        return metrics;
-    }
-
-    @JsonProperty
-    public void setMetrics(MetricsFactory metrics) {
-        this.metrics = metrics;
     }
 
     /**
