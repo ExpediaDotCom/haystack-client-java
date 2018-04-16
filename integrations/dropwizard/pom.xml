@@ -36,17 +36,6 @@
 
     <dependency>
       <groupId>com.expedia.www</groupId>
-      <artifactId>haystack-client-jaxrs2</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>javax.ws.rs-api</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.expedia.www</groupId>
       <artifactId>haystack-client-micrometer</artifactId>
       <version>${project.version}</version>
       <optional>true</optional>
@@ -61,6 +50,11 @@
 
     <dependency>
       <groupId>io.opentracing</groupId>
+      <artifactId>opentracing-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.opentracing</groupId>
       <artifactId>opentracing-noop</artifactId>
     </dependency>
 
@@ -71,12 +65,17 @@
 
     <dependency>
       <groupId>io.dropwizard</groupId>
-      <artifactId>dropwizard-jackson</artifactId>
+      <artifactId>dropwizard-configuration</artifactId>
     </dependency>
 
     <dependency>
       <groupId>io.dropwizard</groupId>
-      <artifactId>dropwizard-validation</artifactId>
+      <artifactId>dropwizard-jersey</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-jackson</artifactId>
     </dependency>
 
     <dependency>
