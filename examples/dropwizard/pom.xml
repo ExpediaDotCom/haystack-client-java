@@ -16,7 +16,6 @@
     </parent>
 
     <artifactId>haystack-client-java-example-dropwizard</artifactId>
-    <version>${parent.version}</version>
     <packaging>jar</packaging>
 
     <name>Dropwizard example integration for Haystack.</name>
@@ -64,6 +63,7 @@
       <groupId>com.expedia.www</groupId>
       <artifactId>haystack-client-dropwizard-metrics</artifactId>
       <version>${project.version}</version>
+      <scope>runtime</scope>
     </dependency>
 
     <!-- Micrometer based metrics for haystack-client -->
@@ -71,6 +71,7 @@
       <groupId>com.expedia.www</groupId>
       <artifactId>haystack-client-micrometer</artifactId>
       <version>${project.version}</version>
+      <scope>runtime</scope>
     </dependency>
 
     <!-- Explicitly pull in a provider for micrometer-->
