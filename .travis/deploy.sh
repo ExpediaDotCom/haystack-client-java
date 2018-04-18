@@ -1,21 +1,17 @@
 #!/bin/bash
 cd `dirname $0`/..
 
-if [ -z "$SONATYPE_USERNAME" ]
-then
+if [ "$TRAVIS_BRANCH" != 'master' ] || [ "$TRAVIS_PULL_REQUEST" == 'true' ]; then
+    echo "Skipping artifact deployment for a non-release build"
+    exit 0
+fi
+
+if [[ -z "$SONATYPE_USERNAME" || -z "$SONATYPE_PASSWORD" ]]; then
     echo "ERROR! Please set SONATYPE_USERNAME and SONATYPE_PASSWORD environment variable"
     exit 1
 fi
 
-if [ -z "$SONATYPE_PASSWORD" ]
-then
-    echo "ERROR! Please set SONATYPE_PASSWORD environment variable"
-    exit 1
-fi
-
-
-if [ ! -z "$TRAVIS_TAG" ]
-then
+if [ ! -z "$TRAVIS_TAG" ]; then
     SKIP_GPG_SIGN=false
     echo "travis tag is set -> updating pom.xml <version> attribute to $TRAVIS_TAG"
     ./mvnw --settings .travis/settings.xml org.codehaus.mojo:versions-maven-plugin:2.1:set -DnewVersion=$TRAVIS_TAG 1>/dev/null 2>/dev/null
