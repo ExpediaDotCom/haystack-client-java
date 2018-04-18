@@ -21,22 +21,12 @@ after_success:
   - bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
 
 deploy:
-  -
-    provider: script
-    script: .travis/deploy.sh
-    skip_cleanup: true
-    on:
-      repo: ExpediaDotCom/haystack-client-java
-      branch: master
-      jdk: oraclejdk8
-  -
-    provider: script
-    script: .travis/deploy.sh
-    skip_cleanup: true
-    on:
-      repo: ExpediaDotCom/haystack-client-java
-      tags: true
-      jdk: oraclejdk8
+  provider: script
+  script: bash .travis/deploy.sh
+  skip_cleanup: true
+  on:
+    repo: ExpediaDotCom/haystack-client-java
+    condition: $TRAVIS_PULL_REQUEST = false
 
 notifications:
   email:
