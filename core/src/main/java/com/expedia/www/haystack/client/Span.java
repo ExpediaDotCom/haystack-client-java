@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 Expedia, Inc.
+ *
+ *       Licensed under the Apache License, Version 2.0 (the "License");
+ *       you may not use this file except in compliance with the License.
+ *       You may obtain a copy of the License at
+ *
+ *           http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *       Unless required by applicable law or agreed to in writing, software
+ *       distributed under the License is distributed on an "AS IS" BASIS,
+ *       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *       See the License for the specific language governing permissions and
+ *       limitations under the License.
+ *
+ */
 package com.expedia.www.haystack.client;
 
 import java.util.ArrayList;
@@ -84,7 +100,7 @@ public class Span implements io.opentracing.Span {
 
     @Override
     public void finish() {
-        finishTrace(clock.milliTime());
+        finishTrace(clock.microTime());
     }
 
     @Override
@@ -223,28 +239,18 @@ public class Span implements io.opentracing.Span {
     }
 
     @Override
-    public Span log(long timestampMicroseconds, String eventName, Object payload) {
-        if (eventName == null) {
+    public Span log(long timestampMicroseconds, String event) {
+        if (event == null) {
             return this;
         }
-        finishedCheck("Setting a log event (%s:%s:%s) on a finished span", timestampMicroseconds, eventName, payload);
-        logs.add(new LogData(timestampMicroseconds, eventName, payload));
+        finishedCheck("Setting a log event (%s:%s) on a finished span", timestampMicroseconds, event);
+        logs.add(new LogData(timestampMicroseconds, event));
         return this;
     }
 
     @Override
-    public Span log(String eventName, Object payload) {
-        return log(System.nanoTime(), eventName, payload);
-    }
-
-    @Override
-    public Span log(long timestampMicroseconds, String eventName) {
-        return log(timestampMicroseconds, eventName, null);
-    }
-
-    @Override
-    public Span log(String eventName) {
-        return log(System.nanoTime(), eventName, null);
+    public Span log(String event) {
+        return log(System.nanoTime(), event);
     }
 
     public List<LogData> getLogs() {

@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project
-        xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <prerequisites>
@@ -12,17 +9,18 @@
     <parent>
       <groupId>com.expedia.www</groupId>
       <artifactId>haystack-client-java-examples</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>0.1.0</version>
     </parent>
 
     <artifactId>haystack-client-java-example-dropwizard</artifactId>
-    <version>${parent.version}</version>
     <packaging>jar</packaging>
 
     <name>Dropwizard example integration for Haystack.</name>
 
     <properties>
         <dropwizard.version>1.2.2</dropwizard.version>
+        <version.io.opentracing.contrib-jaxrs2>0.1.4</version.io.opentracing.contrib-jaxrs2>
+        <version.io.microprofile-opentracing>1.0</version.io.microprofile-opentracing>
         <mainClass>com.expedia.www.haystack.examples.dropwizard.HelloWorldApplication</mainClass>
     </properties>
 
@@ -44,6 +42,41 @@
         <artifactId>haystack-client-dropwizard</artifactId>
         <version>${project.version}</version>
       </dependency>
+
+      <dependency>
+        <groupId>io.opentracing.contrib</groupId>
+        <artifactId>opentracing-jaxrs2</artifactId>
+        <version>${version.io.opentracing.contrib-jaxrs2}</version>
+      </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.microprofile.opentracing</groupId>
+      <artifactId>microprofile-opentracing-api</artifactId>
+      <version>${version.io.microprofile-opentracing}</version>
+    </dependency>
+
+    <!-- Dropwizard based metrics for haystack-client -->
+    <dependency>
+      <groupId>com.expedia.www</groupId>
+      <artifactId>haystack-client-dropwizard-metrics</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- Micrometer based metrics for haystack-client -->
+    <dependency>
+      <groupId>com.expedia.www</groupId>
+      <artifactId>haystack-client-micrometer</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- Explicitly pull in a provider for micrometer-->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-registry-jmx</artifactId>
+      <version>${micrometer.version}</version>
+    </dependency>
 
       <dependency>
         <groupId>com.google.protobuf</groupId>
@@ -70,7 +103,7 @@
                 <configuration>
                     <createDependencyReducedPom>true</createDependencyReducedPom>
                     <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <mainClass>${mainClass}</mainClass>
                         </transformer>
@@ -107,33 +140,6 @@
                         </manifest>
                     </archive>
                 </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.4</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

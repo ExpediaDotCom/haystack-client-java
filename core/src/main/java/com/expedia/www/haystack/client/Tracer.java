@@ -1,7 +1,24 @@
+/*
+ * Copyright 2018 Expedia, Inc.
+ *
+ *       Licensed under the Apache License, Version 2.0 (the "License");
+ *       you may not use this file except in compliance with the License.
+ *       You may obtain a copy of the License at
+ *
+ *           http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *       Unless required by applicable law or agreed to in writing, software
+ *       distributed under the License is distributed on an "AS IS" BASIS,
+ *       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *       See the License for the specific language governing permissions and
+ *       limitations under the License.
+ *
+ */
 package com.expedia.www.haystack.client;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,32 +28,67 @@ import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
+import com.expedia.www.haystack.client.metrics.Counter;
+import com.expedia.www.haystack.client.metrics.Metrics;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
+import com.expedia.www.haystack.client.metrics.Tag;
+import com.expedia.www.haystack.client.metrics.Timer;
+import com.expedia.www.haystack.client.metrics.Timer.Sample;
 import com.expedia.www.haystack.client.propagation.Extractor;
 import com.expedia.www.haystack.client.propagation.Injector;
 import com.expedia.www.haystack.client.propagation.PropagationRegistry;
 import com.expedia.www.haystack.client.propagation.TextMapPropagator;
 
-import io.opentracing.ActiveSpan;
-import io.opentracing.ActiveSpanSource;
-import io.opentracing.BaseSpan;
 import io.opentracing.References;
+import io.opentracing.Scope;
+import io.opentracing.ScopeManager;
+import io.opentracing.Span;
 import io.opentracing.propagation.Format;
 import io.opentracing.propagation.TextMap;
-import io.opentracing.util.ThreadLocalActiveSpanSource;
+import io.opentracing.util.ThreadLocalScopeManager;
 
 public class Tracer implements io.opentracing.Tracer {
     private final Dispatcher dispatcher;
-    private final Clock clock;
-    private final PropagationRegistry registry;
+    protected final Clock clock;
+    protected final PropagationRegistry registry;
     private final String serviceName;
-    private final ActiveSpanSource activeSource;
+    private final ScopeManager scopeManager;
 
-    public Tracer(String serviceName, ActiveSpanSource activeSource, Clock clock, Dispatcher dispatcher, PropagationRegistry registry) {
+    private final Counter spansCreatedCounter;
+
+    private final Timer dispatchTimer;
+
+    private final Timer closeTimer;
+    private final Counter closeExceptionCounter;
+
+    private final Timer flushTimer;
+    private final Counter flushExceptionCounter;
+
+    private final Timer injectTimer;
+    private final Counter injectFailureCounter;
+
+    private final Timer extractTimer;
+    private final Counter extractFailureCounter;
+
+    public Tracer(String serviceName, ScopeManager scopeManager, Clock clock, Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics) {
         this.serviceName = serviceName;
-        this.activeSource = activeSource;
+        this.scopeManager = scopeManager;
         this.clock = clock;
         this.dispatcher = dispatcher;
         this.registry = registry;
+
+        this.dispatchTimer = Timer.builder("dispatch").register(metrics);
+        this.closeTimer = Timer.builder("close").register(metrics);
+        this.closeExceptionCounter = Counter.builder("close").tag(new Tag("state", "exception")).register(metrics);
+        this.flushTimer = Timer.builder("flush").register(metrics);
+        this.flushExceptionCounter = Counter.builder("flush").tag(new Tag("state", "exception")).register(metrics);
+
+        this.spansCreatedCounter = Counter.builder("spans").register(metrics);
+
+        this.injectTimer = Timer.builder("inject").register(metrics);
+        this.injectFailureCounter = Counter.builder("inject").tag(new Tag("state", "exception")).register(metrics);
+        this.extractTimer = Timer.builder("extract").register(metrics);
+        this.extractFailureCounter = Counter.builder("extract").tag(new Tag("state", "exception")).register(metrics);
     }
 
     @Override
@@ -47,15 +99,27 @@ public class Tracer implements io.opentracing.Tracer {
     }
 
     public void close() throws IOException {
-        dispatcher.close();
+        try (Sample timer = closeTimer.start()) {
+            dispatcher.close();
+        } catch(IOException e) {
+            closeExceptionCounter.increment();
+            throw e;
+        }
     }
 
     public void flush() throws IOException {
-        dispatcher.flush();
+        try (Sample timer = flushTimer.start()) {
+            dispatcher.flush();
+        } catch(IOException e) {
+            flushExceptionCounter.increment();
+            throw e;
+        }
     }
 
-    void dispatch(Span span) {
-        dispatcher.dispatch(span);
+    void dispatch(com.expedia.www.haystack.client.Span span) {
+        try (Sample timer = dispatchTimer.start()) {
+            dispatcher.dispatch(span);
+        }
     }
 
     /**
@@ -74,55 +138,61 @@ public class Tracer implements io.opentracing.Tracer {
 
     @Override
     public SpanBuilder buildSpan(String operationName) {
+        spansCreatedCounter.increment();
         return new SpanBuilder(this, clock, operationName);
     }
 
 
     @Override
     public <C> void inject(io.opentracing.SpanContext spanContext, Format<C> format, C carrier) {
-        final Injector<C> injector = registry.getInjector(format);
-        if (injector == null) {
-            throw new IllegalArgumentException(String.format("Unsupported format: %s", format));
-        } else if (!(spanContext instanceof SpanContext)) {
-            throw new IllegalArgumentException(String.format("Invalid SpanContext type: %s", spanContext));
-        }
+        try (Sample sample = injectTimer.start()) {
+            final Injector<C> injector = registry.getInjector(format);
+            if (injector == null) {
+                injectFailureCounter.increment();
+                throw new IllegalArgumentException(String.format("Unsupported format: %s", format));
+            } else if (!(spanContext instanceof SpanContext)) {
+                injectFailureCounter.increment();
+                throw new IllegalArgumentException(String.format("Invalid SpanContext type: %s", spanContext));
+            }
 
-        injector.inject((SpanContext) spanContext, carrier);
+            injector.inject((SpanContext) spanContext, carrier);
+        }
     }
 
     @Override
     public <C> SpanContext extract(Format<C> format, C carrier) {
-        final Extractor<C> extractor = registry.getExtractor(format);
-        if (extractor == null) {
-            throw new IllegalArgumentException(String.format("Unsupported format: %s", format));
+        try (Sample sample = extractTimer.start()) {
+            final Extractor<C> extractor = registry.getExtractor(format);
+            if (extractor == null) {
+                extractFailureCounter.increment();
+                throw new IllegalArgumentException(String.format("Unsupported format: %s", format));
+            }
+            return extractor.extract(carrier);
         }
-        return extractor.extract(carrier);
     }
 
     @Override
-    public ActiveSpan activeSpan() {
-        return activeSource.activeSpan();
+    public Span activeSpan() {
+        final Scope scope = scopeManager.active();
+        return (scope == null ? null : scope.span());
     }
 
     @Override
-    public ActiveSpan makeActive(io.opentracing.Span span) {
-        return activeSource.makeActive(span);
+    public ScopeManager scopeManager() {
+        return scopeManager;
     }
-
 
     public static class SpanBuilder implements io.opentracing.Tracer.SpanBuilder {
+        protected final Tracer tracer;
+        protected Clock clock;
+        protected Boolean ignoreActive;
+        protected String operationName;
+        protected Long startTime;
 
-        private final Tracer tracer;
+        protected final List<Reference> references;
+        protected final Map<String, Object> tags;
 
-        private Clock clock;
-        private Boolean ignoreActive;
-        private String operationName;
-        private Long startTime;
-
-        private final List<Reference> references;
-        private final Map<String, Object> tags;
-
-        public SpanBuilder(Tracer tracer, Clock clock, String operationName) {
+        protected SpanBuilder(Tracer tracer, Clock clock, String operationName) {
             this.tracer = tracer;
             this.clock = clock;
             this.operationName = operationName;
@@ -138,7 +208,7 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         @Override
-        public SpanBuilder asChildOf(BaseSpan<?> parent) {
+        public SpanBuilder asChildOf(Span parent) {
             if (parent == null) {
                 return this;
             }
@@ -191,17 +261,21 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         @Override
-        public ActiveSpan startActive() {
-            return tracer.makeActive(startManual());
+        public Scope startActive(boolean finishSpanOnClose) {
+            return tracer.scopeManager().activate(start(), finishSpanOnClose);
         }
 
-        private SpanContext createNewContext() {
+        protected SpanContext createNewContext() {
             UUID randomId = UUID.randomUUID();
             UUID zero = new UUID(0l, 0l);
-            return new SpanContext(randomId, randomId, zero);
+            return createContext(randomId, randomId, zero, Collections.<String, String>emptyMap());
         }
 
-        private SpanContext createDependentContext() {
+        protected SpanContext createContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage) {
+            return new SpanContext(traceId, spanId, parentId, baggage);
+        }
+
+        protected SpanContext createDependentContext() {
             Reference parent = references.get(0);
             for (Reference reference : references) {
                 if (References.CHILD_OF.equals(reference.getReferenceType())) {
@@ -216,13 +290,13 @@ public class Tracer implements io.opentracing.Tracer {
                 baggage.putAll(reference.getContext().getBaggage());
             }
 
-            return new SpanContext(parent.getContext().getTraceId(),
-                                   UUID.randomUUID(),
-                                   parent.getContext().getSpanId(),
-                                   baggage);
+            return createContext(parent.getContext().getTraceId(),
+                                 UUID.randomUUID(),
+                                 parent.getContext().getSpanId(),
+                                 baggage);
         }
 
-        private SpanContext createContext() {
+        protected SpanContext createContext() {
             // handle active spans if needed
             if (references.isEmpty() && !ignoreActive && tracer.activeSpan() != null) {
                 asChildOf(tracer.activeSpan());
@@ -242,27 +316,34 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         @Override
-        public Span startManual() {
-            return new Span(tracer, clock, operationName, createContext(), calculateStartTime(), tags, references);
+        @Deprecated
+        public com.expedia.www.haystack.client.Span startManual() {
+            return start();
         }
 
         @Override
-        public Span start() {
-            return startManual();
+        public com.expedia.www.haystack.client.Span start() {
+            return new com.expedia.www.haystack.client.Span(tracer, clock, operationName, createContext(), calculateStartTime(), tags, references);
         }
     }
 
 
-    public static final class Builder {
-        private String serviceName;
-        private ActiveSpanSource activeSpanSource = new ThreadLocalActiveSpanSource();
-        private Clock clock = new SystemClock();
-        private Dispatcher dispatcher;
-        private PropagationRegistry registry = new PropagationRegistry();
+    public static class Builder {
+        protected String serviceName;
+        protected ScopeManager scopeManager = new ThreadLocalScopeManager();
+        protected Clock clock = new SystemClock();
+        protected Dispatcher dispatcher;
+        protected PropagationRegistry registry = new PropagationRegistry();
+        protected Metrics metrics;
 
-        public Builder(String serviceName, Dispatcher dispatcher) {
+        public Builder(MetricsRegistry registry, String serviceName, Dispatcher dispatcher) {
+            this(new Metrics(registry, Tracer.class.getName(), Collections.emptyList()), serviceName, dispatcher);
+        }
+
+        public Builder(Metrics metrics, String serviceName, Dispatcher dispatcher) {
             this.serviceName = serviceName;
             this.dispatcher = dispatcher;
+            this.metrics = metrics;
 
             TextMapPropagator textMapPropagator = new TextMapPropagator.Builder().build();
             withFormat(Format.Builtin.TEXT_MAP, (Injector<TextMap>) textMapPropagator);
@@ -274,8 +355,8 @@ public class Tracer implements io.opentracing.Tracer {
 
         }
 
-        public Builder withActiveSpanSource(ActiveSpanSource source) {
-            this.activeSpanSource = source;
+        public Builder withScopeManager(ScopeManager scope) {
+            this.scopeManager = scope;
             return this;
         }
 
@@ -306,7 +387,7 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         public Tracer build() {
-            return new Tracer(serviceName, activeSpanSource, clock, dispatcher, registry);
+            return new Tracer(serviceName, scopeManager, clock, dispatcher, registry, metrics);
         }
 
     }

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 Expedia, Inc.
+ *
+ *       Licensed under the Apache License, Version 2.0 (the "License");
+ *       you may not use this file except in compliance with the License.
+ *       You may obtain a copy of the License at
+ *
+ *           http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *       Unless required by applicable law or agreed to in writing, software
+ *       distributed under the License is distributed on an "AS IS" BASIS,
+ *       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *       See the License for the specific language governing permissions and
+ *       limitations under the License.
+ *
+ */
 package com.expedia.www.haystack.client;
 
 import java.util.Map;
@@ -8,6 +24,7 @@ import org.junit.Test;
 
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
 import com.expedia.www.haystack.client.dispatchers.NoopDispatcher;
+import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 
 import io.opentracing.References;
 
@@ -19,12 +36,12 @@ public class SpanBuilderTest {
     @Before
     public void setUp() throws Exception {
         dispatcher = new NoopDispatcher();
-        tracer = new Tracer.Builder("TestService", dispatcher).build();
+        tracer = new Tracer.Builder(new NoopMetricsRegistry(), "TestService", dispatcher).build();
     }
 
     @Test
     public void testBasic() {
-        Span span = tracer.buildSpan("test-operation").startManual();
+        Span span = tracer.buildSpan("test-operation").start();
 
         Assert.assertEquals("test-operation", span.getOperatioName());
     }
@@ -32,20 +49,18 @@ public class SpanBuilderTest {
 
     @Test
     public void testReferences() {
-        Span parent = tracer.buildSpan("parent").startManual();
-        Span following = tracer.buildSpan("following").startManual();
+        Span parent = tracer.buildSpan("parent").start();
+        Span following = tracer.buildSpan("following").start();
 
         Span child = tracer.buildSpan("child")
             .asChildOf(parent)
             .addReference(References.FOLLOWS_FROM, following.context())
-            .startManual();
+            .start();
 
 
         Assert.assertEquals(2, child.getReferences().size());
-        Assert.assertEquals(parent.context(), child.getReferences().get(0).getContext());
-        Assert.assertEquals(References.CHILD_OF, child.getReferences().get(0).getReferenceType());
-        Assert.assertEquals(following.context(), child.getReferences().get(1).getContext());
-        Assert.assertEquals(References.FOLLOWS_FROM, child.getReferences().get(1).getReferenceType());
+        Assert.assertEquals(child.getReferences().get(0), new Reference(References.CHILD_OF, parent.context()));
+        Assert.assertEquals(child.getReferences().get(1), new Reference(References.FOLLOWS_FROM, following.context()));
     }
 
     @Test
@@ -54,7 +69,7 @@ public class SpanBuilderTest {
             .withTag("string-key", "string-value")
             .withTag("boolean-key", false)
             .withTag("number-key", 1l)
-            .startManual();
+            .start();
 
         Map<String, ?> tags = child.getTags();
 

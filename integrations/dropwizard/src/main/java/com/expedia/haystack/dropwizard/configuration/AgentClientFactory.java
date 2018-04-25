@@ -1,7 +1,22 @@
+/*
+ * Copyright 2018 Expedia, Inc.
+ *
+ *       Licensed under the Apache License, Version 2.0 (the "License");
+ *       you may not use this file except in compliance with the License.
+ *       You may obtain a copy of the License at
+ *
+ *           http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *       Unless required by applicable law or agreed to in writing, software
+ *       distributed under the License is distributed on an "AS IS" BASIS,
+ *       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *       See the License for the specific language governing permissions and
+ *       limitations under the License.
+ *
+ */
 package com.expedia.haystack.dropwizard.configuration;
 
 import javax.annotation.Nullable;
-import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -12,14 +27,17 @@ import com.expedia.open.tracing.Span;
 import com.expedia.www.haystack.client.dispatchers.clients.Client;
 import com.expedia.www.haystack.client.dispatchers.clients.GRPCAgentClient;
 import com.expedia.www.haystack.client.dispatchers.formats.Format;
+import com.expedia.www.haystack.client.metrics.MetricsRegistry;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import io.dropwizard.setup.Environment;
+
 /**
  * A factory for configuring and building {@link GRPCAgentClient} instances.
- * 
+ *
  * Configaruation options are as follows:
- * <table>
+ * <table summary="Configuration values and default values" >
  * <tr>
  *  <td>Name</td>
  *  <td>Default</td>
@@ -28,13 +46,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  *
  * <tr>
  *  <td>host</td>
- *  <td>localhost</td>
+ *  <td>haystack-agent</td>
  *  <td>The host to create a GRPC channel to</td>
  * </tr>
  *
  * <tr>
  *  <td>port</td>
- *  <td>None</td>
+ *  <td>34000</td>
  *  <td>The port to sue when creating a GRPC channel</td>
  * </tr>
  *
@@ -69,12 +87,12 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 public class AgentClientFactory extends BaseClientFactory {
 
     @NotEmpty
-    private String host = "localhost";
+    private String host = "haystack-agent";
 
     @NotNull
     @Min(1)
     @Max(65535)
-    private Integer port;
+    private Integer port = 34000;
 
     @Nullable
     private Long keepAliveTimeMS;
@@ -90,9 +108,9 @@ public class AgentClientFactory extends BaseClientFactory {
     }
 
     @Override
-    public Client build() {
-        GRPCAgentClient.Builder grpcBuilder = new GRPCAgentClient.Builder(host, port);
-        grpcBuilder.withFormat((Format<Span>) getFormat().build());
+    public Client build(Environment environment, MetricsRegistry metrics) {
+        GRPCAgentClient.Builder grpcBuilder = new GRPCAgentClient.Builder(metrics, host, port);
+        grpcBuilder.withFormat((Format<Span>) getFormat().build(environment));
 
         if (keepAliveTimeMS != null) {
             grpcBuilder.withKeepAliveTimeMS(keepAliveTimeMS);

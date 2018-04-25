@@ -1,10 +1,32 @@
+dist: trusty
+
 language: java
 
-env:
-  global:
-    - BRANCH=${TRAVIS_BRANCH}
-    - TAG=${TRAVIS_TAG}
-    - SHA=${TRAVIS_COMMIT}
+jdk:
+  - oraclejdk8
+
+cache:
+  directories:
+  - $HOME/.m2
+
+install:
+  - ./mvnw --batch-mode install -B -V
+
+before_install:
+  - if [ ! -z "$GPG_SECRET_KEYS" ]; then echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import; fi
+  - if [ ! -z "$GPG_OWNERTRUST" ]; then echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust; fi
+
+after_success:
+  - ./mvnw --batch-mode jacoco:report
+  - bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
+
+deploy:
+  provider: script
+  script: bash .travis/deploy.sh
+  skip_cleanup: true
+  on:
+    repo: ExpediaDotCom/haystack-client-java
+    condition: $TRAVIS_PULL_REQUEST = false
 
 notifications:
   email:

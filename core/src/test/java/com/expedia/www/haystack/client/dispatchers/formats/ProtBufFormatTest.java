@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 Expedia, Inc.
+ *
+ *       Licensed under the Apache License, Version 2.0 (the "License");
+ *       you may not use this file except in compliance with the License.
+ *       You may obtain a copy of the License at
+ *
+ *           http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *       Unless required by applicable law or agreed to in writing, software
+ *       distributed under the License is distributed on an "AS IS" BASIS,
+ *       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *       See the License for the specific language governing permissions and
+ *       limitations under the License.
+ *
+ */
 package com.expedia.www.haystack.client.dispatchers.formats;
 
 import static org.junit.Assert.assertEquals;
@@ -12,6 +28,7 @@ import com.expedia.open.tracing.Tag;
 import com.expedia.www.haystack.client.Span;
 import com.expedia.www.haystack.client.Tracer;
 import com.expedia.www.haystack.client.dispatchers.InMemoryDispatcher;
+import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 import com.google.common.collect.ImmutableMap;
 
 public class ProtBufFormatTest {
@@ -38,13 +55,13 @@ public class ProtBufFormatTest {
 
     @Before
     public void setup() {
-        tracer = new Tracer.Builder("protobuf-format-tests", new InMemoryDispatcher())
-            .build();
+        NoopMetricsRegistry metrics = new NoopMetricsRegistry();
+        tracer = new Tracer.Builder(metrics, "protobuf-format-tests", new InMemoryDispatcher.Builder(metrics).build()).build();
     }
 
     @Test
     public void testLogTypes() throws Exception {
-        Span span = tracer.buildSpan("log-types").startManual();
+        Span span = tracer.buildSpan("log-types").start();
         span.log(ImmutableMap.<String, Object>builder()
                  .put("string", "value1")
                  .put("boolean", true)
@@ -68,7 +85,7 @@ public class ProtBufFormatTest {
 
     @Test
     public void testTagTypes() {
-        Span span = tracer.buildSpan("tag-types").startManual();
+        Span span = tracer.buildSpan("tag-types").start();
         span.setTag("string", "value1");
         span.setTag("boolean", true);
         span.setTag("long", (long) 1);
@@ -88,11 +105,11 @@ public class ProtBufFormatTest {
     @Test
     public void testChildSpanConversion() {
         Span parent = tracer.buildSpan("parent")
-            .withStartTimestamp(1L).startManual();
+            .withStartTimestamp(1L).start();
         parent.setBaggageItem("parent-baggage", "value");
 
         Span child = tracer.buildSpan("child").asChildOf(parent)
-            .withStartTimestamp(2L).startManual();
+            .withStartTimestamp(2L).start();
         child.finish(4);
         parent.finish(6);
 
@@ -115,9 +132,8 @@ public class ProtBufFormatTest {
     @Test
     public void testSpanConversion() {
         Span span = tracer.buildSpan("happy-path").
-            withStartTimestamp(1).startManual();
+            withStartTimestamp(1).start();
         span.log("simple-event");
-        span.log("event", "payload");
         span.log(ImmutableMap.of("key1", "value1", "key2", "value2"));
         span.setBaggageItem("baggage", "value");
         span.setTag("tag1", "value1");
@@ -135,7 +151,7 @@ public class ProtBufFormatTest {
         assertEquals(1, protoSpan.getStartTime());
         assertEquals(1, protoSpan.getDuration());
 
-        assertEquals(3, protoSpan.getLogsCount());
+        assertEquals(2, protoSpan.getLogsCount());
 
         // Tags + Baggage for now.
         assertEquals(2, protoSpan.getTagsCount());

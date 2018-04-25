@@ -1,12 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>com.expedia.www</groupId>
     <artifactId>haystack-client-java-integrations</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
   </parent>
 
   <artifactId>haystack-client-dropwizard</artifactId>
@@ -14,10 +13,6 @@
 
   <name>haystack-client-dropwizard</name>
   <description>Dropwizard bindings for the client</description>
-
-  <properties>
-    <dropwizard.version>1.2.2</dropwizard.version>
-  </properties>
 
   <dependencyManagement>
     <dependencies>
@@ -40,13 +35,21 @@
 
     <dependency>
       <groupId>com.expedia.www</groupId>
-      <artifactId>haystack-client-jaxrs2</artifactId>
+      <artifactId>haystack-client-micrometer</artifactId>
       <version>${project.version}</version>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>javax.ws.rs-api</artifactId>
+      <groupId>com.expedia.www</groupId>
+      <artifactId>haystack-client-dropwizard-metrics</artifactId>
+      <version>${project.version}</version>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>io.opentracing</groupId>
+      <artifactId>opentracing-api</artifactId>
     </dependency>
 
     <dependency>
@@ -56,12 +59,22 @@
 
     <dependency>
       <groupId>io.dropwizard</groupId>
-      <artifactId>dropwizard-jackson</artifactId>
+      <artifactId>dropwizard-core</artifactId>
     </dependency>
 
     <dependency>
       <groupId>io.dropwizard</groupId>
-      <artifactId>dropwizard-validation</artifactId>
+      <artifactId>dropwizard-configuration</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-jersey</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-jackson</artifactId>
     </dependency>
 
     <dependency>
@@ -83,20 +96,4 @@
     </dependency>
   </dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
 </project>
