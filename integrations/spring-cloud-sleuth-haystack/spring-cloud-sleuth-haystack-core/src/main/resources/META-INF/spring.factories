@@ -1,6 +1,6 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 com.expedia.haystack.sleuth.core.sleuth.logger.HaystackSlf4jAutoConfiguration,\
-  com.expedia.haystack.sleuth.core.configuration.HaystackSleuthConfiguration,\
+  com.expedia.haystack.sleuth.core.configuration.HaystackSleuthAutoConfiguration,\
   com.expedia.haystack.sleuth.core.instrument.web.HaystackWebAutoConfiguration
 
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\

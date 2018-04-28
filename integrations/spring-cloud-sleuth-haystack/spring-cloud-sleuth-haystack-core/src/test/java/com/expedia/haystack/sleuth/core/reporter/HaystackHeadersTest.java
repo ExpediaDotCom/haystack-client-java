@@ -44,7 +44,6 @@ import com.expedia.www.haystack.client.Span;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = HaystackDemoApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
 @TestPropertySource(properties = {"spring.application.name=haystack-app"})
 public class HaystackHeadersTest {
 

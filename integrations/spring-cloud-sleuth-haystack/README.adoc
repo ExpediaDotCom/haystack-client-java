@@ -1,0 +1,52 @@
+= Spring Cloud Sleuth integration with Haystack 
+
+== Usage
+
+Library that enables use of Spring Cloud Sleuth to send https://expediadotcom.github.io/haystack[Haystack] traces.
+
+
+== Quick start
+
+Add Haystack to the classpath of a Spring Boot application.
+
+IMPORTANT: To ensure that your application name is properly displayed in Haystack, set the `spring.application.name` property in `bootstrap.yml`.
+
+[source,xml,indent=0,subs="verbatim,attributes",role="primary"]
+.Maven
+----
+    <dependency>
+        <groupId>com.expedia.www</groupId>
+        <artifactId>spring-cloud-starter-sleuth-haystack</artifactId>
+        <version>[RELEASE]</version>
+    </dependency>
+----
+
+== Properties and Configuration
+
+NOTE: By default, the traces are displayed in the console or the log. This is managed by sleuth. The https://github
+.com/ExpediaDotCom/haystack-client-java/blob/master/core/src/main/java/com/expedia/www/haystack/client/dispatchers/clients/NoopClient.java[NoopClient] client is used. 
+
+=== InMemory Client Configuration
+
+The InMemory client can be enabled in defining the following properties
+
+[source,properties,indent=0,subs="verbatim,attributes,macros"]
+.InMemory Client Configuration
+----
+spring.sleuth.haystack.client.span.dispatch=inmemory
+
+spring.sleuth.haystack.client.span.dispatch.inmemory.limit=100 # Maximum of spans to keep in memory.  
+----
+
+=== Grpc Agent Client Configuration
+
+The GrpcAgent client can be enabled in defining the following properties
+
+[source,properties,indent=0,subs="verbatim,attributes,macros"]
+.Grpc Agent Client Configuration
+----
+spring.sleuth.haystack.client.span.dispatch=grpc
+
+spring.sleuth.haystack.client.span.dispatch.grpc.host=haystack-agent # The host to create a GRPC channel to
+spring.sleuth.haystack.client.span.dispatch.grpc.port=34000 # The port to use when creating a GRPC channel
+----

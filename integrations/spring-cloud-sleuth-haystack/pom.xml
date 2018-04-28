@@ -17,6 +17,7 @@
 
     <modules>
         <module>spring-cloud-sleuth-haystack-core</module>
+        <module>spring-cloud-starter-sleuth-haystack</module>
     </modules>
 
     <properties>

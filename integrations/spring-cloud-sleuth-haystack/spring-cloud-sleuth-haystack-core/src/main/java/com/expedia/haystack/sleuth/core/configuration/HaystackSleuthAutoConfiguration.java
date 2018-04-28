@@ -22,10 +22,12 @@ import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.sleuth.SpanAdjuster;
+import org.springframework.cloud.sleuth.autoconfig.TraceAutoConfiguration;
 import org.springframework.cloud.sleuth.instrument.web.SleuthWebProperties;
 import org.springframework.cloud.sleuth.sampler.ProbabilityBasedSampler;
 import org.springframework.cloud.sleuth.sampler.SamplerProperties;
@@ -42,7 +44,6 @@ import com.expedia.www.haystack.client.dispatchers.clients.GRPCAgentClient;
 import com.expedia.www.haystack.client.dispatchers.clients.InMemoryClient;
 import com.expedia.www.haystack.client.dispatchers.clients.NoopClient;
 import com.expedia.www.haystack.client.dispatchers.formats.ProtoBufFormat;
-import com.expedia.www.haystack.client.metrics.Metrics;
 import com.expedia.www.haystack.client.metrics.micrometer.GlobalMetricsRegistry;
 
 import brave.Tracing;
@@ -54,8 +55,10 @@ import zipkin2.Span;
 import zipkin2.reporter.Reporter;
 
 @Configuration
-@EnableConfigurationProperties( {SamplerProperties.class, HaystackSpanProperties.class})
-public class HaystackSleuthConfiguration {
+@ConditionalOnProperty(name = {"spring.sleuth.enabled"}, matchIfMissing = true)
+@EnableConfigurationProperties( {SamplerProperties.class, SleuthWebProperties.class, HaystackSpanProperties.class})
+@AutoConfigureBefore(TraceAutoConfiguration.class)
+public class HaystackSleuthAutoConfiguration {
 
     @Autowired(required = false)
     private List<SpanAdjuster> spanAdjusters;
@@ -67,7 +70,7 @@ public class HaystackSleuthConfiguration {
     private String serviceName;
 
     @Configuration
-    @ConditionalOnProperty(value = "spring.sleuth.haystack.client.span.dispatch", havingValue = "logger", matchIfMissing = true)
+    @ConditionalOnProperty(name = "spring.sleuth.haystack.client.span.dispatch", havingValue = "logger", matchIfMissing = true)
     class LogClientConfiguration {
 
         @Bean
@@ -78,19 +81,21 @@ public class HaystackSleuthConfiguration {
     }
 
     @Configuration
-    @ConditionalOnProperty(value = "spring.sleuth.haystack.client.span.dispatch", havingValue = "memory")
+    @ConditionalOnProperty(name = "spring.sleuth.haystack.client.span.dispatch", havingValue = "inmemory")
     class InMemoryClientConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
         public Client client(HaystackSpanProperties haystackSpanProperties) {
-            return new InMemoryClient(new Metrics(new GlobalMetricsRegistry()), haystackSpanProperties.getMemory().getMaxSpans());
+            return new InMemoryClient.Builder(new GlobalMetricsRegistry())
+                .withLimit(haystackSpanProperties.getInMemory().getLimit())
+                .build();
         }
     }
 
     @Configuration
-    @ConditionalOnProperty(value = "spring.sleuth.haystack.client.span.dispatch", havingValue = "grpc")
-    class GrpcClientConfiguration {
+    @ConditionalOnProperty(name = "spring.sleuth.haystack.client.span.dispatch", havingValue = "grpc")
+    class GrpcAgentClientConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
@@ -98,10 +103,10 @@ public class HaystackSleuthConfiguration {
             String host = haystackTraceProperties.getGrpc().getHost();
             int port = haystackTraceProperties.getGrpc().getPort();
 
-            return new GRPCAgentClient.Builder(new Metrics(new GlobalMetricsRegistry()), host, port)
+            return new GRPCAgentClient.Builder(new GlobalMetricsRegistry(), host, port)
                 .withFormat(new ProtoBufFormat())
-                .withKeepAliveTimeMS(haystackTraceProperties.getGrpc().getKeepAliveInMs())
-                .withKeepAliveTimeoutMS(haystackTraceProperties.getGrpc().getKeepAliveTimeoutMs())
+                .withKeepAliveTimeMS(haystackTraceProperties.getGrpc().getKeepAliveInMs().toMillis())
+                .withKeepAliveTimeoutMS(haystackTraceProperties.getGrpc().getKeepAliveTimeoutMs().toMillis())
                 .withKeepAliveWithoutCalls(haystackTraceProperties.getGrpc().getKeepAliveWithoutCalls())
                 .withNegotiationType(haystackTraceProperties.getGrpc().getNegotiationType())
                 .build();
