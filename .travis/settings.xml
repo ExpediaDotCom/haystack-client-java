@@ -20,6 +20,16 @@
         <gpg.executable>${env.GPG_EXECUTABLE}</gpg.executable>
         <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
       </properties>
+        <repositories>
+          <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>http://repo.spring.io/libs-milestone-local</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+          </repository>
+        </repositories>
     </profile>
   </profiles>
 </settings>
