@@ -25,7 +25,6 @@ public class HaystackSpanProperties {
         LOGGER, GRPC, INMEMORY
     }
 
-    private Boolean enabled = true;
     private SpanDispatchMode dispatch = SpanDispatchMode.LOGGER;
 
     @NestedConfigurationProperty
