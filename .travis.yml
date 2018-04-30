@@ -12,12 +12,15 @@ cache:
 install:
   - ./mvnw --settings .travis/settings.xml --batch-mode install -B -V
 
+script:
+  - ./mvnw --settings .travis/settings.xml test -B
+
 before_install:
   - if [ ! -z "$GPG_SECRET_KEYS" ]; then echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import; fi
   - if [ ! -z "$GPG_OWNERTRUST" ]; then echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust; fi
 
 after_success:
-  - ./mvnw --batch-mode jacoco:report
+  - ./mvnw --settings .travis/settings.xml --batch-mode jacoco:report
   - bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
 
 deploy:
