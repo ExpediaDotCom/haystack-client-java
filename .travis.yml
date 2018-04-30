@@ -10,7 +10,7 @@ cache:
   - $HOME/.m2
 
 install:
-  - ./mvnw --batch-mode install -B -V
+  - ./mvnw --settings .travis/settings.xml --batch-mode install -B -V
 
 before_install:
   - if [ ! -z "$GPG_SECRET_KEYS" ]; then echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import; fi
