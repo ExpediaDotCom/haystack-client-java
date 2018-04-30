@@ -162,21 +162,22 @@ public class DispatcherSpanReporter implements Reporter<Span> {
         log.debug("transactionId=" + haystackSpan.context().getTraceId() + "; startTime=" + span.timestampAsLong() + "; endTime=" + haystackSpan.getEndTime() +
                       "; duration=" + span.durationAsLong() + " us");
     }
-}
 
-class HaystackSpan extends com.expedia.www.haystack.client.Span {
-    HaystackSpan(String name, SpanContext spanContext, Long startTimeInMicros) {
-        super(null, null, name, spanContext, startTimeInMicros, emptyMap(), emptyList());
-    }
+    class HaystackSpan extends com.expedia.www.haystack.client.Span {
+        HaystackSpan(String name, SpanContext spanContext, Long startTimeInMicros) {
+            super(null, null, name, spanContext, startTimeInMicros, emptyMap(), emptyList());
+        }
 
-    @Override
-    protected synchronized void finishTrace(long finishMicros) {
-        try {
-            super.finishTrace(finishMicros);
-        } catch (Exception e) {
-            // do nothing
-            // It is thrown because the dispatcher is set to null and could not be overrided
+        @Override
+        protected synchronized void finishTrace(long finishMicros) {
+            try {
+                super.finishTrace(finishMicros);
+            } catch (Exception e) {
+                // do nothing
+                // It is thrown because the dispatcher is set to null and could not be overrided
+            }
         }
     }
 }
+
 
