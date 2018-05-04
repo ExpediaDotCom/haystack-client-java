@@ -1,4 +1,4 @@
-= Spring Cloud Sleuth integration with Haystack 
+= Spring Cloud Sleuth integration with Haystack
 
 == Usage
 
@@ -24,19 +24,7 @@ IMPORTANT: To ensure that your application name is properly displayed in Haystac
 == Properties and Configuration
 
 NOTE: By default, the traces are displayed in the console or the log. This is managed by sleuth. The https://github
-.com/ExpediaDotCom/haystack-client-java/blob/master/core/src/main/java/com/expedia/www/haystack/client/dispatchers/clients/NoopClient.java[NoopClient] client is used. 
-
-=== InMemory Client Configuration
-
-The InMemory client can be enabled in defining the following properties
-
-[source,properties,indent=0,subs="verbatim,attributes,macros"]
-.InMemory Client Configuration
-----
-spring.sleuth.haystack.client.span.dispatch=inmemory
-
-spring.sleuth.haystack.client.span.dispatch.inmemory.limit=100 # Maximum of spans to keep in memory.  
-----
+.com/ExpediaDotCom/haystack-client-java/blob/master/core/src/main/java/com/expedia/www/haystack/client/dispatchers/clients/NoopClient.java[NoopClient] client is used.
 
 === Grpc Agent Client Configuration
 

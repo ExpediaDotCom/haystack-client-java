@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +30,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import com.expedia.haystack.sleuth.core.haystack.TraceKeys;
+import com.expedia.haystack.sleuth.core.haystack.B3KeyConvention;
 import com.expedia.haystack.sleuth.core.reporter.base.AccumulatorClient;
 import com.expedia.haystack.sleuth.core.reporter.base.HaystackDemoApplication;
 import com.expedia.haystack.sleuth.core.reporter.base.Reservation;
@@ -46,7 +44,6 @@ import com.expedia.www.haystack.client.Span;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = HaystackDemoApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = {"spring.application.name=haystack-app"})
-@Ignore
 public class HaystackHeadersTest {
 
     @Autowired
@@ -60,14 +57,15 @@ public class HaystackHeadersTest {
 
     private HttpHeaders headers;
     private String traceId = "681ef06e-6086-4792-9dea-7415d3079785";
-    private String parentId = "00000000-0000-0000-80e5-07fa6a56d6b6";
+    private String spanId = "00000000-0000-0000-80e5-07fa6a56d6b6";
 
     @Before
     public void setup() {
+        B3KeyConvention b3KeyConvention = new B3KeyConvention();
         client.close();
         headers = new HttpHeaders();
-        headers.set(TraceKeys.TRACE_ID, traceId);
-        headers.set(TraceKeys.PARENT_ID, parentId);
+        headers.set(b3KeyConvention.traceIdKeyAliases().iterator().next(), traceId);
+        headers.set(b3KeyConvention.spanIdKeyAliases().iterator().next(), spanId);
     }
 
     @SuppressWarnings("Duplicates")
@@ -82,12 +80,12 @@ public class HaystackHeadersTest {
         assertThat(reservations).isNotNull();
         assertThat(client.getSpans().size()).isGreaterThan(0);
 
-        Span span = client.getSpans().stream().filter(s -> s.context().getParentId() != null).findFirst().get();
+        Span span = client.getSpans().stream().filter(s -> s.getOperatioName().equals("get /reservations/{langid}")).findFirst().get();
 
         assertThat(span.getOperatioName()).isNotBlank().isEqualTo("get /reservations/{langid}");
         assertThat(span.context()).isNotNull();
         assertThat(span.context().getTraceId().toString()).isEqualTo(traceId);
-        assertThat(span.context().getParentId().toString()).isEqualTo(parentId);
+        assertThat(span.context().getParentId().toString()).isEqualTo(spanId);
         assertThat(span.context().getSpanId().toString()).isNotNull();
         assertThat(span.getStartTime()).isPositive();
         assertThat(span.getDuration()).isPositive();
@@ -110,7 +108,7 @@ public class HaystackHeadersTest {
 
         assertThat(client.getSpans().size()).isGreaterThan(0);
 
-        Span span = client.getSpans().get(0);
+        Span span = client.getSpans().stream().filter(s -> s.getOperatioName().equals("get /badreservations/{langid}")).findFirst().get();
 
         assertThat(span.getOperatioName()).isNotBlank().isEqualTo("get /badreservations/{langid}");
         assertThat(span.context()).isNotNull();
@@ -135,7 +133,7 @@ public class HaystackHeadersTest {
         assertThat(reservations).isNotNull();
         assertThat(client.getSpans().size()).isGreaterThan(0);
 
-        Span span = client.getSpans().stream().filter(s -> s.context().getParentId() != null).findFirst().get();
+        Span span = client.getSpans().stream().filter(s -> s.getOperatioName().equals("get /reservations/{langid}")).findFirst().get();
 
         assertThat(span.getOperatioName()).isNotBlank().isEqualTo("get /reservations/{langid}");
         assertThat(span.context()).isNotNull();
@@ -162,7 +160,7 @@ public class HaystackHeadersTest {
 
         assertThat(client.getSpans().size()).isGreaterThan(0);
 
-        Span span = client.getSpans().get(0);
+        Span span = client.getSpans().stream().filter(s -> s.getOperatioName().equals("get /badreservations/{langid}")).findFirst().get();
 
         assertThat(span.getOperatioName()).isNotBlank().isEqualTo("get /badreservations/{langid}");
         assertThat(span.context()).isNotNull();

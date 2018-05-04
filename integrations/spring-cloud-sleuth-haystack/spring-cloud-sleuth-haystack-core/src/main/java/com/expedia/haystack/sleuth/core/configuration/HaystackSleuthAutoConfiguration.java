@@ -81,19 +81,6 @@ public class HaystackSleuthAutoConfiguration {
     }
 
     @Configuration
-    @ConditionalOnProperty(name = "spring.sleuth.haystack.client.span.dispatch", havingValue = "inmemory")
-    class InMemoryClientConfiguration {
-
-        @Bean
-        @ConditionalOnMissingBean
-        public Client client(HaystackSpanProperties haystackSpanProperties) {
-            return new InMemoryClient.Builder(new GlobalMetricsRegistry())
-                .withLimit(haystackSpanProperties.getInMemory().getLimit())
-                .build();
-        }
-    }
-
-    @Configuration
     @ConditionalOnProperty(name = "spring.sleuth.haystack.client.span.dispatch", havingValue = "grpc")
     class GrpcAgentClientConfiguration {
 

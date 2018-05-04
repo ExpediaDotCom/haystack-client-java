@@ -23,6 +23,8 @@ import org.springframework.cloud.sleuth.instrument.web.SleuthWebProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.expedia.haystack.sleuth.core.haystack.B3Codex;
+import com.expedia.haystack.sleuth.core.haystack.B3KeyConvention;
 import com.expedia.haystack.sleuth.core.instrument.web.adjuster.ExceptionSpanAdjuster;
 import com.expedia.haystack.sleuth.core.instrument.web.adjuster.NumericalNameAdjuster;
 import com.expedia.haystack.sleuth.core.instrument.web.adjuster.NumericalSpanAdjuster;
@@ -34,7 +36,7 @@ public class HaystackWebAutoConfiguration {
 
     @Bean
     public HaystackPreTraceFilter haystackPreTraceFilter() {
-        return new HaystackPreTraceFilter();
+        return new HaystackPreTraceFilter(new B3KeyConvention(), new B3Codex());
     }
 
     @Bean

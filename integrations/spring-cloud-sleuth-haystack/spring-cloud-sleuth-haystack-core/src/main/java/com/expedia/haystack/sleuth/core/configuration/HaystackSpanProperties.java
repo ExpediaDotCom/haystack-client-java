@@ -22,16 +22,13 @@ public class HaystackSpanProperties {
     public static Duration DEFAULT_HAYSTACK_AGENT_KEEP_ALIVE_TIME_OUT_MILLIS = Duration.ofMinutes(30);
 
     public enum SpanDispatchMode {
-        LOGGER, GRPC, INMEMORY
+        LOGGER, GRPC
     }
 
     private SpanDispatchMode dispatch = SpanDispatchMode.LOGGER;
 
     @NestedConfigurationProperty
     private Grpc grpc = new Grpc();
-
-    @NestedConfigurationProperty
-    private InMemory inMemory = new InMemory();
 
     @Data
     class Grpc {
@@ -47,10 +44,5 @@ public class HaystackSpanProperties {
         private Duration keepAliveTimeoutMs = DEFAULT_HAYSTACK_AGENT_KEEP_ALIVE_TIME_OUT_MILLIS;
         private Boolean keepAliveWithoutCalls= true;
         private NegotiationType negotiationType = NegotiationType.PLAINTEXT;
-    }
-
-    @Data
-    class InMemory {
-        private int limit = 100;
     }
 }

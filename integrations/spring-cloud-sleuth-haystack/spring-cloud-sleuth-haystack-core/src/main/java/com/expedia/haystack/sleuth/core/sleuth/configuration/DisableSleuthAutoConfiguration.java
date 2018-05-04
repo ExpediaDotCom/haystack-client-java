@@ -31,7 +31,7 @@ import org.springframework.core.env.MutablePropertySources;
 public class DisableSleuthAutoConfiguration {
 
     public static final String SPRING_SLEUTH_OPENTRACING_ENABLED = "spring.sleuth.opentracing.enabled";
-    public static final String SPRING_SLEUTH_LOGGER_SLF4J_ENABLED = "spring.sleuth.logger.slf4j.enabled";
+    public static final String SPRING_SLEUTH_LOGGER_SLF4J_ENABLED = "spring.sleuth.log.slf4j.enabled";
 
     @Autowired
     private ConfigurableEnvironment environment;

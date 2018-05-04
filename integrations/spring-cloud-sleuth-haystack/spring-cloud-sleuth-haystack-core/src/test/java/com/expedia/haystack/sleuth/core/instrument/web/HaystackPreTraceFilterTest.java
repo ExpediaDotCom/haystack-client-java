@@ -29,8 +29,8 @@ import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import com.expedia.haystack.sleuth.core.haystack.KeyFactory;
-import com.expedia.haystack.sleuth.core.haystack.TraceKeys;
+import com.expedia.haystack.sleuth.core.haystack.B3Codex;
+import com.expedia.haystack.sleuth.core.haystack.B3KeyConvention;
 
 import brave.internal.HexCodec;
 
@@ -40,7 +40,7 @@ public class HaystackPreTraceFilterTest {
     public void testWithoutHaystackHeaders() throws IOException, ServletException {
         String customHeader = "CUSTOM_HEADER";
 
-        HaystackPreTraceFilter haystackPreTraceFilter = new HaystackPreTraceFilter();
+        HaystackPreTraceFilter haystackPreTraceFilter = new HaystackPreTraceFilter(new B3KeyConvention(), new B3Codex());
         MockHttpServletRequest servletRequest = new MockHttpServletRequest();
         servletRequest.addHeader(customHeader, "myHeader");
 
@@ -56,11 +56,13 @@ public class HaystackPreTraceFilterTest {
 
     @Test
     public void testWithHaystackHeaders() throws IOException, ServletException {
-        HaystackPreTraceFilter haystackPreTraceFilter = new HaystackPreTraceFilter();
+        B3KeyConvention keyConvention = new B3KeyConvention();
+        B3Codex codex = new B3Codex();
+        HaystackPreTraceFilter haystackPreTraceFilter = new HaystackPreTraceFilter(keyConvention, codex);
         MockHttpServletRequest servletRequest = new MockHttpServletRequest();
         String traceId = new UUID(0, HexCodec.lowerHexToUnsignedLong("1339107135896364746")).toString();
 
-        servletRequest.addHeader(TraceKeys.TRACE_ID, traceId);
+        servletRequest.addHeader(keyConvention.traceIdKey(), traceId);
 
         MockFilterChain chain = new MockFilterChain();
 
@@ -69,9 +71,9 @@ public class HaystackPreTraceFilterTest {
         HaystackPreTraceFilter.MutableHttpServletRequest request = (HaystackPreTraceFilter.MutableHttpServletRequest) chain.getRequest();
 
         assertThat(request).isNotNull();
-        String sleuthTraceKeys = KeyFactory.convertToSleuth(TraceKeys.TRACE_ID);
+        String sleuthTraceKeys = keyConvention.traceIdKey();
         String currentTraceId = request.getHeader(sleuthTraceKeys);
         assertThat(currentTraceId).isNotNull();
-        assertThat(currentTraceId).isEqualTo(haystackPreTraceFilter.convertUUIDToHex(traceId));
+         assertThat(currentTraceId).isEqualTo(traceId);
     }
 }

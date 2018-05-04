@@ -17,8 +17,6 @@
 
 package com.expedia.haystack.sleuth.core.instrument.web;
 
-import static com.expedia.haystack.sleuth.core.haystack.KeyFactory.convertToSleuth;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -34,21 +32,27 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import org.springframework.cloud.sleuth.instrument.web.TraceWebServletAutoConfiguration;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.filter.GenericFilterBean;
 
-import com.expedia.haystack.sleuth.core.haystack.TraceKeys;
+import com.expedia.haystack.sleuth.core.haystack.B3Codex;
+import com.expedia.www.haystack.client.propagation.KeyConvention;
 
-import brave.internal.HexCodec;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 @Order(TraceWebServletAutoConfiguration.TRACING_FILTER_ORDER - 1)
 @Slf4j
 public class HaystackPreTraceFilter extends GenericFilterBean {
+
+    private final KeyConvention keyConvention;
+    private final B3Codex codex;
+
+    public HaystackPreTraceFilter(KeyConvention keyConvention, B3Codex codex) {
+        this.keyConvention = keyConvention;
+        this.codex = codex;
+    }
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
@@ -60,31 +64,25 @@ public class HaystackPreTraceFilter extends GenericFilterBean {
 
         MutableHttpServletRequest mutableHttpServletRequest = new MutableHttpServletRequest(httpServletRequest);
 
-        if (httpServletRequest.getHeader(TraceKeys.TRACE_ID) != null) {
-            mutableHttpServletRequest.putHeader(convertToSleuth(TraceKeys.TRACE_ID), convertUUIDToHex(httpServletRequest.getHeader(TraceKeys.TRACE_ID)));
-        }
+        keyConvention.traceIdKeyAliases().forEach(key -> {
+            if (httpServletRequest.getHeader(key) != null) {
+                mutableHttpServletRequest.putHeader(keyConvention.traceIdKey(), codex.decode(httpServletRequest.getHeader(key)));
+            }
+        });
 
-        if (httpServletRequest.getHeader(TraceKeys.PARENT_ID) != null) {
-            mutableHttpServletRequest.putHeader(convertToSleuth(TraceKeys.PARENT_ID), convertUUIDToHex(httpServletRequest.getHeader(TraceKeys.PARENT_ID)));
-        }
+        keyConvention.parentIdKeyAliases().forEach(key -> {
+            if (httpServletRequest.getHeader(key) != null) {
+                mutableHttpServletRequest.putHeader(keyConvention.parentIdKey(), codex.decode(httpServletRequest.getHeader(key)));
+            }
+        });
 
-        if (httpServletRequest.getHeader(TraceKeys.PARENT_MESSAGE_ID) != null) {
-            mutableHttpServletRequest.putHeader(convertToSleuth(TraceKeys.PARENT_MESSAGE_ID), convertUUIDToHex(httpServletRequest.getHeader(TraceKeys.PARENT_MESSAGE_ID)));
-        }
-
-        if (httpServletRequest.getHeader(TraceKeys.DEBUG_TRACE) != null) {
-            mutableHttpServletRequest.putHeader(convertToSleuth(TraceKeys.DEBUG_TRACE), convertUUIDToHex(httpServletRequest.getHeader(TraceKeys.DEBUG_TRACE)));
-        }
+        keyConvention.spanIdKeyAliases().forEach(key -> {
+            if (httpServletRequest.getHeader(key) != null) {
+                mutableHttpServletRequest.putHeader(keyConvention.spanIdKey(), codex.decode(httpServletRequest.getHeader(key)));
+            }
+        });
 
         chain.doFilter(mutableHttpServletRequest, servletResponse);
-    }
-
-    public String convertUUIDToHex(String id) {
-        val uuid = UUID.fromString(id);
-        val leastSignificantBits = uuid.getLeastSignificantBits();
-        val mostSignificantBits = uuid.getMostSignificantBits();
-
-        return HexCodec.toLowerHex(mostSignificantBits, leastSignificantBits);
     }
 
     class MutableHttpServletRequest extends HttpServletRequestWrapper {

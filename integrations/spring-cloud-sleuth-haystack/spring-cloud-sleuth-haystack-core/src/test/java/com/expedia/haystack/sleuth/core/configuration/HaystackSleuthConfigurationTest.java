@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.sleuth.autoconfig.TraceAutoConfiguration;
 
 import com.expedia.www.haystack.client.dispatchers.clients.GRPCAgentClient;
-import com.expedia.www.haystack.client.dispatchers.clients.InMemoryClient;
 import com.expedia.www.haystack.client.dispatchers.clients.NoopClient;
 
 public class HaystackSleuthConfigurationTest {
@@ -24,19 +23,6 @@ public class HaystackSleuthConfigurationTest {
                 assertThat(context).hasSingleBean(NoopClient.class);
             }
         );
-    }
-
-    @Test
-    public void testInitializeInMemoryClientBean() {
-        contextRunner
-            .withPropertyValues(
-                "spring.sleuth.haystack.client.span.dispatch=inmemory"
-            )
-            .run(context -> {
-                     assertThat(context).hasBean("client");
-                     assertThat(context).hasSingleBean(InMemoryClient.class);
-                 }
-            );
     }
 
     @Test
