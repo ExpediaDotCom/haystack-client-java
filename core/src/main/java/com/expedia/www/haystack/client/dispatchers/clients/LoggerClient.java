@@ -40,7 +40,7 @@ public class LoggerClient implements Client {
     private final Counter closeCounter;
     private final Counter flushCounter;
 
-    public LoggerClient(Metrics metrics, Format<?> format, Logger logger) {
+    private LoggerClient(Metrics metrics, Format<?> format, Logger logger) {
         this.format = format;
         if (logger == null) {
             this.logger = LoggerFactory.getLogger(this.getClass());

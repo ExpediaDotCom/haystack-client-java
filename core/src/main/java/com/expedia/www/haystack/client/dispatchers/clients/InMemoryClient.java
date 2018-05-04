@@ -48,7 +48,7 @@ public class InMemoryClient implements Client {
     private final Timer closeTimer;
     private final Timer flushTimer;
 
-    public InMemoryClient(Metrics metrics, int limit) {
+    private InMemoryClient(Metrics metrics, int limit) {
         limiter = new Semaphore(limit);
         total = new ArrayList<>();
         received = new ArrayList<>();

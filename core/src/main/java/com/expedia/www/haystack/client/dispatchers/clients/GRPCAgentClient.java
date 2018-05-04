@@ -57,7 +57,8 @@ public class GRPCAgentClient implements Client {
     private final Counter closeExceptionCounter;
     private final Counter flushCounter;
 
-    public GRPCAgentClient(Metrics metrics, Format<com.expedia.open.tracing.Span> format, ManagedChannel channel, SpanAgentStub stub, StreamObserver<DispatchResult> observer, long shutdownTimeoutMS) {
+    private GRPCAgentClient(Metrics metrics, Format<com.expedia.open.tracing.Span> format, ManagedChannel channel, SpanAgentStub stub,
+                      StreamObserver<DispatchResult> observer, long shutdownTimeoutMS) {
         this.format = format;
         this.channel = channel;
         this.stub = stub;
