@@ -18,8 +18,8 @@ import lombok.Data;
 @Validated
 public class HaystackSpanProperties {
 
-    public static Duration DEFAULT_HAYSTACK_AGENT_KEEP_ALIVE_MILLIS = Duration.ofMinutes(30);
-    public static Duration DEFAULT_HAYSTACK_AGENT_KEEP_ALIVE_TIME_OUT_MILLIS = Duration.ofMinutes(30);
+    public static Duration DEFAULT_HAYSTACK_AGENT_KEEP_ALIVE_MILLIS = Duration.ofSeconds(30);
+    public static Duration DEFAULT_HAYSTACK_AGENT_KEEP_ALIVE_TIME_OUT_MILLIS = Duration.ofSeconds(30);
 
     public enum SpanDispatchMode {
         LOGGER, GRPC
