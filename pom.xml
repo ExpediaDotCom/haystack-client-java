@@ -63,6 +63,7 @@
     <maven-release-plugin.version>2.5.2</maven-release-plugin.version>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
     <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
+    <maven-shade-plugin.version>3.1.1</maven-shade-plugin.version>
     <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
     <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
   </properties>
@@ -264,6 +265,44 @@
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>${maven-shade-plugin.version}</version>
+          <executions>
+            <execution>
+              <phase>package</phase>
+              <goals>
+                <goal>shade</goal>
+              </goals>
+              <configuration>
+                <transformers>
+                  <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                  <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"/>
+                </transformers>
+                <relocations>
+                  <relocation>
+                    <pattern>io.netty</pattern>
+                    <shadedPattern>haystack.io.netty</shadedPattern>
+                  </relocation>
+                  <relocation>
+                    <pattern>io.opencensus</pattern>
+                    <shadedPattern>haystack.io.opencensus</shadedPattern>
+                  </relocation>
+                  <relocation>
+                    <pattern>com.google</pattern>
+                    <shadedPattern>haystack.com.google</shadedPattern>
+                  </relocation>
+                  <relocation>
+                    <pattern>io.grpc</pattern>
+                    <shadedPattern>haystack.io.grpc</shadedPattern>
+                  </relocation>
+                </relocations>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
           <version>${maven-source-plugin.version}</version>
           <executions>
@@ -375,6 +414,10 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-release-plugin</artifactId>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
           </plugin>
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
