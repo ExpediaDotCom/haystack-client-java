@@ -19,7 +19,7 @@ else
 fi
 
 ./mvnw --batch-mode --settings .travis/settings.xml -Prelease clean deploy -DskipTests=true -B -U
-
+SUCCESS=$?
 if [ ${SUCCESS} -eq 0 ]; then
     echo "successfully deployed the jars to nexus"
 fi
