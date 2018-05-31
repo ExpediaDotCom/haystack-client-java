@@ -19,6 +19,7 @@ package com.expedia.www.haystack.client.dispatchers.clients;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +37,8 @@ import com.expedia.www.haystack.client.metrics.Timer;
 import com.expedia.www.haystack.client.metrics.Timer.Sample;
 
 import io.grpc.ManagedChannel;
-import io.grpc.netty.NegotiationType;
-import io.grpc.netty.NettyChannelBuilder;
+import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.StreamObserver;
 
 public class GRPCAgentClient implements Client {
