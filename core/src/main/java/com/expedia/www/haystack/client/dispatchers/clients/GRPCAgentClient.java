@@ -93,7 +93,7 @@ public class GRPCAgentClient implements Client {
         @Override
         public void onCompleted() {
             onCompletedCounter.increment();
-            LOGGER.info("Dispatching span completed");
+            LOGGER.debug("Dispatching span completed");
         }
 
         @Override
