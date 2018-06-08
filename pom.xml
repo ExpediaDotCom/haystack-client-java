@@ -34,7 +34,6 @@
   </developers>
 
   <modules>
-    <module>proto</module>
     <module>core</module>
     <module>integrations</module>
     <module>examples</module>
@@ -54,12 +53,12 @@
     <grpc.version>1.9.0</grpc.version>
     <jaxrs.version>2.1</jaxrs.version>
     <micrometer.version>1.0.1</micrometer.version>
+    <haystack-commons.version>1.0.37</haystack-commons.version>
 
     <!--Plugin Properties -->
     <maven-jacoco-plugin.version>0.7.9</maven-jacoco-plugin.version>
     <maven-compiler-plugin.version>3.6.1</maven-compiler-plugin.version>
     <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
-    <maven-protobuf-plugin.version>3.3.0.1</maven-protobuf-plugin.version>
     <maven-release-plugin.version>2.5.2</maven-release-plugin.version>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
     <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
@@ -128,6 +127,13 @@
         <artifactId>grpc-stub</artifactId>
         <version>${grpc.version}</version>
       </dependency>
+
+      <dependency>
+        <groupId>com.expedia.www</groupId>
+        <artifactId>haystack-commons</artifactId>
+        <version>${haystack-commons.version}</version>
+      </dependency>
+
       <dependency>
         <groupId>io.grpc</groupId>
         <artifactId>grpc-testing</artifactId>
@@ -227,39 +233,6 @@
               </manifestEntries>
             </archive>
           </configuration>
-        </plugin>
-
-        <plugin>
-          <groupId>com.github.os72</groupId>
-          <artifactId>protoc-jar-maven-plugin</artifactId>
-          <version>${maven-protobuf-plugin.version}</version>
-          <executions>
-            <execution>
-              <phase>generate-sources</phase>
-              <goals>
-                <goal>run</goal>
-              </goals>
-              <configuration>
-                <protocArtifact>com.google.protobuf:protoc:3.0.0</protocArtifact>
-                <includeDirectories>
-                  <include>${project.parent.basedir}/idl/proto</include>
-                </includeDirectories>
-                <inputDirectories>
-                  <include>${project.parent.basedir}/idl/proto</include>
-                </inputDirectories>
-                <outputDirectory>${project.basedir}/target/generated-sources</outputDirectory>
-                <outputTargets>
-                  <outputTarget>
-                    <type>java</type>
-                  </outputTarget>
-                  <outputTarget>
-                    <type>grpc-java</type>
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.0.1</pluginArtifact>
-                  </outputTarget>
-                </outputTargets>
-              </configuration>
-            </execution>
-          </executions>
         </plugin>
 
         <plugin>
