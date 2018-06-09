@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.expedia.www</groupId>
     <artifactId>haystack-client-java-parent</artifactId>
-    <version>0.1.2-SNAPSHOT</version>
+    <version>0.1.2</version>
   </parent>
 
   <artifactId>haystack-client-core</artifactId>
@@ -15,9 +15,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>haystack-idl</artifactId>
-      <version>${project.version}</version>
+      <groupId>com.expedia.www</groupId>
+      <artifactId>haystack-commons</artifactId>
     </dependency>
 
     <dependency>
