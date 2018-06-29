@@ -16,13 +16,6 @@
  */
 package com.expedia.www.haystack.client.dispatchers.formats;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.expedia.open.tracing.Log;
 import com.expedia.open.tracing.Tag;
 import com.expedia.www.haystack.client.Span;
@@ -30,6 +23,12 @@ import com.expedia.www.haystack.client.Tracer;
 import com.expedia.www.haystack.client.dispatchers.InMemoryDispatcher;
 import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 import com.google.common.collect.ImmutableMap;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class ProtBufFormatTest {
     private Tracer tracer;
@@ -156,5 +155,4 @@ public class ProtBufFormatTest {
         // Tags + Baggage for now.
         assertEquals(2, protoSpan.getTagsCount());
     }
-
 }

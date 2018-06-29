@@ -267,8 +267,7 @@ public class Tracer implements io.opentracing.Tracer {
 
         protected SpanContext createNewContext() {
             UUID randomId = UUID.randomUUID();
-            UUID zero = new UUID(0l, 0l);
-            return createContext(randomId, randomId, zero, Collections.<String, String>emptyMap());
+            return createContext(randomId, randomId, null, Collections.emptyMap());
         }
 
         protected SpanContext createContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage) {

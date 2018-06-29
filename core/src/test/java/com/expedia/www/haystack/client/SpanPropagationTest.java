@@ -90,7 +90,7 @@ public class SpanPropagationTest {
         Assert.assertEquals(0, secondSpan.getReferences().size());
         Assert.assertEquals(0, firstSpan.getReferences().size());
         Assert.assertNotEquals(firstSpan.context().getTraceId(), secondSpan.context().getTraceId());
-        Assert.assertEquals(new UUID(0l, 0l), secondSpan.context().getParentId());
+        Assert.assertNull(secondSpan.context().getParentId());
     }
 
     @Test
@@ -114,9 +114,9 @@ public class SpanPropagationTest {
         Assert.assertEquals(parent.context().getSpanId(), child.context().getParentId());
 
         Assert.assertTrue(parent.getReferences().isEmpty());
-        Assert.assertEquals(new UUID(0l, 0l), parent.context().getParentId());
+        Assert.assertNull(parent.context().getParentId());
         Assert.assertTrue(active.getReferences().isEmpty());
-        Assert.assertEquals(new UUID(0l, 0l), active.context().getParentId());
+        Assert.assertNull(active.context().getParentId());
     }
 
     @Test
