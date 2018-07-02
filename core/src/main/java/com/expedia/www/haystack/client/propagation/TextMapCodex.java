@@ -23,11 +23,11 @@ public class TextMapCodex implements Codex<String,Object> {
 
     @Override
     public String encode(Object value) {
-        return value.toString();
+        return value == null ? null : value.toString();
     }
 
     @Override
     public String decode(Object value) {
-        return value.toString();
+        return  value == null ? null : value.toString();
     }
 }
