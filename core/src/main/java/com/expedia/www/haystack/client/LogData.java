@@ -16,13 +16,13 @@
  */
 package com.expedia.www.haystack.client;
 
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 public class LogData {
     private final Long timestamp;
@@ -30,11 +30,11 @@ public class LogData {
 
     public LogData(Long timestamp, String event) {
         this(timestamp,
-             new HashMap<String, Object>(1) {
-                 {
-                     put(event, null);
-                 }
-             });
+                new HashMap<String, Object>(1) {
+                    {
+                        put(event, null);
+                    }
+                });
     }
 
     public LogData(Long timestamp, Map<String, ?> fields) {
@@ -48,8 +48,8 @@ public class LogData {
 
     @Override
     public String toString() {
-        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
-            .toString();
+        return new ReflectionToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
+                .toString();
     }
 
     @Override
@@ -63,7 +63,7 @@ public class LogData {
         if (obj == null || getClass() != obj.getClass()) return false;
         LogData logData = (LogData) obj;
         return Objects.equals(timestamp, logData.getTimestamp())
-            && Objects.equals(fields, logData.getFields());
+                && Objects.equals(fields, logData.getFields());
     }
 
     /**

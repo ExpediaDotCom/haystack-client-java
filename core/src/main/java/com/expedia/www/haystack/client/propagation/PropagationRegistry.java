@@ -16,18 +16,16 @@
  */
 package com.expedia.www.haystack.client.propagation;
 
+import io.opentracing.propagation.Format;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
-import io.opentracing.propagation.Format;
 
 /**
  * Registry to keep track of injectors and extractors for various
  * format types needed to propagate context values.
- *
  */
 public class PropagationRegistry {
     private final Map<Format<?>, Injector<?>> injectors;
@@ -41,8 +39,8 @@ public class PropagationRegistry {
 
     @Override
     public String toString() {
-        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
-            .toString();
+        return new ReflectionToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
+                .toString();
     }
 
     public void clear() {

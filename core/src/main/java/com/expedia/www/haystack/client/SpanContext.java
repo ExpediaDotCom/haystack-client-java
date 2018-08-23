@@ -16,15 +16,11 @@
  */
 package com.expedia.www.haystack.client;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.UUID;
-
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 public class SpanContext implements io.opentracing.SpanContext {
 
@@ -59,15 +55,15 @@ public class SpanContext implements io.opentracing.SpanContext {
         if (obj == null || getClass() != obj.getClass()) return false;
         SpanContext context = (SpanContext) obj;
         return Objects.equals(traceId, context.getTraceId())
-            && Objects.equals(spanId, context.getSpanId())
-            && Objects.equals(parentId, context.getParentId())
-            && Objects.equals(baggage, context.getBaggage());
+                && Objects.equals(spanId, context.getSpanId())
+                && Objects.equals(parentId, context.getParentId())
+                && Objects.equals(baggage, context.getBaggage());
     }
 
     @Override
     public String toString() {
-        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
-            .toString();
+        return new ReflectionToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
+                .toString();
     }
 
     public SpanContext addBaggage(Map<String, String> newBaggage) {
@@ -92,7 +88,6 @@ public class SpanContext implements io.opentracing.SpanContext {
     public String getBaggageItem(String key) {
         return this.baggage.get(key);
     }
-
 
 
     /**
