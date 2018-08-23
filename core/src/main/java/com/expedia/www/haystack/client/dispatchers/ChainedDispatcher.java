@@ -16,15 +16,14 @@
  */
 package com.expedia.www.haystack.client.dispatchers;
 
+import com.expedia.www.haystack.client.Span;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
-import com.expedia.www.haystack.client.Span;
 
 public class ChainedDispatcher implements Dispatcher {
     private final List<Dispatcher> dispatchers;
@@ -41,8 +40,8 @@ public class ChainedDispatcher implements Dispatcher {
 
     @Override
     public String toString() {
-        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
-            .toString();
+        return new ReflectionToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
+                .toString();
     }
 
     @Override
@@ -87,7 +86,7 @@ public class ChainedDispatcher implements Dispatcher {
     }
 
     public static class Builder {
-        private List<Dispatcher> dispatchers = new ArrayList<>();;
+        private List<Dispatcher> dispatchers = new ArrayList<>();
 
         public Builder withDispatcher(Dispatcher dispatcher) {
             dispatchers.add(dispatcher);

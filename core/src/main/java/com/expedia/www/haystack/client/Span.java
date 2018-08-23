@@ -16,16 +16,11 @@
  */
 package com.expedia.www.haystack.client;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Span implements io.opentracing.Span {
     private final Tracer tracer;
@@ -67,9 +62,9 @@ public class Span implements io.opentracing.Span {
 
     @Override
     public String toString() {
-        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
-            .setExcludeFieldNames("tracer", "clock")
-            .toString();
+        return new ReflectionToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
+                .setExcludeFieldNames("tracer", "clock")
+                .toString();
     }
 
     /**
@@ -77,8 +72,7 @@ public class Span implements io.opentracing.Span {
      * has been called.
      *
      * @param format The string format to include in the execption message
-     * @param args Any arguments needed to populate the supplied format
-     *
+     * @param args   Any arguments needed to populate the supplied format
      */
     protected synchronized void finishedCheck(String format, Object... args) {
         if (finished.get()) {

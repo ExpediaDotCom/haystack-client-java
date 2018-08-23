@@ -16,35 +16,20 @@
  */
 package com.expedia.www.haystack.client.dispatchers;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.expedia.www.haystack.client.Span;
 import com.expedia.www.haystack.client.dispatchers.clients.Client;
 import com.expedia.www.haystack.client.dispatchers.clients.ClientException;
-import com.expedia.www.haystack.client.metrics.Counter;
-import com.expedia.www.haystack.client.metrics.Gauge;
-import com.expedia.www.haystack.client.metrics.Metrics;
-import com.expedia.www.haystack.client.metrics.MetricsRegistry;
-import com.expedia.www.haystack.client.metrics.Tag;
-import com.expedia.www.haystack.client.metrics.Timer;
+import com.expedia.www.haystack.client.metrics.*;
 import com.expedia.www.haystack.client.metrics.Timer.Sample;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RemoteDispatcher implements Dispatcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(RemoteDispatcher.class);
@@ -79,43 +64,43 @@ public class RemoteDispatcher implements Dispatcher {
         this.running = new AtomicBoolean(true);
 
         this.flushTask = executor.scheduleAtFixedRate(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        flush();
-                    } catch (ClientException e) {
-                        // do nothing; will retry next inverval
-                    }
+            @Override
+            public void run() {
+                try {
+                    flush();
+                } catch (ClientException e) {
+                    // do nothing; will retry next inverval
                 }
-            }, flushInterval, flushInterval, TimeUnit.MILLISECONDS);
+            }
+        }, flushInterval, flushInterval, TimeUnit.MILLISECONDS);
 
         this.sendTimer = Timer.builder("send").register(metrics);
         this.sendInterruptedCounter = Counter.builder("send").tag(new Tag("state", "interrupted")).register(metrics);
         this.sendExceptionCounter = Counter.builder("send").tag(new Tag("state", "exception")).register(metrics);
 
         this.senderTask = CompletableFuture.runAsync(() -> {
-                while(running.get() || !(acceptQueue.isEmpty())) {
+            while (running.get() || !(acceptQueue.isEmpty())) {
 
-                    try (Sample timer = sendTimer.start()) {
-                        Span span = acceptQueue.take();
-                        try {
-                            client.send(span);
-                        } catch (ClientException e) {
-                            sendExceptionCounter.increment();
-                            LOGGER.error("Client reported a failure:", e);
-                        }
-                    } catch (InterruptedException e) {
-                        // do nothing; will retry next interation
-                        sendInterruptedCounter.increment();
+                try (Sample timer = sendTimer.start()) {
+                    Span span = acceptQueue.take();
+                    try {
+                        client.send(span);
+                    } catch (ClientException e) {
+                        sendExceptionCounter.increment();
+                        LOGGER.error("Client reported a failure:", e);
                     }
+                } catch (InterruptedException e) {
+                    // do nothing; will retry next interation
+                    sendInterruptedCounter.increment();
                 }
-            }, executor);
+            }
+        }, executor);
 
         // held in the registry; but we don't need a local reference
         Gauge.builder("acceptQueue", acceptQueue, Collection::size)
-            .register(metrics);
+                .register(metrics);
         Gauge.builder("running", running, (running) -> (running.get() ? 1 : 0))
-            .register(metrics);
+                .register(metrics);
 
         this.dispatchTimer = Timer.builder("dispatch").register(metrics);
         this.dispatchRejectedCounter = Counter.builder("dispatch").tag(new Tag("state", "rejected")).register(metrics);
@@ -130,9 +115,9 @@ public class RemoteDispatcher implements Dispatcher {
 
     @Override
     public String toString() {
-        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
-            .setExcludeFieldNames("acceptQueue", "executor", "flushTask", "senderTask")
-            .toString();
+        return new ReflectionToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
+                .setExcludeFieldNames("acceptQueue", "executor", "flushTask", "senderTask")
+                .toString();
     }
 
     @Override

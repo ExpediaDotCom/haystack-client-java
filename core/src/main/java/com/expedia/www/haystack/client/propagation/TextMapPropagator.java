@@ -16,16 +16,14 @@
  */
 package com.expedia.www.haystack.client.propagation;
 
+import com.expedia.www.haystack.client.SpanContext;
+import io.opentracing.propagation.TextMap;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
-import com.expedia.www.haystack.client.SpanContext;
-
-import io.opentracing.propagation.TextMap;
 
 public class TextMapPropagator implements Injector<TextMap>, Extractor<TextMap> {
 
@@ -41,8 +39,8 @@ public class TextMapPropagator implements Injector<TextMap>, Extractor<TextMap> 
 
     @Override
     public String toString() {
-        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
-            .toString();
+        return new ReflectionToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
+                .toString();
     }
 
     private String prefixKey(String prefix, String key) {
@@ -84,7 +82,7 @@ public class TextMapPropagator implements Injector<TextMap>, Extractor<TextMap> 
         String parentId = null;
         String spanId = null;
 
-        final Map<String,String> baggage = new HashMap<>();
+        final Map<String, String> baggage = new HashMap<>();
 
         for (Map.Entry<String, String> entry : carrier) {
             final String key = entry.getKey();
@@ -105,8 +103,8 @@ public class TextMapPropagator implements Injector<TextMap>, Extractor<TextMap> 
         }
 
         SpanContext context = new SpanContext(UUID.fromString(traceId),
-                                              UUID.fromString(spanId),
-                                              parentId == null ? null : UUID.fromString(parentId));
+                UUID.fromString(spanId),
+                parentId == null ? null : UUID.fromString(parentId));
         return context.addBaggage(baggage);
     }
 

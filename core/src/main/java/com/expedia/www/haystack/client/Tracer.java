@@ -16,29 +16,14 @@
  */
 package com.expedia.www.haystack.client;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
-import com.expedia.www.haystack.client.metrics.Counter;
-import com.expedia.www.haystack.client.metrics.Metrics;
-import com.expedia.www.haystack.client.metrics.MetricsRegistry;
-import com.expedia.www.haystack.client.metrics.Tag;
+import com.expedia.www.haystack.client.metrics.*;
 import com.expedia.www.haystack.client.metrics.Timer;
 import com.expedia.www.haystack.client.metrics.Timer.Sample;
 import com.expedia.www.haystack.client.propagation.Extractor;
 import com.expedia.www.haystack.client.propagation.Injector;
 import com.expedia.www.haystack.client.propagation.PropagationRegistry;
 import com.expedia.www.haystack.client.propagation.TextMapPropagator;
-
 import io.opentracing.References;
 import io.opentracing.Scope;
 import io.opentracing.ScopeManager;
@@ -46,6 +31,11 @@ import io.opentracing.Span;
 import io.opentracing.propagation.Format;
 import io.opentracing.propagation.TextMap;
 import io.opentracing.util.ThreadLocalScopeManager;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.io.IOException;
+import java.util.*;
 
 public class Tracer implements io.opentracing.Tracer {
     private final Dispatcher dispatcher;
@@ -93,15 +83,15 @@ public class Tracer implements io.opentracing.Tracer {
 
     @Override
     public String toString() {
-        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
-            .setExcludeFieldNames("clock", "activeSource")
-            .toString();
+        return new ReflectionToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
+                .setExcludeFieldNames("clock", "activeSource")
+                .toString();
     }
 
     public void close() throws IOException {
         try (Sample timer = closeTimer.start()) {
             dispatcher.close();
-        } catch(IOException e) {
+        } catch (IOException e) {
             closeExceptionCounter.increment();
             throw e;
         }
@@ -110,7 +100,7 @@ public class Tracer implements io.opentracing.Tracer {
     public void flush() throws IOException {
         try (Sample timer = flushTimer.start()) {
             dispatcher.flush();
-        } catch(IOException e) {
+        } catch (IOException e) {
             flushExceptionCounter.increment();
             throw e;
         }
@@ -290,9 +280,9 @@ public class Tracer implements io.opentracing.Tracer {
             }
 
             return createContext(parent.getContext().getTraceId(),
-                                 UUID.randomUUID(),
-                                 parent.getContext().getSpanId(),
-                                 baggage);
+                    UUID.randomUUID(),
+                    parent.getContext().getSpanId(),
+                    baggage);
         }
 
         protected SpanContext createContext() {

@@ -16,10 +16,10 @@
  */
 package com.expedia.www.haystack.client;
 
-import java.util.Objects;
-
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.util.Objects;
 
 public class Reference {
     private final String referenceType;
@@ -36,7 +36,7 @@ public class Reference {
         if (obj == null || getClass() != obj.getClass()) return false;
         Reference reference = (Reference) obj;
         return Objects.equals(referenceType, reference.getReferenceType())
-            && Objects.equals(context, reference.getContext());
+                && Objects.equals(context, reference.getContext());
     }
 
     @Override
@@ -46,8 +46,8 @@ public class Reference {
 
     @Override
     public String toString() {
-        return new ReflectionToStringBuilder(this, RecursiveToStringStyle.JSON_STYLE)
-            .toString();
+        return new ReflectionToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
+                .toString();
     }
 
     /**
