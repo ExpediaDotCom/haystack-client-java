@@ -10,7 +10,7 @@ Haystack bindings for the OpenTracing API. Clients use this library to send trac
 
 Since this repository contains `haystack-idl` as a submodule, you must use the following command line to clone the repository:
 ```
-git clone --recursive git@github.com:ExpediaDotCom/haystack-client-java.git .
+git clone git@github.com:ExpediaDotCom/haystack-client-java.git .
 ```
 
 ### Prerequisites
