@@ -30,6 +30,7 @@ import io.opentracing.ScopeManager;
 import io.opentracing.Span;
 import io.opentracing.propagation.Format;
 import io.opentracing.propagation.TextMap;
+import io.opentracing.tag.Tags;
 import io.opentracing.util.ThreadLocalScopeManager;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -43,6 +44,7 @@ public class Tracer implements io.opentracing.Tracer {
     protected final PropagationRegistry registry;
     private final String serviceName;
     private final ScopeManager scopeManager;
+    private final boolean dualSpanType;
 
     private final Counter spansCreatedCounter;
 
@@ -60,12 +62,14 @@ public class Tracer implements io.opentracing.Tracer {
     private final Timer extractTimer;
     private final Counter extractFailureCounter;
 
-    public Tracer(String serviceName, ScopeManager scopeManager, Clock clock, Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics) {
+    public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
+                  Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics, boolean dualSpanType) {
         this.serviceName = serviceName;
         this.scopeManager = scopeManager;
         this.clock = clock;
         this.dispatcher = dispatcher;
         this.registry = registry;
+        this.dualSpanType = dualSpanType;
 
         this.dispatchTimer = Timer.builder("dispatch").register(metrics);
         this.closeTimer = Timer.builder("close").register(metrics);
@@ -250,21 +254,19 @@ public class Tracer implements io.opentracing.Tracer {
             return this;
         }
 
-        @Override
-        public Scope startActive(boolean finishSpanOnClose) {
-            return tracer.scopeManager().activate(start(), finishSpanOnClose);
+        boolean isServerSpan() {
+            return Tags.SPAN_KIND_SERVER.equals(tags.get(Tags.SPAN_KIND.getKey()));
         }
 
-        protected SpanContext createNewContext() {
-            UUID randomId = UUID.randomUUID();
-            return createContext(randomId, randomId, null, Collections.emptyMap());
+        SpanContext createNewContext() {
+            return createContext(UUID.randomUUID(), UUID.randomUUID(), null, Collections.emptyMap());
         }
 
-        protected SpanContext createContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage) {
+        SpanContext createContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage) {
             return new SpanContext(traceId, spanId, parentId, baggage);
         }
 
-        protected SpanContext createDependentContext() {
+        SpanContext createDependentContext() {
             Reference parent = references.get(0);
             for (Reference reference : references) {
                 if (References.CHILD_OF.equals(reference.getReferenceType())) {
@@ -279,13 +281,22 @@ public class Tracer implements io.opentracing.Tracer {
                 baggage.putAll(reference.getContext().getBaggage());
             }
 
+            // This is a check to see if the tracer is configured to support single
+            // span type (Zipkin style shared span id) or dual span type (client and server having their
+            // own span ids ).
+            // If tracer is not of dualSpanType and if it is a server span then we
+            // just return the parent context with the same shared span ids.
+            if (isServerSpan() && !tracer.dualSpanType) {
+                return parent.getContext();
+            }
+
             return createContext(parent.getContext().getTraceId(),
                     UUID.randomUUID(),
                     parent.getContext().getSpanId(),
                     baggage);
         }
 
-        protected SpanContext createContext() {
+        SpanContext createContext() {
             // handle active spans if needed
             if (references.isEmpty() && !ignoreActive && tracer.activeSpan() != null) {
                 asChildOf(tracer.activeSpan());
@@ -294,6 +305,7 @@ public class Tracer implements io.opentracing.Tracer {
             if (references.isEmpty()) {
                 return createNewContext();
             }
+
             return createDependentContext();
         }
 
@@ -302,6 +314,11 @@ public class Tracer implements io.opentracing.Tracer {
                 return clock.microTime();
             }
             return startTime;
+        }
+
+        @Override
+        public Scope startActive(boolean finishSpanOnClose) {
+            return tracer.scopeManager().activate(start(), finishSpanOnClose);
         }
 
         @Override
@@ -324,6 +341,7 @@ public class Tracer implements io.opentracing.Tracer {
         protected Dispatcher dispatcher;
         protected PropagationRegistry registry = new PropagationRegistry();
         protected Metrics metrics;
+        private boolean dualSpanType;
 
         public Builder(MetricsRegistry registry, String serviceName, Dispatcher dispatcher) {
             this(new Metrics(registry, Tracer.class.getName(), Collections.emptyList()), serviceName, dispatcher);
@@ -341,7 +359,6 @@ public class Tracer implements io.opentracing.Tracer {
             TextMapPropagator httpPropagator = new TextMapPropagator.Builder().withURLCodex().build();
             withFormat(Format.Builtin.HTTP_HEADERS, (Injector<TextMap>) httpPropagator);
             withFormat(Format.Builtin.HTTP_HEADERS, (Extractor<TextMap>) httpPropagator);
-
         }
 
         public Builder withScopeManager(ScopeManager scope) {
@@ -375,8 +392,13 @@ public class Tracer implements io.opentracing.Tracer {
             return this;
         }
 
+        public Builder withDualSpanType() {
+            dualSpanType = true;
+            return this;
+        }
+
         public Tracer build() {
-            return new Tracer(serviceName, scopeManager, clock, dispatcher, registry, metrics);
+            return new Tracer(serviceName, scopeManager, clock, dispatcher, registry, metrics, dualSpanType);
         }
 
     }
