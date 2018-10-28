@@ -81,8 +81,9 @@ public class HttpCollectorClient implements Client {
         if (headers != null && headers.length > 0) {
             post.setHeaders(headers);
         }
-        post.setHeader(new BasicHeader("Content-Type", "application/octet-stream"));
-        post.setEntity(new ByteArrayEntity(spanBytes));
+        final ByteArrayEntity entity = new ByteArrayEntity(spanBytes);
+        entity.setContentType("application/octet-stream");
+        post.setEntity(entity);
         CloseableHttpResponse response = null;
         try {
             response = httpClient.execute(post);

@@ -102,10 +102,22 @@ public class HttpCollectorClientTest {
         client.send(span);
     }
 
+    @Test(expected = ClientException.class)
+    public void testAnotherFailedDispatch() throws Exception {
+        final Span span = tracer.buildSpan("sad-path").start();
+        span.finish();
+        final ArgumentCaptor<HttpPost> httpPostCapture = ArgumentCaptor.forClass(HttpPost.class);
+        final CloseableHttpClient http = Mockito.mock(CloseableHttpClient.class);
+        when(http.execute(httpPostCapture.capture())).thenThrow(new IOException());
+
+        final HttpCollectorClient client = new HttpCollectorClient("http://myendpoint:8080/span", new HashMap<>(), http);
+        client.send(span);
+    }
+
     private void verifyCapturedHttpPost(final HttpPost httpPost) throws IOException {
         assertEquals(httpPost.getMethod(), "POST");
         assertEquals(httpPost.getURI().toString(), "http://myendpoint:8080/span");
-        assertEquals(httpPost.getFirstHeader("Content-Type").getValue(), "application/octet-stream");
+        assertEquals(httpPost.getEntity().getContentType().getValue(), "application/octet-stream");
         assertEquals(httpPost.getFirstHeader("client-id").getValue(), "my-client");
         com.expedia.open.tracing.Span span = com.expedia.open.tracing.Span.parseFrom(httpPost.getEntity().getContent());
         assertEquals(span.getServiceName(), serviceName);
