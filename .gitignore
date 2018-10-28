@@ -40,3 +40,6 @@ hs_err_pid*
 # IntelliJ Idea project files
 .idea/
 *.iml
+*.classpath
+*.project
+*.settings
