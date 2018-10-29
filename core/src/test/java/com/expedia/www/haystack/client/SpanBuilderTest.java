@@ -16,17 +16,19 @@
  */
 package com.expedia.www.haystack.client;
 
-import java.util.Map;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
 import com.expedia.www.haystack.client.dispatchers.NoopDispatcher;
 import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
-
 import io.opentracing.References;
+import io.opentracing.propagation.Format;
+import io.opentracing.propagation.TextMap;
+import io.opentracing.tag.Tags;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 public class SpanBuilderTest {
 
@@ -53,10 +55,9 @@ public class SpanBuilderTest {
         Span following = tracer.buildSpan("following").start();
 
         Span child = tracer.buildSpan("child")
-            .asChildOf(parent)
-            .addReference(References.FOLLOWS_FROM, following.context())
-            .start();
-
+                .asChildOf(parent)
+                .addReference(References.FOLLOWS_FROM, following.context())
+                .start();
 
         Assert.assertEquals(2, child.getReferences().size());
         Assert.assertEquals(child.getReferences().get(0), new Reference(References.CHILD_OF, parent.context()));
@@ -64,12 +65,102 @@ public class SpanBuilderTest {
     }
 
     @Test
+    public void testChildOfWithDualSpanType() {
+        //create a client span
+        final Tracer clientTracer = new Tracer.Builder(new NoopMetricsRegistry(),
+                                                       "ClientService",
+                                                       dispatcher).withDualSpanMode().build();
+        final Span clientSpan = clientTracer.buildSpan("Api_call")
+                .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
+                .start();
+        final MapBackedTextMap wireData = new MapBackedTextMap();
+        clientTracer.inject(clientSpan.context(), Format.Builtin.TEXT_MAP, wireData);
+
+        //create a server
+        final Tracer serverTracer = new Tracer.Builder(new NoopMetricsRegistry(),
+                                                       "ServerService",
+                                                       dispatcher).withDualSpanMode().build();
+        final SpanContext wireContext = serverTracer.extract(Format.Builtin.TEXT_MAP, wireData);
+        final Span serverSpan = serverTracer.buildSpan("Api")
+                .asChildOf(wireContext)
+                .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)
+                .start();
+
+        Assert.assertEquals("trace-ids are not matching",
+                            clientSpan.context().getTraceId().toString(),
+                            serverSpan.context().getTraceId().toString());
+        Assert.assertEquals("server's parent id - client's span id do not match",
+                            clientSpan.context().getSpanId().toString(),
+                            serverSpan.context().getParentId().toString());
+    }
+
+    @Test
+    public void testChildOfWithSingleSpanType() {
+        //create a client span
+        final Tracer clientTracer = new Tracer.Builder(new NoopMetricsRegistry(),
+                                                       "ClientService",
+                                                       dispatcher).build();
+        final Span clientSpan = clientTracer.buildSpan("Api_call")
+                .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
+                .start();
+        final MapBackedTextMap wireData = new MapBackedTextMap();
+        clientTracer.inject(clientSpan.context(), Format.Builtin.TEXT_MAP, wireData);
+
+        //create a server
+        final Tracer serverTracer = new Tracer.Builder(new NoopMetricsRegistry(),
+                                                       "ServerService",
+                                                       dispatcher).build();
+        final SpanContext wireContext = serverTracer.extract(Format.Builtin.TEXT_MAP, wireData);
+        final Span serverSpan = serverTracer.buildSpan("Api")
+                .asChildOf(wireContext)
+                .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)
+                .start();
+
+        Assert.assertEquals("trace-ids are not matching",
+                            clientSpan.context().getTraceId().toString(),
+                            serverSpan.context().getTraceId().toString());
+        Assert.assertEquals("server - client spans do not match",
+                            clientSpan.context().getSpanId().toString(),
+                            serverSpan.context().getSpanId().toString());
+    }
+
+
+    @Test
+    public void testChildOfWithSingleSpanTypeAndExtractedContext() {
+        //create a client span
+        final Tracer clientTracer = new Tracer.Builder(new NoopMetricsRegistry(),
+                                                       "ClientService",
+                                                       dispatcher).build();
+        final Span clientSpan = clientTracer.buildSpan("Api_call")
+                .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
+                .start();
+        final MapBackedTextMap wireData = new MapBackedTextMap();
+        clientTracer.inject(clientSpan.context(), Format.Builtin.TEXT_MAP, wireData);
+
+        //create a server
+        final Tracer serverTracer = new Tracer.Builder(new NoopMetricsRegistry(),
+                                                       "ServerService",
+                                                       dispatcher).build();
+        final SpanContext wireContext = serverTracer.extract(Format.Builtin.TEXT_MAP, wireData);
+        final Span serverSpan = serverTracer.buildSpan("Api")
+                .asChildOf(wireContext)
+                .start();
+
+        Assert.assertEquals("trace-ids are not matching",
+                            clientSpan.context().getTraceId().toString(),
+                            serverSpan.context().getTraceId().toString());
+        Assert.assertEquals("server - client spans do not match",
+                            clientSpan.context().getSpanId().toString(),
+                            serverSpan.context().getSpanId().toString());
+    }
+
+    @Test
     public void testWithTags() {
         Span child = tracer.buildSpan("child")
-            .withTag("string-key", "string-value")
-            .withTag("boolean-key", false)
-            .withTag("number-key", 1l)
-            .start();
+                .withTag("string-key", "string-value")
+                .withTag("boolean-key", false)
+                .withTag("number-key", 1l)
+                .start();
 
         Map<String, ?> tags = child.getTags();
 
@@ -82,4 +173,21 @@ public class SpanBuilderTest {
         Assert.assertEquals(1l, tags.get("number-key"));
     }
 
+    private class MapBackedTextMap implements TextMap {
+        private final Map<String, String> map = new HashMap<>();
+
+        @Override
+        public Iterator<Map.Entry<String, String>> iterator() {
+            return map.entrySet().iterator();
+        }
+
+        @Override
+        public void put(String key, String value) {
+            map.put(key, value);
+        }
+
+        public Map<String, String> getMap() {
+            return map;
+        }
+    }
 }
