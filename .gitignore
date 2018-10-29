@@ -37,14 +37,11 @@ buildNumber.properties
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-# IntelliJ Idea project files
+# IDE
 .idea/
 *.iml
-<<<<<<< HEAD
 *.ipr
 *.iws
-=======
 *.classpath
 *.project
 *.settings
->>>>>>> d55d6d9f4d37b05fe37fa2f583858b0e53b1999e
