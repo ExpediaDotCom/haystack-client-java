@@ -103,8 +103,9 @@ public class TextMapPropagator implements Injector<TextMap>, Extractor<TextMap> 
         }
 
         SpanContext context = new SpanContext(UUID.fromString(traceId),
-                UUID.fromString(spanId),
-                parentId == null ? null : UUID.fromString(parentId));
+                                              UUID.fromString(spanId),
+                                              parentId == null ? null : UUID.fromString(parentId),
+                                              true);
         return context.addBaggage(baggage);
     }
 

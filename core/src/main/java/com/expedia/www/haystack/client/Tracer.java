@@ -263,7 +263,7 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         SpanContext createContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage) {
-            return new SpanContext(traceId, spanId, parentId, baggage);
+            return new SpanContext(traceId, spanId, parentId, baggage, false);
         }
 
         SpanContext createDependentContext() {
@@ -282,11 +282,14 @@ public class Tracer implements io.opentracing.Tracer {
             }
 
             // This is a check to see if the tracer is configured to support single
-            // span type (Zipkin style shared span id) or dual span type (client and server having their
-            // own span ids ).
-            // If tracer is not of dualSpanType and if it is a server span then we
-            // just return the parent context with the same shared span ids.
-            if (isServerSpan() && !tracer.dualSpanType) {
+            // single span type (Zipkin style shared span id) or
+            // dual span type (client and server having their own span ids ).
+            // a. If tracer is not of dualSpanType and if it is a server span then we
+            // just return the parent context with the same shared span ids
+            // b. If tracer is not of dualSpanType and if the parent context is an extracted one from the wire
+            // then we assume this is the first span in the server and so just return the parent context
+            // with the same shared span ids
+            if (!tracer.dualSpanType && (isServerSpan() || parent.getContext().isExtractedContext())) {
                 return parent.getContext();
             }
 

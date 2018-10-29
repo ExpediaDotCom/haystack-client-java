@@ -124,6 +124,36 @@ public class SpanBuilderTest {
                             serverSpan.context().getSpanId().toString());
     }
 
+
+    @Test
+    public void testChildOfWithSingleSpanTypeAndExtractedContext() {
+        //create a client span
+        final Tracer clientTracer = new Tracer.Builder(new NoopMetricsRegistry(),
+                                                       "ClientService",
+                                                       dispatcher).build();
+        final Span clientSpan = clientTracer.buildSpan("Api_call")
+                .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
+                .start();
+        final MapBackedTextMap wireData = new MapBackedTextMap();
+        clientTracer.inject(clientSpan.context(), Format.Builtin.TEXT_MAP, wireData);
+
+        //create a server
+        final Tracer serverTracer = new Tracer.Builder(new NoopMetricsRegistry(),
+                                                       "ServerService",
+                                                       dispatcher).build();
+        final SpanContext wireContext = serverTracer.extract(Format.Builtin.TEXT_MAP, wireData);
+        final Span serverSpan = serverTracer.buildSpan("Api")
+                .asChildOf(wireContext)
+                .start();
+
+        Assert.assertEquals("trace-ids are not matching",
+                            clientSpan.context().getTraceId().toString(),
+                            serverSpan.context().getTraceId().toString());
+        Assert.assertEquals("server - client spans do not match",
+                            clientSpan.context().getSpanId().toString(),
+                            serverSpan.context().getSpanId().toString());
+    }
+
     @Test
     public void testWithTags() {
         Span child = tracer.buildSpan("child")

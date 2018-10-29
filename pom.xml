@@ -54,6 +54,7 @@
     <jaxrs.version>2.1</jaxrs.version>
     <micrometer.version>1.0.1</micrometer.version>
     <haystack-commons.version>1.0.41</haystack-commons.version>
+    <http-client.vesion>4.5.3</http-client.vesion>
 
     <!--Plugin Properties -->
     <maven-jacoco-plugin.version>0.7.9</maven-jacoco-plugin.version>
@@ -132,6 +133,12 @@
         <groupId>com.expedia.www</groupId>
         <artifactId>haystack-commons</artifactId>
         <version>${haystack-commons.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>${http-client.vesion}</version>
       </dependency>
 
       <dependency>

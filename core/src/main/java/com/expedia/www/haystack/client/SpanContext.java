@@ -28,12 +28,22 @@ public class SpanContext implements io.opentracing.SpanContext {
     private final UUID traceId;
     private final UUID spanId;
     private final UUID parentId;
+    private boolean extractedContext;
 
     public SpanContext(UUID traceId, UUID spanId, UUID parentId) {
-        this(traceId, spanId, parentId, Collections.<String, String>emptyMap());
+        this(traceId, spanId, parentId, false);
     }
 
+    public SpanContext(UUID traceId, UUID spanId, UUID parentId, boolean extractedContext) {
+        this(traceId, spanId, parentId, Collections.emptyMap(), extractedContext);
+    }
+
+    @Deprecated
     SpanContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage) {
+        this(traceId, spanId, parentId, baggage, false);
+    }
+
+    SpanContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage, boolean extractedContext) {
         if (baggage == null) {
             throw new NullPointerException();
         }
@@ -42,6 +52,7 @@ public class SpanContext implements io.opentracing.SpanContext {
         this.spanId = spanId;
         this.parentId = parentId;
         this.baggage = Collections.unmodifiableMap(baggage);
+        this.extractedContext = extractedContext;
     }
 
     @Override
@@ -67,13 +78,13 @@ public class SpanContext implements io.opentracing.SpanContext {
     }
 
     public SpanContext addBaggage(Map<String, String> newBaggage) {
-        return new SpanContext(traceId, spanId, parentId, newBaggage);
+        return new SpanContext(traceId, spanId, parentId, newBaggage, extractedContext);
     }
 
     public SpanContext addBaggage(String key, String value) {
         Map<String, String> newBaggage = new HashMap<>(this.baggage);
         newBaggage.put(key, value);
-        return new SpanContext(traceId, spanId, parentId, newBaggage);
+        return new SpanContext(traceId, spanId, parentId, newBaggage, extractedContext);
     }
 
     @Override
@@ -109,5 +120,9 @@ public class SpanContext implements io.opentracing.SpanContext {
      */
     public UUID getParentId() {
         return parentId;
+    }
+
+    boolean isExtractedContext() {
+        return extractedContext;
     }
 }
