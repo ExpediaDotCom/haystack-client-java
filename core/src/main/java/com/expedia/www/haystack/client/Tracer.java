@@ -44,7 +44,7 @@ public class Tracer implements io.opentracing.Tracer {
     protected final PropagationRegistry registry;
     private final String serviceName;
     private final ScopeManager scopeManager;
-    private final boolean dualSpanType;
+    private final boolean dualSpanMode;
 
     private final Counter spansCreatedCounter;
 
@@ -63,13 +63,13 @@ public class Tracer implements io.opentracing.Tracer {
     private final Counter extractFailureCounter;
 
     public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
-                  Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics, boolean dualSpanType) {
+                  Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics, boolean dualSpanMode) {
         this.serviceName = serviceName;
         this.scopeManager = scopeManager;
         this.clock = clock;
         this.dispatcher = dispatcher;
         this.registry = registry;
-        this.dualSpanType = dualSpanType;
+        this.dualSpanMode = dualSpanMode;
 
         this.dispatchTimer = Timer.builder("dispatch").register(metrics);
         this.closeTimer = Timer.builder("close").register(metrics);
@@ -289,7 +289,7 @@ public class Tracer implements io.opentracing.Tracer {
             // b. If tracer is not of dualSpanType and if the parent context is an extracted one from the wire
             // then we assume this is the first span in the server and so just return the parent context
             // with the same shared span ids
-            if (!tracer.dualSpanType && (isServerSpan() || parent.getContext().isExtractedContext())) {
+            if (!tracer.dualSpanMode && (isServerSpan() || parent.getContext().isExtractedContext())) {
                 return parent.getContext();
             }
 
@@ -344,7 +344,7 @@ public class Tracer implements io.opentracing.Tracer {
         protected Dispatcher dispatcher;
         protected PropagationRegistry registry = new PropagationRegistry();
         protected Metrics metrics;
-        private boolean dualSpanType;
+        private boolean dualSpanMode;
 
         public Builder(MetricsRegistry registry, String serviceName, Dispatcher dispatcher) {
             this(new Metrics(registry, Tracer.class.getName(), Collections.emptyList()), serviceName, dispatcher);
@@ -395,13 +395,18 @@ public class Tracer implements io.opentracing.Tracer {
             return this;
         }
 
-        public Builder withDualSpanType() {
-            dualSpanType = true;
+        /**
+         * Enables production of client and server spans with two different span-ids. If not enabled,
+         * this will cause the Tracer to produce client and server spans with shared span-ids (Zipkin style)
+         * @return this builder instance
+         */
+        public Builder withDualSpanMode() {
+            dualSpanMode = true;
             return this;
         }
 
         public Tracer build() {
-            return new Tracer(serviceName, scopeManager, clock, dispatcher, registry, metrics, dualSpanType);
+            return new Tracer(serviceName, scopeManager, clock, dispatcher, registry, metrics, dualSpanMode);
         }
 
     }
