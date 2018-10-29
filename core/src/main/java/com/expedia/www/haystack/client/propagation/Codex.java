@@ -38,6 +38,6 @@ public interface Codex<R,T> {
      * @param value The encoded value
      * @return The decoded value
      */
-    R decode(T value);
+    T decode(R value);
 
 }

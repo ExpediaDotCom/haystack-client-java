@@ -31,28 +31,28 @@ public class TextMapURLCodex extends TextMapCodex {
      * UTF-8 should be used. Not doing so may introduce
      * incompatibilites.
 
-     * @see java.net.URLCodex#encode(String, String)
+     * @see java.net.URLEncoder#encode(String, String)
      * @see java.net.URLDecoder#decode(String, String)
      */
     private final String ENCODING = "UTF-8";
 
     @Override
-    public String encode(Object value) {
+    public String encode(String value) {
         try {
-            return URLEncoder.encode(value.toString(), ENCODING);
+            return URLEncoder.encode(value, ENCODING);
         } catch (UnsupportedEncodingException e) {
             // hope for the best
-            return value.toString();
+            return value;
         }
     }
 
     @Override
-    public String decode(Object value) {
+    public String decode(String value) {
         try {
-            return URLDecoder.decode(value.toString(), ENCODING);
+            return URLDecoder.decode(value, ENCODING);
         } catch (UnsupportedEncodingException e) {
             // hope for the best
-            return value.toString();
+            return value;
         }
     }
 
