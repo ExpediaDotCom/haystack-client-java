@@ -83,6 +83,14 @@ public class Tracer implements io.opentracing.Tracer {
         this.injectFailureCounter = Counter.builder("inject").tag(new Tag("state", "exception")).register(metrics);
         this.extractTimer = Timer.builder("extract").register(metrics);
         this.extractFailureCounter = Counter.builder("extract").tag(new Tag("state", "exception")).register(metrics);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                Tracer.this.close();
+            } catch (IOException e) {
+                /* skip logging any error */
+            }
+        }));
     }
 
     @Override
