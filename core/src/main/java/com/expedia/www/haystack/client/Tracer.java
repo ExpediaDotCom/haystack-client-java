@@ -290,7 +290,10 @@ public class Tracer implements io.opentracing.Tracer {
             // then we assume this is the first span in the server and so just return the parent context
             // with the same shared span ids
             if (!tracer.dualSpanMode && (isServerSpan() || parent.getContext().isExtractedContext())) {
-                return parent.getContext();
+                return createContext(parent.getContext().getTraceId(),
+                                     parent.getContext().getSpanId(),
+                                     parent.getContext().getParentId(),
+                                     baggage);
             }
 
             return createContext(parent.getContext().getTraceId(),
