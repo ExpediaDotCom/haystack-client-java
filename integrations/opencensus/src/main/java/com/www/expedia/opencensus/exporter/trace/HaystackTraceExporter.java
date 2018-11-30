@@ -42,6 +42,8 @@ public class HaystackTraceExporter {
     @Nullable
     static SpanExporter.Handler handler = null;
 
+    @Nullable
+    private static Client<Span> client = null;
 
     private HaystackTraceExporter() {
     }
@@ -56,8 +58,8 @@ public class HaystackTraceExporter {
                                          final Metrics metrics) {
         synchronized (monitor) {
             checkState(handler == null, "haystack exporter is already registered.");
-            final Client<Span> dispatcher = buildRemoteClient(dispatcherConfig, metrics);
-            final SpanExporter.Handler newHandler = new HaystackExporterHandler(dispatcher, serviceName, metrics);
+            client = buildRemoteClient(dispatcherConfig, metrics);
+            final SpanExporter.Handler newHandler = new HaystackExporterHandler(client, serviceName, metrics);
             HaystackTraceExporter.handler = newHandler;
             register(Tracing.getExportComponent().getSpanExporter(), newHandler);
         }
@@ -92,6 +94,10 @@ public class HaystackTraceExporter {
         synchronized (monitor) {
             checkState(handler != null, "haystack exporter is not registered.");
             Tracing.getExportComponent().getSpanExporter().unregisterHandler(REGISTER_NAME);
+            if (client != null) {
+                client.close();
+                client = null;
+            }
             handler = null;
         }
     }
