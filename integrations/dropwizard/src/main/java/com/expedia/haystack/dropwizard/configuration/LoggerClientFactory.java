@@ -16,15 +16,14 @@
  */
 package com.expedia.haystack.dropwizard.configuration;
 
-import javax.annotation.Nullable;
-
 import com.expedia.www.haystack.client.dispatchers.clients.Client;
 import com.expedia.www.haystack.client.dispatchers.clients.LoggerClient;
 import com.expedia.www.haystack.client.metrics.MetricsRegistry;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-
 import io.dropwizard.setup.Environment;
+
+import javax.annotation.Nullable;
 
 /**
  * A factory for configuring and building {@link LoggerClient} instances.

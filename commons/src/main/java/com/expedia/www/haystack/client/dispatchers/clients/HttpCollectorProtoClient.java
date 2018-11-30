@@ -14,38 +14,29 @@
  *       limitations under the License.
  *
  */
+
 package com.expedia.www.haystack.client.dispatchers.clients;
 
-import com.expedia.www.haystack.client.Span;
-import com.expedia.www.haystack.client.dispatchers.formats.Format;
-import com.expedia.www.haystack.client.dispatchers.formats.ProtoBufFormat;
+import com.expedia.open.tracing.Span;
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import java.util.Collections;
 import java.util.Map;
 
-public class HttpCollectorClient extends BaseHttpClient implements Client<Span> {
-    private final Format<com.expedia.open.tracing.Span> format;
-
-    public HttpCollectorClient(String endpoint, Map<String, String> headers) {
+public class HttpCollectorProtoClient extends BaseHttpClient implements Client<Span>{
+    public HttpCollectorProtoClient(String endpoint, Map<String, String> headers) {
         super(endpoint, headers);
-        this.format = new ProtoBufFormat();
     }
 
-    public HttpCollectorClient(String endpoint) {
-        this(endpoint, Collections.emptyMap());
+    public HttpCollectorProtoClient(String endpoint) {
+        super(endpoint);
     }
 
-    public HttpCollectorClient(final String endpoint,
-                               final Map<String, String> headers,
-                               final CloseableHttpClient httpClient) {
+    public HttpCollectorProtoClient(String endpoint, Map<String, String> headers, CloseableHttpClient httpClient) {
         super(endpoint, headers, httpClient);
-        this.format = new ProtoBufFormat();
     }
 
     @Override
     public boolean send(Span span) throws ClientException {
-        final byte[] spanBytes = format.format(span).toByteArray();
-       return super.send(spanBytes);
+        return super.send(span.toByteArray());
     }
 }

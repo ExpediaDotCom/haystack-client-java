@@ -74,5 +74,4 @@ public class GRPCAgentClientTest {
 
         verify(serviceImpl, times(1)).dispatch(spanCapture.capture(), Matchers.<StreamObserver<DispatchResult>>any());
     }
-
 }
