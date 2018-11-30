@@ -26,7 +26,7 @@ import com.expedia.www.haystack.client.metrics.Timer.Sample;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 
-public class GRPCAgentProtoClient extends BaseGrpcClient implements Client<Span> {
+public class GRPCAgentProtoClient extends BaseGrpcClient<Span> {
     public GRPCAgentProtoClient(Metrics metrics,
                                 ManagedChannel channel,
                                 SpanAgentStub stub,

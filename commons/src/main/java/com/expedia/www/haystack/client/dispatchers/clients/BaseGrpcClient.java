@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-abstract public class BaseGrpcClient {
+abstract public class BaseGrpcClient<R> implements Client<R> {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseGrpcClient.class);
 
     protected final ManagedChannel channel;
@@ -140,7 +140,7 @@ abstract public class BaseGrpcClient {
         }
     }
 
-    public static class Builder {
+    public static abstract class Builder {
         protected StreamObserver<DispatchResult> observer;
 
         protected Metrics metrics;
@@ -228,5 +228,7 @@ abstract public class BaseGrpcClient {
                     .negotiationType(negotiationType)
                     .build();
         }
+
+        public abstract BaseGrpcClient build();
     }
 }

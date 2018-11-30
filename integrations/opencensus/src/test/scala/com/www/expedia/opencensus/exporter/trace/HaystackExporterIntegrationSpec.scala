@@ -50,7 +50,7 @@ class HaystackExporterIntegrationSpec extends FunSpec with GivenWhenThen with Ma
     HaystackTraceExporter.unregister()
   }
 
-  private def generateTrace(tracer: Tracer, startTimeInMillis: Long) = {
+  private def generateTrace(tracer: Tracer) = {
     val spanBuilder = tracer.spanBuilder(OPERATION_NAME).setRecordEvents(true).setSampler(Samplers.alwaysSample())
     val spanDurationInMillis = new Random().nextInt(10) + 1
 
@@ -72,14 +72,12 @@ class HaystackExporterIntegrationSpec extends FunSpec with GivenWhenThen with Ma
 
   describe("Integration Test with haystack and opencensus") {
     it ("should dispatch the spans to haystack-agent") {
-      val startTimeMillis = System.currentTimeMillis()
       HaystackTraceExporter.createAndRegister(new GrpcAgentDispatcherConfig("haystack-agent", 35000), SERVICE_NAME)
-
       val tracer = Tracing.getTracer
 
-      generateTrace(tracer, startTimeMillis)
+      generateTrace(tracer)
       Thread.sleep(2000)
-      generateTrace(tracer, startTimeMillis)
+      generateTrace(tracer)
 
       // wait for few sec to let the span reach kafka
       Thread.sleep(10000)
@@ -89,7 +87,6 @@ class HaystackExporterIntegrationSpec extends FunSpec with GivenWhenThen with Ma
       val record = records.iterator().next()
       val protoSpan = com.expedia.open.tracing.Span.parseFrom(record.value())
       protoSpan.getTraceId shouldEqual record.key()
-      protoSpan.getStartTime should (be >= startTimeMillis * 1000 and be <= System.currentTimeMillis() * 1000) // micros
       protoSpan.getServiceName shouldEqual SERVICE_NAME
       protoSpan.getOperationName shouldEqual OPERATION_NAME
       protoSpan.getTagsCount shouldBe 2

@@ -28,7 +28,7 @@ import com.expedia.www.haystack.client.metrics.Timer.Sample;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 
-public class GRPCAgentClient extends BaseGrpcClient implements com.expedia.www.haystack.client.dispatchers.clients.Client<Span> {
+public class GRPCAgentClient extends BaseGrpcClient<Span> {
     private final Format<com.expedia.open.tracing.Span> format;
 
     public GRPCAgentClient(Metrics metrics, Format<com.expedia.open.tracing.Span> format, ManagedChannel channel, SpanAgentStub stub, StreamObserver<DispatchResult> observer, long shutdownTimeoutMS) {
