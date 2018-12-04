@@ -63,6 +63,11 @@ public class Tracer implements io.opentracing.Tracer {
     private final Counter extractFailureCounter;
 
     public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
+                  Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics) {
+        this(serviceName, scopeManager, clock, dispatcher, registry, metrics, false);
+
+    }
+    public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
                   Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics, boolean dualSpanMode) {
         this.serviceName = serviceName;
         this.scopeManager = scopeManager;
@@ -266,15 +271,15 @@ public class Tracer implements io.opentracing.Tracer {
             return Tags.SPAN_KIND_SERVER.equals(tags.get(Tags.SPAN_KIND.getKey()));
         }
 
-        SpanContext createNewContext() {
+        protected SpanContext createNewContext() {
             return createContext(UUID.randomUUID(), UUID.randomUUID(), null, Collections.emptyMap());
         }
 
-        SpanContext createContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage) {
+        protected SpanContext createContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage) {
             return new SpanContext(traceId, spanId, parentId, baggage, false);
         }
 
-        SpanContext createDependentContext() {
+        protected SpanContext createDependentContext() {
             Reference parent = references.get(0);
             for (Reference reference : references) {
                 if (References.CHILD_OF.equals(reference.getReferenceType())) {

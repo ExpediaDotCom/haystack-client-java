@@ -35,7 +35,7 @@ import com.expedia.www.haystack.client.metrics.Tag;
 import com.expedia.www.haystack.client.metrics.Timer;
 import com.expedia.www.haystack.client.metrics.Timer.Sample;
 
-public class InMemoryClient implements Client {
+public class InMemoryClient implements Client<Span> {
     private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryClient.class);
 
     private Semaphore limiter;

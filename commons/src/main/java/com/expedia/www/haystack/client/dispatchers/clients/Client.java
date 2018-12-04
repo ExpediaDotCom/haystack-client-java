@@ -19,12 +19,10 @@ package com.expedia.www.haystack.client.dispatchers.clients;
 import java.io.Closeable;
 import java.io.Flushable;
 
-import com.expedia.www.haystack.client.Span;
-
 /**
  * A Client is how a RemoteDispatcher sends it's finished spans to a remote endpoint
  */
-public interface Client extends Closeable, Flushable {
+public interface Client<R> extends Closeable, Flushable {
 
 
     @Override
@@ -41,5 +39,5 @@ public interface Client extends Closeable, Flushable {
      *         <code>false</code> if it was unsuccessful
      * @throws ClientException throws a <code>ClientException</code> if an exception occured
      */
-    boolean send(Span span) throws ClientException;
+    boolean send(R span) throws ClientException;
 }

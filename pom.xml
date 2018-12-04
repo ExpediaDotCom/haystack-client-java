@@ -34,6 +34,7 @@
   </developers>
 
   <modules>
+    <module>commons</module>
     <module>core</module>
     <module>integrations</module>
     <module>examples</module>
@@ -65,6 +66,8 @@
     <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
     <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
     <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
+    <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
+    <maven-scalatest-plugin.version>1.0</maven-scalatest-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -316,6 +319,19 @@
             </execution>
           </executions>
         </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>${exec-maven-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.scalatest</groupId>
+          <artifactId>scalatest-maven-plugin</artifactId>
+          <version>${maven-scalatest-plugin.version}</version>
+        </plugin>
+
       </plugins>
     </pluginManagement>
 
