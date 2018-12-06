@@ -15,7 +15,7 @@
  *
  */
 
-package com.www.expedia.opencensus.exporter.trace.config;
+package com.expedia.www.opencensus.exporter.trace.config;
 
 import org.apache.commons.lang3.Validate;
 

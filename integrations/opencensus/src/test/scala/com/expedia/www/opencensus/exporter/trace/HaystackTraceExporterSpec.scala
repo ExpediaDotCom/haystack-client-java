@@ -15,9 +15,9 @@
  *
  */
 
-package com.www.expedia.opencensus.exporter.trace
+package com.expedia.www.opencensus.exporter.trace
 
-import com.www.expedia.opencensus.exporter.trace.config.{GrpcAgentDispatcherConfig, HttpDispatcherConfig}
+import com.expedia.www.opencensus.exporter.trace.config.{GrpcAgentDispatcherConfig, HttpDispatcherConfig}
 import org.scalatest.{FunSpec, GivenWhenThen, Matchers}
 
 class HaystackTraceExporterSpec extends FunSpec with GivenWhenThen with Matchers {

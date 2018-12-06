@@ -15,7 +15,7 @@
  *
  */
 
-package com.www.expedia.opencensus.exporter.trace;
+package com.expedia.www.opencensus.exporter.trace;
 
 import com.expedia.open.tracing.Log;
 import com.expedia.open.tracing.Tag;

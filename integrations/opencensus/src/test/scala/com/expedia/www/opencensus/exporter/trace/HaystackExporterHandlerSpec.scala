@@ -15,8 +15,7 @@
  *
  */
 
-package com.www.expedia.opencensus.exporter.trace
-
+package com.expedia.www.opencensus.exporter.trace
 
 import java.util.Collections
 
@@ -29,6 +28,7 @@ import io.opencensus.trace.{MessageEvent, Tracestate, _}
 import org.easymock.EasyMock
 import org.scalatest._
 import org.scalatest.easymock.EasyMockSugar
+
 import scala.collection.JavaConverters._
 
 class HaystackExporterHandlerSpec extends FunSpec with GivenWhenThen with Matchers with EasyMockSugar {

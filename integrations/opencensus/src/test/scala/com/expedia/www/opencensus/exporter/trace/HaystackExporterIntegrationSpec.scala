@@ -15,17 +15,14 @@
  *
  */
 
-package com.www.expedia.opencensus.exporter.trace
+package com.expedia.www.opencensus.exporter.trace
 
-
-import java.util
 import java.util.{Collections, Random}
 
-import com.www.expedia.opencensus.exporter.trace.config.GrpcAgentDispatcherConfig
+import com.expedia.www.opencensus.exporter.trace.config.GrpcAgentDispatcherConfig
 import io.opencensus.trace._
 import io.opencensus.trace.samplers.Samplers
-import org.apache.kafka.clients.consumer.ConsumerConfig._
-import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
 import org.apache.kafka.common.serialization.{ByteArrayDeserializer, StringDeserializer}
 import org.scalatest.{BeforeAndAfterAll, FunSpec, GivenWhenThen, Matchers}
 
@@ -34,16 +31,15 @@ import scala.collection.JavaConverters._
 class HaystackExporterIntegrationSpec extends FunSpec with GivenWhenThen with Matchers with BeforeAndAfterAll {
   private val OPERATION_NAME = "/search"
   private val SERVICE_NAME = "my-service"
-  private val START_TIME_MICROS = System.currentTimeMillis() * 1000
   private val MAX_DURATION_MILLIS = 10
   private var consumer: KafkaConsumer[String, Array[Byte]] = _
 
   override def beforeAll(): Unit = {
     Thread.sleep(20000)
-    val config: java.util.Map[String, Object] = new util.HashMap()
-    config.put(BOOTSTRAP_SERVERS_CONFIG, "kafkasvc:9092")
-    config.put(GROUP_ID_CONFIG, "integration_test")
-    config.put(AUTO_OFFSET_RESET_CONFIG, "earliest")
+    val config: java.util.Map[String, Object] = new java.util.HashMap()
+    config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafkasvc:9092")
+    config.put(ConsumerConfig.GROUP_ID_CONFIG, "integration_test")
+    config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
     consumer = new KafkaConsumer(config, new StringDeserializer(), new ByteArrayDeserializer())
     consumer.subscribe(Collections.singleton("proto-spans"))
   }
@@ -70,6 +66,7 @@ class HaystackExporterIntegrationSpec extends FunSpec with GivenWhenThen with Ma
       tracer.getCurrentSpan.putAttribute("error", AttributeValue.booleanAttributeValue(true))
       tracer.getCurrentSpan.addAnnotation("done searching",
         Collections.singletonMap("someevent", AttributeValue.longAttributeValue(200)))
+
     } catch {
       case _: Exception =>
         tracer.getCurrentSpan.addAnnotation("Exception thrown when processing!")
@@ -102,7 +99,6 @@ class HaystackExporterIntegrationSpec extends FunSpec with GivenWhenThen with Ma
         protoSpan.getTraceId shouldEqual record.key()
         protoSpan.getServiceName shouldEqual SERVICE_NAME
         protoSpan.getOperationName shouldEqual OPERATION_NAME
-        protoSpan.getStartTime should be >= START_TIME_MICROS
         protoSpan.getTagsCount shouldBe 5
         protoSpan.getTagsList.asScala.find(_.getKey == "span.kind").get.getVStr shouldEqual "server"
         protoSpan.getTagsList.asScala.find(_.getKey == "foo").get.getVStr shouldEqual "bar"
