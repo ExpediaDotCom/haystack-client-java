@@ -89,7 +89,11 @@ class HaystackExporterIntegrationSpec extends FunSpec with GivenWhenThen with Ma
       generateTrace(tracer)
 
       // wait for few sec to let the span reach kafka
-      Thread.sleep(10000)
+      Thread.sleep(5000)
+
+      // create another trace
+      generateTrace(tracer)
+      Thread.sleep(5000)
 
       val records = consumer.poll(2000)
       records.count > 1 shouldBe true
