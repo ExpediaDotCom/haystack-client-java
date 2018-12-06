@@ -22,8 +22,8 @@ import java.util
 import java.util.{Collections, Random}
 
 import com.www.expedia.opencensus.exporter.trace.config.GrpcAgentDispatcherConfig
+import io.opencensus.trace._
 import io.opencensus.trace.samplers.Samplers
-import io.opencensus.trace.{AttributeValue, Status, Tracer, Tracing}
 import org.apache.kafka.clients.consumer.ConsumerConfig._
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.{ByteArrayDeserializer, StringDeserializer}
@@ -34,6 +34,8 @@ import scala.collection.JavaConverters._
 class HaystackExporterIntegrationSpec extends FunSpec with GivenWhenThen with Matchers with BeforeAndAfterAll {
   private val OPERATION_NAME = "/search"
   private val SERVICE_NAME = "my-service"
+  private val START_TIME_MICROS = System.currentTimeMillis() * 1000
+  private val MAX_DURATION_MILLIS = 10
   private var consumer: KafkaConsumer[String, Array[Byte]] = _
 
   override def beforeAll(): Unit = {
@@ -51,8 +53,12 @@ class HaystackExporterIntegrationSpec extends FunSpec with GivenWhenThen with Ma
   }
 
   private def generateTrace(tracer: Tracer) = {
-    val spanBuilder = tracer.spanBuilder(OPERATION_NAME).setRecordEvents(true).setSampler(Samplers.alwaysSample())
-    val spanDurationInMillis = new Random().nextInt(10) + 1
+    val spanBuilder = tracer
+      .spanBuilder(OPERATION_NAME)
+      .setSpanKind(Span.Kind.SERVER)
+      .setSampler(Samplers.alwaysSample())
+
+    val spanDurationInMillis = new Random().nextInt(MAX_DURATION_MILLIS) + 1
 
     val scopedSpan = spanBuilder.startScopedSpan
     try {
@@ -60,10 +66,13 @@ class HaystackExporterIntegrationSpec extends FunSpec with GivenWhenThen with Ma
       Thread.sleep(spanDurationInMillis)
       tracer.getCurrentSpan.putAttribute("foo", AttributeValue.stringAttributeValue("bar"))
       tracer.getCurrentSpan.putAttribute("items", AttributeValue.longAttributeValue(10l))
-      tracer.getCurrentSpan.addAnnotation("done searching")
+      tracer.getCurrentSpan.putAttribute("price", AttributeValue.doubleAttributeValue(5.5))
+      tracer.getCurrentSpan.putAttribute("error", AttributeValue.booleanAttributeValue(true))
+      tracer.getCurrentSpan.addAnnotation("done searching",
+        Collections.singletonMap("someevent", AttributeValue.longAttributeValue(200)))
     } catch {
       case _: Exception =>
-        tracer.getCurrentSpan.addAnnotation("Exception thrown when processing video.")
+        tracer.getCurrentSpan.addAnnotation("Exception thrown when processing!")
         tracer.getCurrentSpan.setStatus(Status.UNKNOWN)
     } finally {
       scopedSpan.close()
@@ -71,7 +80,7 @@ class HaystackExporterIntegrationSpec extends FunSpec with GivenWhenThen with Ma
   }
 
   describe("Integration Test with haystack and opencensus") {
-    it ("should dispatch the spans to haystack-agent") {
+    it("should dispatch the spans to haystack-agent") {
       HaystackTraceExporter.createAndRegister(new GrpcAgentDispatcherConfig("haystack-agent", 35000), SERVICE_NAME)
       val tracer = Tracing.getTracer
 
@@ -80,18 +89,31 @@ class HaystackExporterIntegrationSpec extends FunSpec with GivenWhenThen with Ma
       generateTrace(tracer)
 
       // wait for few sec to let the span reach kafka
-      Thread.sleep(10000)
+      Thread.sleep(5000)
+
+      // create another trace
+      generateTrace(tracer)
+      Thread.sleep(5000)
 
       val records = consumer.poll(2000)
-      records.count > 1 shouldBe true
-      val record = records.iterator().next()
-      val protoSpan = com.expedia.open.tracing.Span.parseFrom(record.value())
-      protoSpan.getTraceId shouldEqual record.key()
-      protoSpan.getServiceName shouldEqual SERVICE_NAME
-      protoSpan.getOperationName shouldEqual OPERATION_NAME
-      protoSpan.getTagsCount shouldBe 2
-      protoSpan.getTagsList.asScala.find(_.getKey == "foo").get.getVStr shouldEqual "bar"
-      protoSpan.getTagsList.asScala.find(_.getKey == "items").get.getVLong shouldBe 10
+      if (records.count > 1) {
+        val record = records.iterator().next()
+        val protoSpan = com.expedia.open.tracing.Span.parseFrom(record.value())
+        protoSpan.getTraceId shouldEqual record.key()
+        protoSpan.getServiceName shouldEqual SERVICE_NAME
+        protoSpan.getOperationName shouldEqual OPERATION_NAME
+        protoSpan.getStartTime should be >= START_TIME_MICROS
+        protoSpan.getTagsCount shouldBe 5
+        protoSpan.getTagsList.asScala.find(_.getKey == "span.kind").get.getVStr shouldEqual "server"
+        protoSpan.getTagsList.asScala.find(_.getKey == "foo").get.getVStr shouldEqual "bar"
+        protoSpan.getTagsList.asScala.find(_.getKey == "items").get.getVLong shouldBe 10
+        protoSpan.getTagsList.asScala.find(_.getKey == "price").get.getVDouble shouldBe 5.5
+        protoSpan.getTagsList.asScala.find(_.getKey == "error").get.getVBool shouldBe true
+        protoSpan.getLogsCount shouldBe 2
+        protoSpan.getLogs(0).getFieldsList.asScala.find(_.getKey == "message").get.getVStr shouldEqual "start searching"
+        protoSpan.getLogs(1).getFieldsList.asScala.find(_.getKey == "message").get.getVStr shouldEqual "done searching"
+        protoSpan.getLogs(1).getFieldsList.asScala.find(_.getKey == "someevent").get.getVLong shouldBe 200l
+      }
     }
   }
 }
