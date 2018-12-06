@@ -16,7 +16,7 @@ For Maven add to your `pom.xml`:
     <version>0.17.0</version>
   </dependency>
   <dependency>
-    <groupId>io.opencensus</groupId>
+    <groupId>com.expedia.www</groupId>
     <artifactId>opencensus-exporter-trace-haystack</artifactId>
     <version>[0.2.1,)</version>
   </dependency>
@@ -32,7 +32,7 @@ For Maven add to your `pom.xml`:
 For Gradle add to your dependencies:
 ```groovy
 compile 'io.opencensus:opencensus-api:0.17.0'
-compile 'io.opencensus:opencensus-exporter-trace-haystack:0.2.1'
+compile 'com.expedia.www:opencensus-exporter-trace-haystack:0.2.1'
 runtime 'io.opencensus:opencensus-impl:0.17.0'
 ```
 

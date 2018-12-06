@@ -24,6 +24,10 @@ public class GrpcAgentDispatcherConfig extends DispatcherConfig {
     private final String host;
     private int port;
 
+    public GrpcAgentDispatcherConfig() {
+        this("haystack-agent", 35000);
+    }
+
     public GrpcAgentDispatcherConfig(final String host,
                                      final int port) {
         this(host, port, 5000);
