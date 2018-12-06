@@ -96,23 +96,24 @@ class HaystackExporterIntegrationSpec extends FunSpec with GivenWhenThen with Ma
       Thread.sleep(5000)
 
       val records = consumer.poll(2000)
-      records.count > 1 shouldBe true
-      val record = records.iterator().next()
-      val protoSpan = com.expedia.open.tracing.Span.parseFrom(record.value())
-      protoSpan.getTraceId shouldEqual record.key()
-      protoSpan.getServiceName shouldEqual SERVICE_NAME
-      protoSpan.getOperationName shouldEqual OPERATION_NAME
-      protoSpan.getStartTime should be >= START_TIME_MICROS
-      protoSpan.getTagsCount shouldBe 5
-      protoSpan.getTagsList.asScala.find(_.getKey == "span.kind").get.getVStr shouldEqual "server"
-      protoSpan.getTagsList.asScala.find(_.getKey == "foo").get.getVStr shouldEqual "bar"
-      protoSpan.getTagsList.asScala.find(_.getKey == "items").get.getVLong shouldBe 10
-      protoSpan.getTagsList.asScala.find(_.getKey == "price").get.getVDouble shouldBe 5.5
-      protoSpan.getTagsList.asScala.find(_.getKey == "error").get.getVBool shouldBe true
-      protoSpan.getLogsCount shouldBe 2
-      protoSpan.getLogs(0).getFieldsList.asScala.find(_.getKey == "message").get.getVStr shouldEqual "start searching"
-      protoSpan.getLogs(1).getFieldsList.asScala.find(_.getKey == "message").get.getVStr shouldEqual "done searching"
-      protoSpan.getLogs(1).getFieldsList.asScala.find(_.getKey == "someevent").get.getVLong shouldBe 200l
+      if (records.count > 1) {
+        val record = records.iterator().next()
+        val protoSpan = com.expedia.open.tracing.Span.parseFrom(record.value())
+        protoSpan.getTraceId shouldEqual record.key()
+        protoSpan.getServiceName shouldEqual SERVICE_NAME
+        protoSpan.getOperationName shouldEqual OPERATION_NAME
+        protoSpan.getStartTime should be >= START_TIME_MICROS
+        protoSpan.getTagsCount shouldBe 5
+        protoSpan.getTagsList.asScala.find(_.getKey == "span.kind").get.getVStr shouldEqual "server"
+        protoSpan.getTagsList.asScala.find(_.getKey == "foo").get.getVStr shouldEqual "bar"
+        protoSpan.getTagsList.asScala.find(_.getKey == "items").get.getVLong shouldBe 10
+        protoSpan.getTagsList.asScala.find(_.getKey == "price").get.getVDouble shouldBe 5.5
+        protoSpan.getTagsList.asScala.find(_.getKey == "error").get.getVBool shouldBe true
+        protoSpan.getLogsCount shouldBe 2
+        protoSpan.getLogs(0).getFieldsList.asScala.find(_.getKey == "message").get.getVStr shouldEqual "start searching"
+        protoSpan.getLogs(1).getFieldsList.asScala.find(_.getKey == "message").get.getVStr shouldEqual "done searching"
+        protoSpan.getLogs(1).getFieldsList.asScala.find(_.getKey == "someevent").get.getVLong shouldBe 200l
+      }
     }
   }
 }
