@@ -15,7 +15,7 @@
  *
  */
 
-package com.www.expedia.opencensus.exporter.trace;
+package com.expedia.www.opencensus.exporter.trace;
 
 import com.expedia.open.tracing.Span;
 import com.expedia.www.haystack.client.dispatchers.clients.Client;
@@ -23,9 +23,9 @@ import com.expedia.www.haystack.client.dispatchers.clients.GRPCAgentProtoClient;
 import com.expedia.www.haystack.client.dispatchers.clients.HttpCollectorProtoClient;
 import com.expedia.www.haystack.client.metrics.Metrics;
 import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
-import com.www.expedia.opencensus.exporter.trace.config.DispatcherConfig;
-import com.www.expedia.opencensus.exporter.trace.config.GrpcAgentDispatcherConfig;
-import com.www.expedia.opencensus.exporter.trace.config.HttpDispatcherConfig;
+import com.expedia.www.opencensus.exporter.trace.config.DispatcherConfig;
+import com.expedia.www.opencensus.exporter.trace.config.GrpcAgentDispatcherConfig;
+import com.expedia.www.opencensus.exporter.trace.config.HttpDispatcherConfig;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.export.SpanExporter;
 
