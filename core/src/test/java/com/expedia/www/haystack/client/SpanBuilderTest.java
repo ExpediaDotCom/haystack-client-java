@@ -22,6 +22,9 @@ import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 import io.opentracing.References;
 import io.opentracing.propagation.Format;
 import io.opentracing.propagation.TextMap;
+import io.opentracing.tag.BooleanTag;
+import io.opentracing.tag.IntTag;
+import io.opentracing.tag.StringTag;
 import io.opentracing.tag.Tags;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -206,17 +209,25 @@ public class SpanBuilderTest {
                 .withTag("string-key", "string-value")
                 .withTag("boolean-key", false)
                 .withTag("number-key", 1l)
+                .withTag(new StringTag("tag-string"), "value")
+                .withTag(new BooleanTag("tag-boolean"), true)
+                .withTag(new IntTag("tag-number"), 2)
+                .withTag((StringTag) null, "no")
+                .withTag(new StringTag("null"), null)
                 .start();
 
         Map<String, ?> tags = child.getTags();
 
-        Assert.assertEquals(3, tags.size());
+        Assert.assertEquals(6, tags.size());
         Assert.assertTrue(tags.containsKey("string-key"));
         Assert.assertEquals("string-value", tags.get("string-key"));
         Assert.assertTrue(tags.containsKey("boolean-key"));
         Assert.assertEquals(false, tags.get("boolean-key"));
         Assert.assertTrue(tags.containsKey("number-key"));
         Assert.assertEquals(1l, tags.get("number-key"));
+        Assert.assertEquals("value", tags.get("tag-string"));
+        Assert.assertEquals(true, tags.get("tag-boolean"));
+        Assert.assertEquals(2, tags.get("tag-number"));
     }
 
     private class MapBackedTextMap implements TextMap {

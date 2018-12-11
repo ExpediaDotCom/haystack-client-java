@@ -228,4 +228,13 @@ public class SpanTest {
         Assert.assertEquals(span.context().getTraceId().toString(), span.context().toTraceId());
         Assert.assertEquals(span.context().getSpanId().toString(), span.context().toSpanId());
     }
+
+    @Test
+    public void testNullTag() {
+        span.setTag((StringTag) null, "");
+        Assert.assertTrue(span.getTags().isEmpty());
+        span.setTag(new StringTag("key"), null);
+        Assert.assertTrue(span.getTags().isEmpty());
+    }
+
 }
