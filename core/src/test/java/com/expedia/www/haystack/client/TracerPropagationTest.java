@@ -16,6 +16,7 @@
  */
 package com.expedia.www.haystack.client;
 
+import io.opentracing.Scope;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -189,5 +190,11 @@ public class TracerPropagationTest {
         tracer.extract(new Format<String>() {}, new String());
     }
 
-
+    @Test
+    public void testActivateSpan() {
+        Span s = tracer.buildSpan("test").start();
+        try(Scope scope = tracer.activateSpan(s)) {
+            Assert.assertEquals(tracer.activeSpan(), s);
+        }
+    }
 }

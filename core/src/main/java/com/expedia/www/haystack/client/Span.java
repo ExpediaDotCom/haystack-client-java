@@ -16,6 +16,7 @@
  */
 package com.expedia.www.haystack.client;
 
+import io.opentracing.tag.Tag;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -201,6 +202,15 @@ public class Span implements io.opentracing.Span {
     @Override
     public Span setTag(String key, String value) {
         return addTag(key, value);
+    }
+
+    @Override
+    public <T> Span setTag(Tag<T> tag, T value) {
+        if (tag == null || value == null) {
+            return this;
+        }
+        tag.set(this, value);
+        return this;
     }
 
     protected Span addTag(String key, Object value) {

@@ -16,6 +16,9 @@
  */
 package com.expedia.www.haystack.client;
 
+import io.opentracing.tag.BooleanTag;
+import io.opentracing.tag.IntTag;
+import io.opentracing.tag.StringTag;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -88,6 +91,8 @@ public class SpanTest {
         Long value = new Long(3l);
         span.setTag(key, value);
         Assert.assertEquals(value, span.getTags().get(key));
+        span.setTag(new IntTag("tag"), value.intValue());
+        Assert.assertEquals(value.intValue(), span.getTags().get("tag"));
     }
 
     @Test
@@ -96,6 +101,8 @@ public class SpanTest {
         boolean value = false;
         span.setTag(key, value);
         Assert.assertEquals(value, span.getTags().get(key));
+        span.setTag(new BooleanTag("tag"), value);
+        Assert.assertEquals(value, span.getTags().get("tag"));
     }
 
     @Test
@@ -104,6 +111,8 @@ public class SpanTest {
         String value = "value-value";
         span.setTag(key, value);
         Assert.assertEquals(value, span.getTags().get(key));
+        span.setTag(new StringTag("tag"), value);
+        Assert.assertEquals(value, span.getTags().get("tag"));
     }
 
     @Test
@@ -113,8 +122,8 @@ public class SpanTest {
         Long longValue = new Long(3l);
         boolean boolValue = false;
 
-        span.setTag(null, stringValue);
-        span.setTag(null, longValue);
+        span.setTag((String) null, stringValue);
+        span.setTag((String) null, longValue);
         span.setTag(null, boolValue);
         span.setTag(key, (Number) null);
         span.setTag(key, (String) null);
@@ -210,5 +219,13 @@ public class SpanTest {
         Assert.assertEquals(0, dispatcher.getReportedSpans().size());
         Assert.assertEquals(1, dispatcher.getFlushedSpans().size());
         Assert.assertEquals(1, dispatcher.getReceivedSpans().size());
+    }
+
+    @Test
+    public void testIds() {
+        Assert.assertNotNull(span.context().toTraceId());
+        Assert.assertNotNull(span.context().toSpanId());
+        Assert.assertEquals(span.context().getTraceId().toString(), span.context().toTraceId());
+        Assert.assertEquals(span.context().getSpanId().toString(), span.context().toSpanId());
     }
 }

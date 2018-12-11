@@ -116,6 +116,22 @@ public class SpanContext implements io.opentracing.SpanContext {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toTraceId() {
+        return this.traceId.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toSpanId() {
+        return this.spanId.toString();
+    }
+
+    /**
      * @return the parentId
      */
     public UUID getParentId() {

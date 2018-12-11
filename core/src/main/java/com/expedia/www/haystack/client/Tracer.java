@@ -189,6 +189,11 @@ public class Tracer implements io.opentracing.Tracer {
         return scopeManager;
     }
 
+    @Override
+    public Scope activateSpan(Span span) {
+        return scopeManager().activate(span);
+    }
+
     public static class SpanBuilder implements io.opentracing.Tracer.SpanBuilder {
         protected final Tracer tracer;
         protected Clock clock;
@@ -264,6 +269,23 @@ public class Tracer implements io.opentracing.Tracer {
         @Override
         public SpanBuilder withStartTimestamp(long microseconds) {
             this.startTime = microseconds;
+            return this;
+        }
+
+        @Override
+        public <T> SpanBuilder withTag(io.opentracing.tag.Tag<T> tag, T value) {
+            if (tag == null) {
+                return this;
+            }
+            if (value instanceof String) {
+                return this.withTag(tag.getKey(), (String) value);
+            }
+            if (value instanceof Number) {
+                return this.withTag(tag.getKey(), (Number) value);
+            }
+            if (value instanceof Boolean) {
+                return this.withTag(tag.getKey(), (Boolean) value);
+            }
             return this;
         }
 
