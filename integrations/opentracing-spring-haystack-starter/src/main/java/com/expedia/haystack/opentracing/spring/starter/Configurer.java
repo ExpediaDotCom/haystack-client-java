@@ -13,8 +13,10 @@ import com.expedia.www.haystack.client.metrics.MetricsRegistry;
 import com.expedia.www.haystack.client.metrics.micrometer.MicrometerMetricsRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -33,15 +35,16 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties(Settings.class)
 public class Configurer {
 
-    @Autowired(required = false)
-    private List<TracerBuilderCustomizer> tracerCustomizers = Collections.emptyList();
-
     @Bean
     public io.opentracing.Tracer tracer(@Value("${spring.application.name:unnamed-application}") String serviceName,
                                         final Dispatcher dispatcher,
-                                        final MetricsRegistry metricsRegistry) {
+                                        final MetricsRegistry metricsRegistry,
+                                        ObjectProvider<Collection<TracerBuilderCustomizer>> tracerCustomizersProvider) {
         final Tracer.Builder tracerBuilder = new Tracer.Builder(metricsRegistry, serviceName, dispatcher);
-        tracerCustomizers.forEach(customizer -> customizer.customize(tracerBuilder));
+        final Collection<TracerBuilderCustomizer> tracerBuilderCustomizers = tracerCustomizersProvider.getIfAvailable();
+        if (tracerBuilderCustomizers != null) {
+            tracerBuilderCustomizers.forEach(customizer -> customizer.customize(tracerBuilder));
+        }
         return tracerBuilder.build();
     }
 
