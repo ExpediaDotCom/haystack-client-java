@@ -33,6 +33,15 @@ import static org.junit.Assert.assertNotNull;
 public class ProtBufFormatTest {
     private Tracer tracer;
 
+    private void verifyTag2(final Tag tag) {
+        if (tag.getKey().equals("bad-binary")) {
+            assertEquals("SomeClass{key=value}", tag.getVStr());
+        }
+        else {
+            verifyTag(tag);
+        }
+    }
+
     private void verifyTag(final Tag tag) {
         switch (tag.getType()) {
             case BOOL:
@@ -79,6 +88,31 @@ public class ProtBufFormatTest {
 
         for (final Tag tag : log.getFieldsList()) {
             verifyTag(tag);
+        }
+    }
+
+    @Test
+    public void testLogTypesWithNonSerializableBinary() throws Exception {
+        Span span = tracer.buildSpan("log-types").start();
+        span.log(ImmutableMap.<String, Object>builder()
+                         .put("string", "value1")
+                         .put("boolean", true)
+                         .put("long", 1L)
+                         .put("int", 1)
+                         .put("short", Short.parseShort("1"))
+                         .put("double", Double.valueOf(2d))
+                         .put("float", Float.parseFloat("2.0000"))
+                         .put("bad-binary", new SomeClass())
+                         .build());
+
+        com.expedia.open.tracing.Span protoSpan = new ProtoBufFormat().format(span);
+        assertEquals(1, protoSpan.getLogsCount());
+
+        Log log = protoSpan.getLogs(0);
+        assertEquals(8, log.getFieldsCount());
+
+        for (final Tag tag : log.getFieldsList()) {
+            verifyTag2(tag);
         }
     }
 
@@ -154,5 +188,12 @@ public class ProtBufFormatTest {
 
         // Tags + Baggage for now.
         assertEquals(2, protoSpan.getTagsCount());
+    }
+
+    public static class SomeClass {
+        @Override
+        public String toString() {
+            return "SomeClass{key=value}";
+        }
     }
 }
