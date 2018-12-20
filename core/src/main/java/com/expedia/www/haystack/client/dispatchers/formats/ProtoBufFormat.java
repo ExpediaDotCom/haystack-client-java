@@ -108,8 +108,9 @@ public class ProtoBufFormat implements Format<com.expedia.open.tracing.Span> {
                 }
             } catch (IOException e) {
                 LOGGER.warn("Conversion of tag to binary failed with exception: {}", e);
-                // can't do much so set it to an EMPTY payload
-                builder.setVBytes(ByteString.EMPTY);
+                // can't do much so set it to a string payload
+                builder.setType(TagType.STRING);
+                builder.setVStr(value.toString());
             }
         }
 
