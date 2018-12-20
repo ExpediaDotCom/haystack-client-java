@@ -30,7 +30,7 @@ import com.expedia.www.haystack.client.metrics.Tag;
 import com.expedia.www.haystack.client.metrics.Timer;
 import com.expedia.www.haystack.client.metrics.Timer.Sample;
 
-public class LoggerClient implements Client {
+public class LoggerClient implements Client<Span> {
     private final Format<?> format;
 
     /** Event logger for data {@link LoggerClient#send sent} to the client instance */

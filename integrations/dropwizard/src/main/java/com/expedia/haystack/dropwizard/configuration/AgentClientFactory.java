@@ -16,13 +16,6 @@
  */
 package com.expedia.haystack.dropwizard.configuration;
 
-import javax.annotation.Nullable;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.validator.constraints.NotEmpty;
-
 import com.expedia.open.tracing.Span;
 import com.expedia.www.haystack.client.dispatchers.clients.Client;
 import com.expedia.www.haystack.client.dispatchers.clients.GRPCAgentClient;
@@ -30,8 +23,13 @@ import com.expedia.www.haystack.client.dispatchers.formats.Format;
 import com.expedia.www.haystack.client.metrics.MetricsRegistry;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-
 import io.dropwizard.setup.Environment;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.annotation.Nullable;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 /**
  * A factory for configuring and building {@link GRPCAgentClient} instances.

@@ -63,6 +63,11 @@ public class Tracer implements io.opentracing.Tracer {
     private final Counter extractFailureCounter;
 
     public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
+                  Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics) {
+        this(serviceName, scopeManager, clock, dispatcher, registry, metrics, false);
+
+    }
+    public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
                   Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics, boolean dualSpanMode) {
         this.serviceName = serviceName;
         this.scopeManager = scopeManager;
@@ -83,6 +88,14 @@ public class Tracer implements io.opentracing.Tracer {
         this.injectFailureCounter = Counter.builder("inject").tag(new Tag("state", "exception")).register(metrics);
         this.extractTimer = Timer.builder("extract").register(metrics);
         this.extractFailureCounter = Counter.builder("extract").tag(new Tag("state", "exception")).register(metrics);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                Tracer.this.close();
+            } catch (IOException e) {
+                /* skip logging any error */
+            }
+        }));
     }
 
     @Override
@@ -258,15 +271,15 @@ public class Tracer implements io.opentracing.Tracer {
             return Tags.SPAN_KIND_SERVER.equals(tags.get(Tags.SPAN_KIND.getKey()));
         }
 
-        SpanContext createNewContext() {
+        protected SpanContext createNewContext() {
             return createContext(UUID.randomUUID(), UUID.randomUUID(), null, Collections.emptyMap());
         }
 
-        SpanContext createContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage) {
+        protected SpanContext createContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage) {
             return new SpanContext(traceId, spanId, parentId, baggage, false);
         }
 
-        SpanContext createDependentContext() {
+        protected SpanContext createDependentContext() {
             Reference parent = references.get(0);
             for (Reference reference : references) {
                 if (References.CHILD_OF.equals(reference.getReferenceType())) {
@@ -290,7 +303,10 @@ public class Tracer implements io.opentracing.Tracer {
             // then we assume this is the first span in the server and so just return the parent context
             // with the same shared span ids
             if (!tracer.dualSpanMode && (isServerSpan() || parent.getContext().isExtractedContext())) {
-                return parent.getContext();
+                return createContext(parent.getContext().getTraceId(),
+                                     parent.getContext().getSpanId(),
+                                     parent.getContext().getParentId(),
+                                     baggage);
             }
 
             return createContext(parent.getContext().getTraceId(),

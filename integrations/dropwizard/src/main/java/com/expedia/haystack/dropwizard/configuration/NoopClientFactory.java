@@ -20,7 +20,6 @@ import com.expedia.www.haystack.client.dispatchers.clients.Client;
 import com.expedia.www.haystack.client.dispatchers.clients.NoopClient;
 import com.expedia.www.haystack.client.metrics.MetricsRegistry;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-
 import io.dropwizard.setup.Environment;
 
 /**

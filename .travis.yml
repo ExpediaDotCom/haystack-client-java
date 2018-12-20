@@ -1,4 +1,9 @@
+sudo: required
+
 dist: trusty
+
+services:
+  - docker
 
 language: java
 
@@ -8,6 +13,11 @@ jdk:
 cache:
   directories:
   - $HOME/.m2
+
+addons:
+  hosts:
+    - haystack-agent
+    - kafkasvc
 
 install:
   - ./mvnw --batch-mode install -B -V

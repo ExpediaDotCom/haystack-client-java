@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.expedia.www</groupId>
-        <artifactId>haystack-client-java-parent</artifactId>
-        <version>0.1.7-SNAPSHOT</version>
+      <groupId>com.expedia.www</groupId>
+      <artifactId>haystack-client-java-parent</artifactId>
+      <version>0.2.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>haystack-client-java-integrations</artifactId>
@@ -43,5 +43,6 @@
         <module>dropwizard-metrics</module>
         <module>micrometer</module>
         <module>opentracing-spring-haystack-starter</module>
+        <module>opencensus</module>
     </modules>
 </project>
