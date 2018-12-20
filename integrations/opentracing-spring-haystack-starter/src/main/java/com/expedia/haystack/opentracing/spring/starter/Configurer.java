@@ -23,20 +23,21 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@org.springframework.context.annotation.Configuration
+@Configuration
 @ConditionalOnClass(com.expedia.www.haystack.client.Tracer.class)
 @ConditionalOnMissingBean(io.opentracing.Tracer.class)
 @ConditionalOnProperty(value = "opentracing.spring.haystack.enabled", havingValue = "true", matchIfMissing = true)
 @AutoConfigureBefore(io.opentracing.contrib.spring.tracer.configuration.TracerAutoConfiguration.class)
-@EnableConfigurationProperties(Configuration.class)
-public class AutoConfigurer {
+@EnableConfigurationProperties(Settings.class)
+public class Configurer {
 
     @Autowired(required = false)
     private List<TracerBuilderCustomizer> tracerCustomizers = Collections.emptyList();
 
     @Bean
-    public io.opentracing.Tracer tracer(@Value("${spring.application.name:spring-boot}") String serviceName,
+    public io.opentracing.Tracer tracer(@Value("${spring.application.name:unnamed-application}") String serviceName,
                                         final Dispatcher dispatcher,
                                         final MetricsRegistry metricsRegistry) {
         final Tracer.Builder tracerBuilder = new Tracer.Builder(metricsRegistry, serviceName, dispatcher);
@@ -46,21 +47,21 @@ public class AutoConfigurer {
 
     @Bean
     @ConditionalOnMissingBean
-    public Dispatcher dispatcher(Configuration configuration,
+    public Dispatcher dispatcher(Settings settings,
                                  MetricsRegistry metricsRegistry,
                                  GrpcDispatcherFactory grpcAgentFactory,
                                  HttpDispatcherFactory httpDispatcherFactory) {
         List<Dispatcher> dispatchers = new ArrayList<>();
-        if (configuration.getAgent() != null) {
-            dispatchers.add(grpcDispatcher(configuration.getAgent(), metricsRegistry, grpcAgentFactory));
+        if (settings.getAgent() != null) {
+            dispatchers.add(grpcDispatcher(settings.getAgent(), metricsRegistry, grpcAgentFactory));
         }
 
-        if (configuration.getHttp() != null) {
-            dispatchers.add(httpDispatcher(configuration.getHttp(), metricsRegistry, httpDispatcherFactory));
+        if (settings.getHttp() != null) {
+            dispatchers.add(httpDispatcher(settings.getHttp(), metricsRegistry, httpDispatcherFactory));
         }
 
-        if (configuration.getLogger() != null) {
-            dispatchers.add(loggerDispatcher(configuration.getLogger(), metricsRegistry));
+        if (settings.getLogger() != null) {
+            dispatchers.add(loggerDispatcher(settings.getLogger(), metricsRegistry));
         }
 
         if (dispatchers.size() == 0) {
@@ -91,19 +92,19 @@ public class AutoConfigurer {
                                                                                       config.getHeaders())).build();
     }
 
-    private Dispatcher grpcDispatcher(Configuration.AgentConfiguration agentConfiguration,
+    private Dispatcher grpcDispatcher(Settings.AgentConfiguration agentConfiguration,
                                       MetricsRegistry metricsRegistry,
                                       GrpcDispatcherFactory factory) {
         return factory.create(metricsRegistry, agentConfiguration);
     }
 
-    private Dispatcher httpDispatcher(Configuration.HttpConfiguration httpConfiguration,
+    private Dispatcher httpDispatcher(Settings.HttpConfiguration httpConfiguration,
                                       MetricsRegistry metricsRegistry,
                                       HttpDispatcherFactory factory) {
         return factory.create(metricsRegistry, httpConfiguration);
     }
 
-    private Dispatcher loggerDispatcher(Configuration.LoggerConfiguration loggerConfiguration,
+    private Dispatcher loggerDispatcher(Settings.LoggerConfiguration loggerConfiguration,
                                         MetricsRegistry metricsRegistry) {
         return new LoggerDispatcher.Builder(metricsRegistry).withLogger(loggerConfiguration.getName()).build();
     }

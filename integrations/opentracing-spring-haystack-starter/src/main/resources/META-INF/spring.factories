@@ -1,3 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.expedia.haystack.opentracing.spring.starter.AutoConfigurer
+com.expedia.haystack.opentracing.spring.starter.Configurer
 

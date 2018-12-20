@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("opentracing.spring.haystack")
-public class Configuration {
+public class Settings {
     private boolean enabled = true;
     private AgentConfiguration agent;
     private HttpConfiguration http;
@@ -45,7 +45,7 @@ public class Configuration {
     public void setLogger(LoggerConfiguration logger) {
         this.logger = logger;
     }
-    
+
     public static class AgentConfiguration {
         private boolean enabled = false;
         private String host = "haystack-agent";
@@ -112,11 +112,12 @@ public class Configuration {
         }
 
         GRPCAgentClient.Builder builder(MetricsRegistry metricsRegistry) {
-            return new GRPCAgentClient.Builder(metricsRegistry, this.host, this.port)
-                    .withKeepAliveTimeMS(this.keepAliveTimeMS)
+            final GRPCAgentClient.Builder client = new GRPCAgentClient.Builder(metricsRegistry, this.host, this.port);
+            client.withKeepAliveTimeMS(this.keepAliveTimeMS)
                     .withKeepAliveTimeoutMS(this.keepAliveTimeoutMS)
                     .withKeepAliveWithoutCalls(this.keepAliveWithoutCalls)
                     .withNegotiationType(this.negotiationType);
+            return client;
         }
     }
 
