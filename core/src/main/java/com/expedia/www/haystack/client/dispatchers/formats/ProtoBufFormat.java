@@ -99,18 +99,8 @@ public class ProtoBufFormat implements Format<com.expedia.open.tracing.Span> {
             builder.setType(TagType.BOOL);
             builder.setVBool((Boolean) value);
         } else {
-            try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                try (final ObjectOutputStream os = new ObjectOutputStream(out)) {
-                    os.writeObject(value);
-                    builder.setType(TagType.BINARY);
-                    builder.setVBytes(ByteString.copyFrom(out.toByteArray()));
-                }
-            } catch (IOException e) {
-                LOGGER.warn("Conversion of tag to binary failed with exception: {}", e);
-                // can't do much so set it to a string payload
-                builder.setType(TagType.STRING);
-                builder.setVStr(value.toString());
-            }
+            builder.setType(TagType.STRING);
+            builder.setVStr(value.toString());
         }
 
         return builder.build();
