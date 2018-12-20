@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-      <groupId>com.expedia.www</groupId>
-      <artifactId>haystack-client-java-parent</artifactId>
-      <version>0.1.7-SNAPSHOT</version>
+        <groupId>com.expedia.www</groupId>
+        <artifactId>haystack-client-java-parent</artifactId>
+        <version>0.1.7-SNAPSHOT</version>
     </parent>
 
     <artifactId>haystack-client-java-integrations</artifactId>
@@ -15,31 +16,32 @@
     <name>Client integrations for Haystack.</name>
 
     <properties>
-      <dropwizard.version>1.2.2</dropwizard.version>
-      <dropwizard-metrics.version>4.0.2</dropwizard-metrics.version>
+        <dropwizard.version>1.2.2</dropwizard.version>
+        <dropwizard-metrics.version>4.0.2</dropwizard-metrics.version>
     </properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>io.dropwizard</groupId>
-        <artifactId>dropwizard-bom</artifactId>
-        <version>${dropwizard.version}</version>
-        <type>pom</type>
-      </dependency>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-bom</artifactId>
+                <version>${dropwizard.version}</version>
+                <type>pom</type>
+            </dependency>
 
-      <dependency>
-        <groupId>io.dropwizard.metrics</groupId>
-        <artifactId>metrics-core</artifactId>
-        <version>${dropwizard-metrics.version}</version>
-      </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${dropwizard-metrics.version}</version>
+            </dependency>
 
-    </dependencies>
-  </dependencyManagement>
+        </dependencies>
+    </dependencyManagement>
 
     <modules>
-      <module>dropwizard</module>
-      <module>dropwizard-metrics</module>
-      <module>micrometer</module>
+        <module>dropwizard</module>
+        <module>dropwizard-metrics</module>
+        <module>micrometer</module>
+        <module>opentracing-spring-haystack-starter</module>
     </modules>
 </project>
