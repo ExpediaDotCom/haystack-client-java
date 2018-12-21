@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("opentracing.spring.haystack")
-public class Settings {
+public class TracerSettings {
     private boolean enabled = true;
     private AgentConfiguration agent;
     private HttpConfiguration http;

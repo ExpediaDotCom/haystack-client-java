@@ -2,7 +2,7 @@ package com.expedia.haystack.opentracing.spring.starter;
 
 import com.expedia.haystack.opentracing.spring.starter.support.GrpcDispatcherFactory;
 import com.expedia.haystack.opentracing.spring.starter.support.HttpDispatcherFactory;
-import com.expedia.haystack.opentracing.spring.starter.support.TracerBuilderCustomizer;
+import com.expedia.haystack.opentracing.spring.starter.support.TracerCustomizer;
 import com.expedia.www.haystack.client.Tracer;
 import com.expedia.www.haystack.client.dispatchers.ChainedDispatcher;
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
@@ -14,10 +14,9 @@ import com.expedia.www.haystack.client.metrics.micrometer.MicrometerMetricsRegis
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -32,30 +31,34 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnMissingBean(io.opentracing.Tracer.class)
 @ConditionalOnProperty(value = "opentracing.spring.haystack.enabled", havingValue = "true", matchIfMissing = true)
 @AutoConfigureBefore(io.opentracing.contrib.spring.tracer.configuration.TracerAutoConfiguration.class)
-@EnableConfigurationProperties(Settings.class)
-public class Configurer {
+@EnableConfigurationProperties(TracerSettings.class)
+public class TracerConfigurer {
 
     @Bean
     public io.opentracing.Tracer tracer(@Value("${spring.application.name:unnamed-application}") String serviceName,
                                         final Dispatcher dispatcher,
                                         final MetricsRegistry metricsRegistry,
-                                        ObjectProvider<Collection<TracerBuilderCustomizer>> tracerCustomizersProvider) {
+                                        ObjectProvider<Collection<TracerCustomizer>> tracerCustomizersProvider) {
+        Validate.notEmpty(serviceName);
+        Validate.notNull(dispatcher);
+        Validate.notNull(metricsRegistry);
+        Validate.notNull(tracerCustomizersProvider);
         final Tracer.Builder tracerBuilder = new Tracer.Builder(metricsRegistry, serviceName, dispatcher);
-        final Collection<TracerBuilderCustomizer> tracerBuilderCustomizers = tracerCustomizersProvider.getIfAvailable();
-        if (tracerBuilderCustomizers != null) {
-            tracerBuilderCustomizers.forEach(customizer -> customizer.customize(tracerBuilder));
+        final Collection<TracerCustomizer> tracerCustomizers = tracerCustomizersProvider.getIfAvailable();
+        if (tracerCustomizers != null) {
+            tracerCustomizers.forEach(customizer -> customizer.customize(tracerBuilder));
         }
         return tracerBuilder.build();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public Dispatcher dispatcher(Settings settings,
+    public Dispatcher dispatcher(TracerSettings settings,
                                  MetricsRegistry metricsRegistry,
                                  GrpcDispatcherFactory grpcAgentFactory,
                                  HttpDispatcherFactory httpDispatcherFactory) {
         List<Dispatcher> dispatchers = new ArrayList<>();
-        if (settings.getAgent() != null) {
+        if (settings.getAgent() != null && settings.getAgent().isEnabled()) {
             dispatchers.add(grpcDispatcher(settings.getAgent(), metricsRegistry, grpcAgentFactory));
         }
 
@@ -95,19 +98,19 @@ public class Configurer {
                                                                                       config.getHeaders())).build();
     }
 
-    private Dispatcher grpcDispatcher(Settings.AgentConfiguration agentConfiguration,
+    private Dispatcher grpcDispatcher(TracerSettings.AgentConfiguration agentConfiguration,
                                       MetricsRegistry metricsRegistry,
                                       GrpcDispatcherFactory factory) {
         return factory.create(metricsRegistry, agentConfiguration);
     }
 
-    private Dispatcher httpDispatcher(Settings.HttpConfiguration httpConfiguration,
+    private Dispatcher httpDispatcher(TracerSettings.HttpConfiguration httpConfiguration,
                                       MetricsRegistry metricsRegistry,
                                       HttpDispatcherFactory factory) {
         return factory.create(metricsRegistry, httpConfiguration);
     }
 
-    private Dispatcher loggerDispatcher(Settings.LoggerConfiguration loggerConfiguration,
+    private Dispatcher loggerDispatcher(TracerSettings.LoggerConfiguration loggerConfiguration,
                                         MetricsRegistry metricsRegistry) {
         return new LoggerDispatcher.Builder(metricsRegistry).withLogger(loggerConfiguration.getName()).build();
     }
