@@ -1,9 +1,6 @@
 package com.expedia.haystack.opentracing.spring.starter;
 
-import com.expedia.www.haystack.client.dispatchers.ChainedDispatcher;
-import com.expedia.www.haystack.client.dispatchers.Dispatcher;
 import com.expedia.www.haystack.client.dispatchers.InMemoryDispatcher;
-import com.expedia.www.haystack.client.dispatchers.LoggerDispatcher;
 import com.expedia.www.haystack.client.metrics.MetricsRegistry;
 import java.io.IOException;
 import org.assertj.core.api.Assertions;
@@ -11,23 +8,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(
-        classes = SimpleServer.class,
+        properties = "spring.application.name=SimpleServer",
+        classes = { SimpleServer.class, DispatcherInjectionIntegrationTest.TestContextConfiguration.class },
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@ContextConfiguration(initializers = HappyPathIntegrationTest.Initializer.class)
-public class HappyPathIntegrationTest {
+public class DispatcherInjectionIntegrationTest {
 
     @Autowired
     private TestRestTemplate testRestTemplate;
@@ -36,7 +28,7 @@ public class HappyPathIntegrationTest {
     private InMemoryDispatcher inMemoryDispatcher;
 
     @Test
-    public void testHaystackWebStarterWiresServerTracesToConfiguredDispatcher() throws IOException {
+    public void testHaystackWebStarterWiresServerTracesToInjectedDispatcher() throws IOException {
         final String response = testRestTemplate.getForObject("/helloWorld", String.class);
         Assertions.assertThat(response).isEqualTo("Hello, World!");
         Assertions.assertThat(inMemoryDispatcher.getReportedSpans().size()).isEqualTo(2);
@@ -52,7 +44,7 @@ public class HappyPathIntegrationTest {
     }
 
     @Test
-    public void testHaystackStarterWiresSpringRestTemplateToConfiguredDispatcher() throws IOException {
+    public void testHaystackStarterWiresRestTemplateClientTracesToInjectedDispatcher() throws IOException {
         final String response = testRestTemplate.getForObject("/helloWorld", String.class);
         Assertions.assertThat(response).isEqualTo("Hello, World!");
         Assertions.assertThat(inMemoryDispatcher.getReportedSpans().size()).isEqualTo(2);
@@ -63,21 +55,12 @@ public class HappyPathIntegrationTest {
         inMemoryDispatcher.flush();
     }
 
-    static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            TestPropertyValues.of("spring.application.name=SimpleServer")
-                    .applyTo(configurableApplicationContext);
-        }
-    }
-    
-    @Configuration
-    static class ContextConfiguration {
+    @TestConfiguration
+    static class TestContextConfiguration {
         @Bean
-        public Dispatcher dispatcher(MetricsRegistry metricsRegistry, InMemoryDispatcher inMemoryDispatcher) {
-            final LoggerDispatcher loggerDispatcher = new LoggerDispatcher.Builder(metricsRegistry)
-                    .withLogger("haystack").build();
-            return new ChainedDispatcher(loggerDispatcher, inMemoryDispatcher);
+        public InMemoryDispatcher dispatcher(MetricsRegistry metricsRegistry) {
+            return new InMemoryDispatcher.Builder(metricsRegistry)
+                    .withLimit(10).build();
         }
     }
 }

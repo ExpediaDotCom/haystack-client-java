@@ -15,6 +15,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,11 +44,11 @@ public class TracerConfigurer {
         Validate.notNull(dispatcher);
         Validate.notNull(metricsRegistry);
         Validate.notNull(tracerCustomizersProvider);
+
         final Tracer.Builder tracerBuilder = new Tracer.Builder(metricsRegistry, serviceName, dispatcher);
-        final Collection<TracerCustomizer> tracerCustomizers = tracerCustomizersProvider.getIfAvailable();
-        if (tracerCustomizers != null) {
-            tracerCustomizers.forEach(customizer -> customizer.customize(tracerBuilder));
-        }
+        final Optional<Collection<TracerCustomizer>> tracerCustomizers =
+                Optional.ofNullable(tracerCustomizersProvider.getIfAvailable());
+        tracerCustomizers.ifPresent(c -> c.forEach(customizer -> customizer.customize(tracerBuilder)));
         return tracerBuilder.build();
     }
 
