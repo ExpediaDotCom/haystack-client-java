@@ -28,25 +28,23 @@ public class DispatcherInjectionIntegrationTest {
     private InMemoryDispatcher inMemoryDispatcher;
 
     @Test
-    public void testHaystackWebStarterWiresServerTracesToInjectedDispatcher() throws IOException {
+    public void testHaystackWebStarterWiresServerTracesToInjectedDispatcher() throws Exception {
         final String response = testRestTemplate.getForObject("/helloWorld", String.class);
         Assertions.assertThat(response).isEqualTo("Hello, World!");
+        Thread.sleep(500);
         Assertions.assertThat(inMemoryDispatcher.getReportedSpans().size()).isEqualTo(2);
         Assertions.assertThat(
                 inMemoryDispatcher.getReportedSpans()
                         .stream()
                         .anyMatch(span -> span.getTags().get("span.kind").equals("server"))).isEqualTo(true);
-        Assertions.assertThat(
-                inMemoryDispatcher.getReportedSpans()
-                        .stream()
-                        .anyMatch(span -> span.getTags().get("span.kind").equals("client"))).isEqualTo(true);
         inMemoryDispatcher.flush();
     }
 
     @Test
-    public void testHaystackStarterWiresRestTemplateClientTracesToInjectedDispatcher() throws IOException {
+    public void testHaystackStarterWiresRestTemplateClientTracesToInjectedDispatcher() throws Exception {
         final String response = testRestTemplate.getForObject("/helloWorld", String.class);
         Assertions.assertThat(response).isEqualTo("Hello, World!");
+        Thread.sleep(500);
         Assertions.assertThat(inMemoryDispatcher.getReportedSpans().size()).isEqualTo(2);
         Assertions.assertThat(
                 inMemoryDispatcher.getReportedSpans()
