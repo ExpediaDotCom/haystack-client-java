@@ -2,7 +2,6 @@ package com.expedia.haystack.opentracing.spring.starter;
 
 import com.expedia.www.haystack.client.dispatchers.InMemoryDispatcher;
 import com.expedia.www.haystack.client.metrics.MetricsRegistry;
-import java.io.IOException;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
