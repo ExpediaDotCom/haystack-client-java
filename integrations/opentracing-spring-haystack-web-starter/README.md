@@ -1,3 +1,18 @@
+Table of Contents
+=================
+
+* [Instrumenting Spring Boot or Spring Web applications](#instrumenting-spring-boot-or-spring-web-applications)
+   * [Configuration](#configuration)
+   * [Defaults](#defaults)
+   * [Configuration](#configuration-1)
+      * [Disabling Tracer](#disabling-tracer)
+      * [Configuring Dispatcher(s)](#configuring-dispatchers)
+         * [Logger Dispatcher](#logger-dispatcher)
+         * [Grpc Agent Dispatcher](#grpc-agent-dispatcher)
+      * [Configuring Metrics](#configuring-metrics)
+      * [Configuring Tracer](#configuring-tracer)
+
+
 ## Instrumenting Spring Boot or Spring Web applications
 
 One can use this library to instrument spring web applications to send tracing information to Opentracing complicant [Haystack](https://expediadotcom.github.io/haystack/) distributed tracing platform. 
