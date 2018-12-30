@@ -48,7 +48,55 @@ Using configuration properties one can configure one or more of the following di
 
 ##### Logger Dispatcher
 
+One can configure the name of the logger to use in a LoggerDispatcher by setting the following property in Spring Boot yaml or properties file
 
+```yaml
+opentracing:
+  haystack:
+    dispatchers:
+      logger:
+        name: span-logger
+```
+
+##### Grpc Agent Dispatcher
+
+Haystack provides a [GRPC agent](https://github.com/ExpediaDotCom/haystack-agent) as a convenience to send protobuf spans to Haystack's kafka. One can configure grpc agent by simply enabling it in the configuration. 
+
+```yaml
+opentracing:
+  haystack:
+    dispatchers:
+      agent:
+        enabled: true
+```
+
+There are other properties available to further configure the grpc agent dispatcher
+
+```
+opentracing.haystack.dispatchers.agent.host=haystack-agent
+opentracing.haystack.dispatchers.agent.keep-alive-time-m-s=30
+opentracing.haystack.dispatchers.agent.keep-alive-timeout-m-s=30
+opentracing.haystack.dispatchers.agent.keep-alive-without-calls=true
+opentracing.haystack.dispatchers.agent.negotiation-type=PLAINTEXT
+```
+
+Alternately, one can create a bean of type [GrpcAgentFactory](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/integrations/opentracing-spring-haystack-starter/src/main/java/com/expedia/haystack/opentracing/spring/starter/support/GrpcDispatcherFactory.java). This bean will be invoked with configuration properties defined to build a RemoteDispatcher with GrpcAgentClient.
+
+```java
+public interface GrpcDispatcherFactory {
+    Dispatcher create(MetricsRegistry metricsRegistry, 
+                      TracerSettings.AgentConfiguration agentConfiguration);
+}
+```
+
+```java
+@Bean
+public GrpcDispatcherFactory grpcDispatcherFactory() {
+    return (metricsRegistry, config) ->
+            new RemoteDispatcher.Builder(metricsRegistry, 
+                                         config.builder(metricsRegistry).build()).build();
+}
+```
 
 #### Configuring Metrics
 
