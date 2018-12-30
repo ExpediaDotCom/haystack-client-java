@@ -68,11 +68,11 @@ class TracerConfigurerSpec extends FunSpec with GivenWhenThen with Matchers with
     it("should create a chained dispatcher if there are more than one dispatcher in settings") {
       Given("a valid settings with two dispatchers configured")
       val settings = new TracerSettings
-      settings.setLogger(new LoggerConfiguration)
+      settings.getDispatchers.setLogger(new LoggerConfiguration)
       val http = new HttpConfiguration
       http.setEndpoint("https://localhost")
       http.setHeaders(Map[String, String]().asJava)
-      settings.setHttp(http)
+      settings.getDispatchers.setHttp(http)
       val metricsRegistry = new NoopMetricsRegistry
       val tracerConfigurer = new TracerConfigurer
       When("a dispatcher is created")
@@ -87,7 +87,7 @@ class TracerConfigurerSpec extends FunSpec with GivenWhenThen with Matchers with
       val settings = new TracerSettings
       val agent = new AgentConfiguration
       agent.setEnabled(true)
-      settings.setAgent(agent)
+      settings.getDispatchers.setAgent(agent)
       val metricsRegistry = new NoopMetricsRegistry
       val grpcDispatcherFactory = mock[GrpcDispatcherFactory]
       val httpDispatcherFactory = niceMock[HttpDispatcherFactory]
@@ -111,7 +111,7 @@ class TracerConfigurerSpec extends FunSpec with GivenWhenThen with Matchers with
       val http = new HttpConfiguration
       http.setEndpoint("https://localhost")
       http.setHeaders(Map[String, String]().asJava)
-      settings.setHttp(http)
+      settings.getDispatchers.setHttp(http)
       val metricsRegistry = new NoopMetricsRegistry
       val grpcDispatcherFactory = mock[GrpcDispatcherFactory]
       val httpDispatcherFactory = mock[HttpDispatcherFactory]

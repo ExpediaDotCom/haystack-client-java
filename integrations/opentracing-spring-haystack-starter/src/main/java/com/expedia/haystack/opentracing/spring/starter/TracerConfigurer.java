@@ -60,16 +60,18 @@ public class TracerConfigurer {
                                  GrpcDispatcherFactory grpcAgentFactory,
                                  HttpDispatcherFactory httpDispatcherFactory) {
         List<Dispatcher> dispatchers = new ArrayList<>();
-        if (settings.getAgent() != null && settings.getAgent().isEnabled()) {
-            dispatchers.add(grpcDispatcher(settings.getAgent(), metricsRegistry, grpcAgentFactory));
+        final TracerSettings.DispatcherConfiguration dispatcherSettings = settings.getDispatchers();
+
+        if (dispatcherSettings.getAgent() != null && dispatcherSettings.getAgent().isEnabled()) {
+            dispatchers.add(grpcDispatcher(dispatcherSettings.getAgent(), metricsRegistry, grpcAgentFactory));
         }
 
-        if (settings.getHttp() != null) {
-            dispatchers.add(httpDispatcher(settings.getHttp(), metricsRegistry, httpDispatcherFactory));
+        if (dispatcherSettings.getHttp() != null) {
+            dispatchers.add(httpDispatcher(dispatcherSettings.getHttp(), metricsRegistry, httpDispatcherFactory));
         }
 
-        if (settings.getLogger() != null) {
-            dispatchers.add(loggerDispatcher(settings.getLogger(), metricsRegistry));
+        if (dispatcherSettings.getLogger() != null) {
+            dispatchers.add(loggerDispatcher(dispatcherSettings.getLogger(), metricsRegistry));
         }
 
         if (dispatchers.size() == 0) {

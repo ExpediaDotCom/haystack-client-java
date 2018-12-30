@@ -10,9 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("opentracing.haystack")
 public class TracerSettings {
     private boolean enabled = true;
-    private AgentConfiguration agent;
-    private HttpConfiguration http;
-    private LoggerConfiguration logger;
+    private DispatcherConfiguration dispatchers = new DispatcherConfiguration();
 
     public boolean isEnabled() {
         return enabled;
@@ -22,28 +20,42 @@ public class TracerSettings {
         this.enabled = enabled;
     }
 
-    public AgentConfiguration getAgent() {
-        return agent;
+    public DispatcherConfiguration getDispatchers() {
+        return dispatchers;
     }
 
-    public void setAgent(AgentConfiguration agent) {
-        this.agent = agent;
+    public void setDispatchers(DispatcherConfiguration dispatchers) {
+        this.dispatchers = dispatchers;
     }
 
-    public HttpConfiguration getHttp() {
-        return http;
-    }
+    public static class DispatcherConfiguration {
+        private AgentConfiguration agent;
+        private HttpConfiguration http;
+        private LoggerConfiguration logger;
 
-    public void setHttp(HttpConfiguration http) {
-        this.http = http;
-    }
+        public AgentConfiguration getAgent() {
+            return agent;
+        }
 
-    public LoggerConfiguration getLogger() {
-        return logger;
-    }
+        public void setAgent(AgentConfiguration agent) {
+            this.agent = agent;
+        }
 
-    public void setLogger(LoggerConfiguration logger) {
-        this.logger = logger;
+        public HttpConfiguration getHttp() {
+            return http;
+        }
+
+        public void setHttp(HttpConfiguration http) {
+            this.http = http;
+        }
+
+        public LoggerConfiguration getLogger() {
+            return logger;
+        }
+
+        public void setLogger(LoggerConfiguration logger) {
+            this.logger = logger;
+        }
     }
 
     public static class AgentConfiguration {
