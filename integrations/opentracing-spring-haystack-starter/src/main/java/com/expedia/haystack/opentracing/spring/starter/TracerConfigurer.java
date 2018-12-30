@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConditionalOnClass(com.expedia.www.haystack.client.Tracer.class)
 @ConditionalOnMissingBean(io.opentracing.Tracer.class)
-@ConditionalOnProperty(value = "opentracing.spring.haystack.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(value = "opentracing.haystack.enabled", havingValue = "true", matchIfMissing = true)
 @AutoConfigureBefore(io.opentracing.contrib.spring.tracer.configuration.TracerAutoConfiguration.class)
 @EnableConfigurationProperties(TracerSettings.class)
 public class TracerConfigurer {
