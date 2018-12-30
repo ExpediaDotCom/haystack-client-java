@@ -18,4 +18,38 @@ Check maven for latest versions of this library. At present, this library has be
         </dependency>
 ```
 
+### Defaults
 
+Adding this library autoconfigures an instance of [Haystack Tracer](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/core/src/main/java/com/expedia/www/haystack/client/Tracer.java) using defaults mentioned below. 
+
+* `service-name`: Is read from configuration property `spring.application.name`. If it is not provided then the value will be set to `unnamed-application`
+* `dispatcher`: Spans are dispatched to Haystack using one or more [Dispatcher](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/core/src/main/java/com/expedia/www/haystack/client/dispatchers/Dispatcher.java) instances. If none is configured, then a [LoggerDispatcher](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/core/src/main/java/com/expedia/www/haystack/client/dispatchers/LoggerDispatcher.java) is configured with "haystack" as the logger name
+* `metrics`: This library depends on Micrometer's MeterRegistry to instrument the library itself. If no instance of `MeterRegistry` is present in the [spring application](https://spring.io/blog/2018/03/16/micrometer-spring-boot-2-s-new-application-metrics-collector#what-do-i-get-out-of-the-box), then it uses a built-in No-op implementation. Which means no metrics are recorded
+
+### Configuration
+
+One can also configure the tracer created by the library using few configuration properties and optional beans.
+
+#### Disabling Tracer
+
+One can completely disable tracing with configuration property `opentracing.haystack.enabled`. If the property is missing (default), this property value is assumed as `true`.
+
+```yaml
+opentracing:
+  haystack:
+    enabled: false
+```
+
+#### Configuring Dispatcher(s)
+
+One can configure `Dispatcher` in two ways: using configuration properties or with a spring bean.
+
+Using configuration properties one can configure one or more of the following dispatchers. Configuring more than one dispatcher, creates a `ChainedDispatcher` and sends a span to all of the configured dispatcher instances.
+
+##### Logger Dispatcher
+
+
+
+#### Configuring Metrics
+
+#### Configuring Tracer
