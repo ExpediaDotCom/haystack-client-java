@@ -46,10 +46,10 @@
 
         <dependency>
             <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-registry-jmx</artifactId>
+            <artifactId>micrometer-core</artifactId>
             <version>${io-micrometer.version}</version>
         </dependency>
-
+        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

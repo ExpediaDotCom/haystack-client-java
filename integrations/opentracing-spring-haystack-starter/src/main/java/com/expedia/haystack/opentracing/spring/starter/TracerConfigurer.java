@@ -10,6 +10,7 @@ import com.expedia.www.haystack.client.dispatchers.LoggerDispatcher;
 import com.expedia.www.haystack.client.dispatchers.RemoteDispatcher;
 import com.expedia.www.haystack.client.dispatchers.clients.HttpCollectorClient;
 import com.expedia.www.haystack.client.metrics.MetricsRegistry;
+import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 import com.expedia.www.haystack.client.metrics.micrometer.MicrometerMetricsRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.ArrayList;
@@ -80,8 +81,12 @@ public class TracerConfigurer {
 
     @Bean
     @ConditionalOnMissingBean
-    public MetricsRegistry metricsRegistry(final MeterRegistry meterRegistry) {
-        return new MicrometerMetricsRegistry(meterRegistry);
+    public MetricsRegistry metricsRegistry(final ObjectProvider<MeterRegistry> meterRegistryObjectProvider) {
+        final MeterRegistry meterRegistry = meterRegistryObjectProvider.getIfAvailable();
+        if (meterRegistry != null) {
+            return new MicrometerMetricsRegistry(meterRegistry);
+        }
+        return new NoopMetricsRegistry();
     }
 
     @Bean

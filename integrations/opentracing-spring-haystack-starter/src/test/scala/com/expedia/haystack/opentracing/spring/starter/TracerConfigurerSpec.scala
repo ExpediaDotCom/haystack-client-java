@@ -7,6 +7,7 @@ import com.expedia.haystack.opentracing.spring.starter.support.{GrpcDispatcherFa
 import com.expedia.www.haystack.client.dispatchers.{ChainedDispatcher, Dispatcher, LoggerDispatcher}
 import com.expedia.www.haystack.client.metrics.micrometer.MicrometerMetricsRegistry
 import com.expedia.www.haystack.client.metrics.{MetricsRegistry, NoopMetricsRegistry}
+import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.opentracing.Tracer
 import org.scalatest.{FunSpec, GivenWhenThen, Matchers}
@@ -132,11 +133,32 @@ class TracerConfigurerSpec extends FunSpec with GivenWhenThen with Matchers with
       Given("a micrometer MeterRegistry")
       val meterRegistry = new SimpleMeterRegistry()
       val tracerConfigurer = new TracerConfigurer
+      val objectProvider = mock[ObjectProvider[MeterRegistry]]
+      expecting {
+        objectProvider.getIfAvailable.andReturn(meterRegistry).once()
+      }
+      replay(objectProvider)
       When("a MetricsRegistry is created")
-      val metricsRegistry = tracerConfigurer.metricsRegistry(meterRegistry)
+      val metricsRegistry = tracerConfigurer.metricsRegistry(objectProvider)
       Then("it should wrap and return a MetricsRegistry")
       metricsRegistry should not be null
       metricsRegistry shouldBe a [MicrometerMetricsRegistry]
+      verify(objectProvider)
+    }
+    it("should create a no-op metrics registry if no meterregistry instance is provided") {
+      Given("No micrometer MeterRegistry")
+      val tracerConfigurer = new TracerConfigurer
+      val objectProvider = mock[ObjectProvider[MeterRegistry]]
+      expecting {
+        objectProvider.getIfAvailable.andReturn(null).once()
+      }
+      replay(objectProvider)
+      When("a MetricsRegistry is created")
+      val metricsRegistry = tracerConfigurer.metricsRegistry(objectProvider)
+      Then("it should return a Noop MetricsRegistry")
+      metricsRegistry should not be null
+      metricsRegistry shouldBe a [NoopMetricsRegistry]
+      verify(objectProvider)
     }
   }
 }
