@@ -9,6 +9,7 @@ Table of Contents
    * [Configuring Dispatcher(s)](#configuring-dispatchers)
       * [Logger Dispatcher](#logger-dispatcher)
       * [Grpc Agent Dispatcher](#grpc-agent-dispatcher)
+      * [Http Dispatcher](#http-dispatcher)
    * [Configuring Metrics](#configuring-metrics)
   * [Configuring Tracer](#configuring-tracer)
 
@@ -89,13 +90,14 @@ There are other properties available to further configure the grpc agent dispatc
 
 ```
 opentracing.haystack.dispatchers.agent.host=haystack-agent
+opentracing.haystack.dispatchers.agent.port=3400
 opentracing.haystack.dispatchers.agent.keep-alive-time-m-s=30
 opentracing.haystack.dispatchers.agent.keep-alive-timeout-m-s=30
 opentracing.haystack.dispatchers.agent.keep-alive-without-calls=true
 opentracing.haystack.dispatchers.agent.negotiation-type=PLAINTEXT
 ```
 
-Alternately, one can create a bean of type [GrpcAgentFactory](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/integrations/opentracing-spring-haystack-starter/src/main/java/com/expedia/haystack/opentracing/spring/starter/support/GrpcDispatcherFactory.java). This bean will be invoked with configuration properties defined to build a RemoteDispatcher with GrpcAgentClient.
+Alternately, one can create a bean of type [GrpcDispatcherFactory](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/integrations/opentracing-spring-haystack-starter/src/main/java/com/expedia/haystack/opentracing/spring/starter/support/GrpcDispatcherFactory.java). 
 
 ```java
 public interface GrpcDispatcherFactory {
@@ -103,6 +105,8 @@ public interface GrpcDispatcherFactory {
                       TracerSettings.AgentConfiguration agentConfiguration);
 }
 ```
+
+If available, this bean will be invoked with configuration properties defined to build a RemoteDispatcher with GrpcAgentClient.
 
 ```java
 @Bean
@@ -112,6 +116,27 @@ public GrpcDispatcherFactory grpcDispatcherFactory() {
                                          config.builder(metricsRegistry).build()).build();
 }
 ```
+
+#### Http Dispatcher
+
+Haystack also provides a [http collector](https://github.com/ExpediaDotCom/haystack-collector/tree/master/http) to ingest Json and Protobuf serialized spans over http.
+
+One can configure a http dispatcher by adding the following endpoint configuration
+
+```yaml
+opentracing:
+  haystack:
+    dispatchers:
+      http:
+        endpoint: http://localhost:8080/span
+        headers: 
+          client-id: foo
+          client-key: bar
+```
+
+`headers` property is optional. All properties defined under 'headers' will be sent as HTTP headers along with the serialized span data. 
+
+As in Grpc Agent, one can create a bean of type [HttpDispatcherFactory](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/integrations/opentracing-spring-haystack-starter/src/main/java/com/expedia/haystack/opentracing/spring/starter/support/GrpcDispatcherFactory.java). If available, that bean will be invoked to create a RemoteDispatcher with HttpClient
 
 ### Configuring Metrics
 
