@@ -2,15 +2,15 @@ Table of Contents
 =================
 
 * [Instrumenting Spring Boot or Spring Web applications](#instrumenting-spring-boot-or-spring-web-applications)
-   * [Configuration](#configuration)
-   * [Defaults](#defaults)
-   * [Configuration](#configuration-1)
-      * [Disabling Tracer](#disabling-tracer)
-      * [Configuring Dispatcher(s)](#configuring-dispatchers)
-         * [Logger Dispatcher](#logger-dispatcher)
-         * [Grpc Agent Dispatcher](#grpc-agent-dispatcher)
-      * [Configuring Metrics](#configuring-metrics)
-      * [Configuring Tracer](#configuring-tracer)
+* [Usage](#usage)
+* [Defaults](#defaults)
+* [Configuration](#configuration)
+   * [Disabling Tracer](#disabling-tracer)
+   * [Configuring Dispatcher(s)](#configuring-dispatchers)
+      * [Logger Dispatcher](#logger-dispatcher)
+      * [Grpc Agent Dispatcher](#grpc-agent-dispatcher)
+   * [Configuring Metrics](#configuring-metrics)
+  * [Configuring Tracer](#configuring-tracer)
 
 
 ## Instrumenting Spring Boot or Spring Web applications
@@ -21,7 +21,7 @@ This library actually uses [io.opentracing.contrib:opentracing-spring-web-starte
 
 This library is purely a convenience library that in turn depends on `io.opentracing.contrib:opentracing-spring-web-starter` and `com.expedia.www:opentracing-spring-haystack-starter` to reduce the dependency configuration required to instrument a spring stack using Opentracing and Haystack.
 
-### Configuration
+## Usage
 
 Check maven for latest versions of this library. At present, this library has been built and tested with Spring Boot 2.x
 
@@ -33,7 +33,7 @@ Check maven for latest versions of this library. At present, this library has be
         </dependency>
 ```
 
-### Defaults
+## Defaults
 
 Adding this library autoconfigures an instance of [Haystack Tracer](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/core/src/main/java/com/expedia/www/haystack/client/Tracer.java) using defaults mentioned below. 
 
@@ -41,11 +41,11 @@ Adding this library autoconfigures an instance of [Haystack Tracer](https://gith
 * `dispatcher`: Spans are dispatched to Haystack using one or more [Dispatcher](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/core/src/main/java/com/expedia/www/haystack/client/dispatchers/Dispatcher.java) instances. If none is configured, then a [LoggerDispatcher](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/core/src/main/java/com/expedia/www/haystack/client/dispatchers/LoggerDispatcher.java) is configured with "haystack" as the logger name
 * `metrics`: This library depends on Micrometer's MeterRegistry to instrument the library itself. If no instance of `MeterRegistry` is present in the [spring application](https://spring.io/blog/2018/03/16/micrometer-spring-boot-2-s-new-application-metrics-collector#what-do-i-get-out-of-the-box), then it uses a built-in No-op implementation. Which means no metrics are recorded
 
-### Configuration
+## Configuration
 
 One can also configure the tracer created by the library using few configuration properties and optional beans.
 
-#### Disabling Tracer
+### Disabling Tracer
 
 One can completely disable tracing with configuration property `opentracing.haystack.enabled`. If the property is missing (default), this property value is assumed as `true`.
 
@@ -55,13 +55,13 @@ opentracing:
     enabled: false
 ```
 
-#### Configuring Dispatcher(s)
+### Configuring Dispatcher(s)
 
 One can configure `Dispatcher` in two ways: using configuration properties or with a spring bean.
 
 Using configuration properties one can configure one or more of the following dispatchers. Configuring more than one dispatcher, creates a `ChainedDispatcher` and sends a span to all of the configured dispatcher instances.
 
-##### Logger Dispatcher
+#### Logger Dispatcher
 
 One can configure the name of the logger to use in a LoggerDispatcher by setting the following property in Spring Boot yaml or properties file
 
@@ -73,7 +73,7 @@ opentracing:
         name: span-logger
 ```
 
-##### Grpc Agent Dispatcher
+#### Grpc Agent Dispatcher
 
 Haystack provides a [GRPC agent](https://github.com/ExpediaDotCom/haystack-agent) as a convenience to send protobuf spans to Haystack's kafka. One can configure grpc agent by simply enabling it in the configuration. 
 
@@ -113,6 +113,6 @@ public GrpcDispatcherFactory grpcDispatcherFactory() {
 }
 ```
 
-#### Configuring Metrics
+### Configuring Metrics
 
-#### Configuring Tracer
+### Configuring Tracer
