@@ -61,15 +61,17 @@ public class TextMapPropagator implements Injector<TextMap>, Extractor<TextMap> 
     }
 
 
-    private void put(TextMap carrier, Object key, Object value) {
+    private void put(TextMap carrier, String key, String value) {
         carrier.put(keyCodex.encode(key), valueCodex.encode(value));
     }
 
     @Override
     public void inject(SpanContext context, TextMap carrier) {
-        put(carrier, convention.traceIdKey(), context.getTraceId());
-        put(carrier, convention.spanIdKey(), context.getSpanId());
-        put(carrier, convention.parentIdKey(), context.getParentId());
+        put(carrier, convention.traceIdKey(), context.getTraceId().toString());
+        put(carrier, convention.spanIdKey(), context.getSpanId().toString());
+        if (context.getParentId() != null) {
+            put(carrier, convention.parentIdKey(), context.getParentId().toString());
+        }
 
         for (Map.Entry<String, String> baggage : context.baggageItems()) {
             put(carrier, prefixKey(convention.baggagePrefix(), baggage.getKey()), baggage.getValue());

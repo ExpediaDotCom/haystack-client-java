@@ -424,6 +424,5 @@ public class Tracer implements io.opentracing.Tracer {
         public Tracer build() {
             return new Tracer(serviceName, scopeManager, clock, dispatcher, registry, metrics, dualSpanMode);
         }
-
     }
 }
