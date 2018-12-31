@@ -162,3 +162,6 @@ For example, adding the following two dependencies to the application will autom
 ```
 
 ### Customizing Tracer
+
+Haystack Tracer's [Builder](https://github.com/ExpediaDotCom/haystack-client-java/blob/master/core/src/main/java/com/expedia/www/haystack/client/Tracer.java#L356) class exposes a number of possible configurations that can be used to customize the `Tracer` instance built by this library and used by [Opentracing's Spring integration](https://github.com/opentracing-contrib/java-spring-web/). To customize the Tracer instance, one can create a bean of type [TracerCustomizer](../opentracing-spring-haystack-starter/src/main/java/com/expedia/haystack/opentracing/spring/starter/support/TracerCustomizer.java). This will be invoked when the library attempts to build an instance of Tracer. One can see this in the [integration test](src/test/java/com/expedia/haystack/opentracing/spring/starter/TracerCustomizerIntegrationTest.java#L29).
+
