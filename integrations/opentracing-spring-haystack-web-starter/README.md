@@ -53,8 +53,8 @@ To access an instance of `opentracing.io.Tracer` to instrument a Spring applicat
 ```xml
 <dependency>
     <groupId>com.expedia.www</groupId>
-    <artifactId>opentracing-spring-haystack-web-starter</artifactId>
-    <version>${opentracing-spring-haystack-web-starter.version}</version>
+    <artifactId>opentracing-spring-haystack-starter</artifactId>
+    <version>${opentracing-spring-haystack-starter.version}</version>
 </dependency>
 ```
 
