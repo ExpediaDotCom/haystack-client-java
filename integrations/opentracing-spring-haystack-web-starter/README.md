@@ -10,6 +10,7 @@ Table of Contents
       * [Logger Dispatcher](#logger-dispatcher)
       * [Grpc Agent Dispatcher](#grpc-agent-dispatcher)
       * [Http Dispatcher](#http-dispatcher)
+      * [Dispatcher Bean](#dispatcher-bean)
    * [Metrics](#metrics)
    * [Customizing Tracer](#customizing-tracer)
 
@@ -27,11 +28,11 @@ This library is purely a convenience library that in turn depends on `io.opentra
 Check maven for latest versions of this library. At present, this library has been built and tested with Spring Boot 2.x
 
 ```xml
-        <dependency>
-            <groupId>com.expedia.www</groupId>
-            <artifactId>opentracing-spring-haystack-web-starter</artifactId>
-            <version>${opentracing-spring-haystack-web-starter.version}</version>
-        </dependency>
+<dependency>
+    <groupId>com.expedia.www</groupId>
+    <artifactId>opentracing-spring-haystack-web-starter</artifactId>
+    <version>${opentracing-spring-haystack-web-starter.version}</version>
+</dependency>
 ```
 
 ## Defaults
@@ -39,7 +40,7 @@ Check maven for latest versions of this library. At present, this library has be
 Adding this library autoconfigures an instance of [Haystack Tracer](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/core/src/main/java/com/expedia/www/haystack/client/Tracer.java) using defaults mentioned below. 
 
 * `service-name`: Is read from configuration property `spring.application.name`. If it is not provided then the value will be set to `unnamed-application`
-* `dispatcher`: Spans are dispatched to Haystack using one or more [Dispatcher](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/core/src/main/java/com/expedia/www/haystack/client/dispatchers/Dispatcher.java) instances. If none is configured, then a [LoggerDispatcher](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/core/src/main/java/com/expedia/www/haystack/client/dispatchers/LoggerDispatcher.java) is configured with "haystack" as the logger name
+* `dispatcher`: Spans are dispatched to Haystack using one or more [Dispatcher](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/core/src/main/java/com/expedia/www/haystack/client/dispatchers/Dispatcher.java) instances. If none is configured or created, then a [LoggerDispatcher](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/core/src/main/java/com/expedia/www/haystack/client/dispatchers/LoggerDispatcher.java) is configured with "haystack" as the logger name
 * `metrics`: This library depends on Micrometer's MeterRegistry to instrument the library itself. If no instance of `MeterRegistry` is present in the [spring application](https://spring.io/blog/2018/03/16/micrometer-spring-boot-2-s-new-application-metrics-collector#what-do-i-get-out-of-the-box), then it uses a built-in No-op implementation. Which means no metrics are recorded
 
 ## Configuration
@@ -58,7 +59,7 @@ opentracing:
 
 ### Dispatcher(s)
 
-One can configure `Dispatcher` in two ways: using configuration properties or with a spring bean.
+One can configure `Dispatcher` in two ways: using configuration properties or by creating a spring bean.
 
 Using configuration properties one can configure one or more of the following dispatchers. Configuring more than one dispatcher, creates a `ChainedDispatcher` and sends a span to all of the configured dispatcher instances.
 
@@ -88,7 +89,7 @@ opentracing:
 
 There are other properties available to further configure the grpc agent dispatcher
 
-```
+```properties
 opentracing.haystack.dispatchers.agent.host=haystack-agent
 opentracing.haystack.dispatchers.agent.port=3400
 opentracing.haystack.dispatchers.agent.keep-alive-time-m-s=30
@@ -138,6 +139,26 @@ opentracing:
 
 As in Grpc Agent, one can create a bean of type [HttpDispatcherFactory](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/integrations/opentracing-spring-haystack-starter/src/main/java/com/expedia/haystack/opentracing/spring/starter/support/GrpcDispatcherFactory.java). If available, that bean will be invoked to create a RemoteDispatcher with HttpClient
 
+#### Dispatcher Bean
+
+Instead of configuring dispatchers through properties, one can create a bean of type `Dispatcher` in the application's spring context. This library will use that bean instead of creating one using configuration or defaults. One can see this in the [integration test example](src/test/java/com/expedia/haystack/opentracing/spring/starter/DispatcherInjectionIntegrationTest.java#L57).
+
 ### Metrics
+
+As mentioned earlier, this library looks for a bean of type [Micrometer's MeterRegistry](https://micromerter.io). If present, it uses that to write all metrics from the library to the configured store. If not, the library will use a no-op implementation and no metrics will be written.
+
+For example, adding the following two dependencies to the application will automatically create a `MeterRegistry` bean and write the metrics to JMX
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-registry-jmx</artifactId>
+    <version>${io-micrometer.version}</version>
+</dependency>
+```
 
 ### Customizing Tracer
