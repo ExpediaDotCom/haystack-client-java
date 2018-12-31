@@ -26,7 +26,11 @@ This library is purely a convenience library that in turn depends on `io.opentra
 
 ## Quick Start
 
-This section provides steps required to quickly configure your spring web or boot application to be wired using Opentracing's spring integration to Haystack. If you need additional information, please read the subsequent sections in this documentation
+This section provides steps required to quickly configure your spring application to be wired using Opentracing's spring integration to Haystack. If you need additional information, please read the subsequent sections in this documentation
+
+### Spring Boot or Spring Web dependency
+
+Add the following dependency to your application
 
 ```xml
 <dependency>
@@ -35,6 +39,22 @@ This section provides steps required to quickly configure your spring web or boo
     <version>${opentracing-spring-haystack-web-starter.version}</version>
 </dependency>
 ```
+
+### Spring Application dependency
+
+To access an instance of `opentracing.io.Tracer` to instrument a Spring application, one can add the following dependencies
+
+```xml
+<dependency>
+    <groupId>com.expedia.www</groupId>
+    <artifactId>opentracing-spring-haystack-web-starter</artifactId>
+    <version>${opentracing-spring-haystack-web-starter.version}</version>
+</dependency>
+```
+
+Enable `@ComponentScan` on the package `com.expedia.haystack.opentracing.spring.starter` to configure the `Tracer` bean
+
+### Other dependencies
 
 Optionally, add the following to get metrics recorded in JMX
 
@@ -49,6 +69,8 @@ Optionally, add the following to get metrics recorded in JMX
     <version>${io-micrometer.version}</version>
 </dependency>
 ```
+
+### Sample yaml/properties file
 
 Add the following to the properties or yaml file of the application being instrumented  (this is just a sample. change the name of the application, host name/port of the agent etc)
 
