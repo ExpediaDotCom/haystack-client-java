@@ -6,12 +6,12 @@ Table of Contents
 * [Defaults](#defaults)
 * [Configuration](#configuration)
    * [Disabling Tracer](#disabling-tracer)
-   * [Configuring Dispatcher(s)](#configuring-dispatchers)
+   * [Dispatcher(s)](#dispatchers)
       * [Logger Dispatcher](#logger-dispatcher)
       * [Grpc Agent Dispatcher](#grpc-agent-dispatcher)
       * [Http Dispatcher](#http-dispatcher)
-   * [Configuring Metrics](#configuring-metrics)
-  * [Configuring Tracer](#configuring-tracer)
+   * [Metrics](#metrics)
+   * [Customizing Tracer](#customizing-tracer)
 
 
 ## Instrumenting Spring Boot or Spring Web applications
@@ -56,7 +56,7 @@ opentracing:
     enabled: false
 ```
 
-### Configuring Dispatcher(s)
+### Dispatcher(s)
 
 One can configure `Dispatcher` in two ways: using configuration properties or with a spring bean.
 
@@ -138,6 +138,6 @@ opentracing:
 
 As in Grpc Agent, one can create a bean of type [HttpDispatcherFactory](https://github.com/ExpediaDotCom/haystack-client-java/blob/opentracing-spring-haystack-starter/integrations/opentracing-spring-haystack-starter/src/main/java/com/expedia/haystack/opentracing/spring/starter/support/GrpcDispatcherFactory.java). If available, that bean will be invoked to create a RemoteDispatcher with HttpClient
 
-### Configuring Metrics
+### Metrics
 
-### Configuring Tracer
+### Customizing Tracer
