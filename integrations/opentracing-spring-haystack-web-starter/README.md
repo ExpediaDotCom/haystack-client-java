@@ -1,3 +1,20 @@
+Table of Contents
+=================
+
+* [Instrumenting Spring Boot or Spring Web applications](#instrumenting-spring-boot-or-spring-web-applications)
+* [Quick Start](#quick-start)
+* [Details](#details)
+   * [Using this library](#using-this-library)
+   * [Defaults](#defaults)
+   * [Configuration](#configuration)
+      * [Disabling Tracer](#disabling-tracer)
+      * [Dispatcher(s)](#dispatchers)
+         * [Logger Dispatcher](#logger-dispatcher)
+         * [Grpc Agent Dispatcher](#grpc-agent-dispatcher)
+         * [Http Dispatcher](#http-dispatcher)
+         * [Dispatcher Bean](#dispatcher-bean)
+      * [Metrics](#metrics)
+      * [Customizing Tracer](#customizing-tracer)
 
 ## Instrumenting Spring Boot or Spring Web applications
 
