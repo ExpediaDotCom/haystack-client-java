@@ -3,12 +3,14 @@
 [![License](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg)](https://github.com/ExpediaDotCom/haystack/blob/master/LICENSE)
 
 # haystack-client-java
+
 Haystack bindings for the OpenTracing API. Clients use this library to send trace data to a Haystack server.
 
 
 ## How to build the code
 
 Since this repository contains `haystack-idl` as a submodule, you must use the following command line to clone the repository:
+
 ```
 git clone git@github.com:ExpediaDotCom/haystack-client-java.git .
 ```
@@ -20,11 +22,15 @@ git clone git@github.com:ExpediaDotCom/haystack-client-java.git .
 ### Building
 
 For a full build, including unit tests you can run the following
+
 ```
 ./mvnw clean package
 ```
 
 ### Releases
+
+Latest releases of this library are available in [Maven central](https://mvnrepository.com/search?q=Haystack&d=com.expedia)
+
 1. Decide what kind of version bump is necessary, based on [Semantic Versioning](http://semver.org/) conventions.
 In the items below, the version number you select will be referred to as `x.y.z`.
 2. Update the [pom.xml](https://github.com/ExpediaDotCom/haystack-client-java/blob/master/pom.xml),
