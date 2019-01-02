@@ -6,6 +6,16 @@
 
 Haystack bindings for the OpenTracing API. Clients use this library to send trace data to a Haystack server.
 
+Opentracing API usage has been documented at [https://github.com/opentracing/opentracing-java](https://github.com/opentracing/opentracing-java). 
+
+`haystack-client-core` library provides an implementation of `io.opentracing.Tracer` that sends spans to `Haystack` server. 
+
+Integrations for common frameworks are available @ 
+
+* [Dropwizard](integrations/dropwizard/README.md)
+* [Spring Boot and Web](integrations/opentracing-spring-haystack-web-starter/README.md)
+* [Opencencus](integrations/opencensus/README.md)
+
 
 ## How to build the code
 
