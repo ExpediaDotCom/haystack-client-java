@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.2.1/ 2019-01-02 
+## 0.2.2/ 2019-01-02 
 
 * Adding opentracing-spring-haystack-web-starter in integrations for Spring Boot and Web applications
 

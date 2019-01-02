@@ -9,7 +9,7 @@
     <parent>
       <groupId>com.expedia.www</groupId>
       <artifactId>haystack-client-java-examples</artifactId>
-      <version>0.2.1-SNAPSHOT</version>
+      <version>0.2.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>haystack-client-java-example-dropwizard</artifactId>
