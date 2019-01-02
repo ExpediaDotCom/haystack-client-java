@@ -19,12 +19,6 @@ Integrations for common frameworks are available @
 
 ## How to build the code
 
-Since this repository contains `haystack-idl` as a submodule, you must use the following command line to clone the repository:
-
-```
-git clone git@github.com:ExpediaDotCom/haystack-client-java.git .
-```
-
 ### Prerequisites
 
 * Make sure you have Java 1.8
