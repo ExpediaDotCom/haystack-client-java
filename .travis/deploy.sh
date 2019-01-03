@@ -1,7 +1,7 @@
 #!/bin/bash
 cd `dirname $0`/..
 
-if [ "${TRAVIS_BRANCH}" == 'master' -a "${TRAVIS_PULL_REQUEST}" == 'false' ]; then
+if [ "${TRAVIS_BRANCH}" == 'master' -a "${TRAVIS_PULL_REQUEST}" == 'false' ] || [ -n "${TRAVIS_TAG}" ]; then
   if [[ -z "${SONATYPE_USERNAME}" || -z "${SONATYPE_PASSWORD}" ]]; then
     echo "ERROR! Please set SONATYPE_USERNAME and SONATYPE_PASSWORD environment variable"
     exit 1
@@ -21,6 +21,8 @@ if [ "${TRAVIS_BRANCH}" == 'master' -a "${TRAVIS_PULL_REQUEST}" == 'false' ]; th
   fi
 
   exit ${SUCCESS}
+else
+  echo "Skipping artifact deployment for branch ${TRAVIS_BRANCH} with PR=${TRAVIS_PULL_REQUEST} and TAG=${TRAVIS_TAG}"
 fi
 
 exit 0
