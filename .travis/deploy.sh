@@ -1,7 +1,7 @@
 #!/bin/bash
 cd `dirname $0`/..
 
-if [ "$TRAVIS_BRANCH" != 'master' ] || [ "$TRAVIS_PULL_REQUEST" == 'true' ]; then
+if [ "$TRAVIS_BRANCH" != 'master' ] || [ "$TRAVIS_PULL_REQUEST" != 'false' ]; then
     echo "Skipping artifact deployment for a non-release build"
     exit 0
 fi
