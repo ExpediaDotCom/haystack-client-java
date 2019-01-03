@@ -30,13 +30,8 @@ after_success:
   - ./mvnw --batch-mode jacoco:report
   - bash <(curl -s https://codecov.io/bash) || echo 'Codecov failed to upload'
 
-deploy:
-  provider: script
-  script: bash .travis/deploy.sh
-  skip_cleanup: true
-  on:
-    repo: ExpediaDotCom/haystack-client-java
-    condition: $TRAVIS_PULL_REQUEST = false
+script:
+  - .travis/deploy.sh
 
 notifications:
   email:
