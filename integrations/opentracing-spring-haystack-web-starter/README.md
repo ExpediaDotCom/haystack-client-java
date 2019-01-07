@@ -46,6 +46,8 @@ Add the following dependency to your application
 </dependency>
 ```
 
+Alternately, one can use the following 
+
 ### Spring Application dependency
 
 To access an instance of `opentracing.io.Tracer` to instrument a Spring application, one can add the following dependencies

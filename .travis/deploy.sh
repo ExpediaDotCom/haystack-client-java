@@ -9,13 +9,14 @@ if [ "${TRAVIS_BRANCH}" == 'master' -a "${TRAVIS_PULL_REQUEST}" == 'false' ] || 
 
   if [ ! -z "${TRAVIS_TAG}" ]; then
     echo "travis tag is set -> updating pom.xml <version> attribute to ${TRAVIS_TAG}"
-    ./mvnw --batch-mode --settings .travis/settings.xml --no-snapshot-updates -Prelease -DskipTests=true -DreleaseVersion=${TRAVIS_TAG} release:prepare
+    ./mvnw --batch-mode --settings .travis/settings.xml -DskipTests=true -DreleaseVersion=${TRAVIS_TAG} release:clean release:prepare release:perform
+    SUCCESS=$?
   else
     echo "no travis tag is set, hence keeping the snapshot version in pom.xml"
+    ./mvnw --batch-mode --settings .travis/settings.xml clean deploy -DskipTests=true -B -U
+    SUCCESS=$?
   fi
 
-  ./mvnw --batch-mode --settings .travis/settings.xml -Prelease clean deploy -DskipTests=true -B -U
-  SUCCESS=$?
   if [ ${SUCCESS} -eq 0 ]; then
     echo "successfully deployed the jars to nexus"
   fi
