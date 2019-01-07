@@ -46,7 +46,15 @@ Add the following dependency to your application
 </dependency>
 ```
 
-Alternately, one can use the following 
+Alternately, one can use `opentracing-spring-haystack-cloud-starter` instead. It is convenience starter that includes opentracing-spring-haystack-starter, opentracing-spring-web-starter and opentracing-spring-cloud-starter. This allows one to take advantage of opentracing instrumentation provided for Spring Cloud.
+
+```xml
+<dependency>
+    <groupId>com.expedia.www</groupId>
+    <artifactId>opentracing-spring-haystack-cloud-starter</artifactId>
+    <version>${opentracing-spring-haystack-cloud-starter.version}</version>
+</dependency>
+```
 
 ### Spring Application dependency
 
