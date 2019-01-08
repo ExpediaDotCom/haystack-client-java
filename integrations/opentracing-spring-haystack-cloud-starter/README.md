@@ -1,0 +1,1 @@
+Check the [Quick Start](../opentracing-spring-haystack-web-starter#quick-start) section of the README file in [opentracing-spring-haystack-web-starter](../opentracing-spring-haystack-web-starter) module
