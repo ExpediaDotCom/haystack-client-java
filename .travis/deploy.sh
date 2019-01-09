@@ -1,23 +1,16 @@
 #!/bin/bash
 cd `dirname $0`/..
 
-function fix_git {
-    echo "Fixing git setup for $TRAVIS_BRANCH"
-    git checkout ${TRAVIS_BRANCH}
-    git branch -u origin/${TRAVIS_BRANCH}
-    git config branch.${TRAVIS_BRANCH}.remote origin
-    git config branch.${TRAVIS_BRANCH}.merge refs/heads/${TRAVIS_BRANCH}
-}
-
-
 if [ "${TRAVIS_BRANCH}" == 'master' -a "${TRAVIS_PULL_REQUEST}" == 'false' ] || [ -n "${TRAVIS_TAG}" ]; then
   if [[ -z "${SONATYPE_USERNAME}" || -z "${SONATYPE_PASSWORD}" ]]; then
     echo "ERROR! Please set SONATYPE_USERNAME and SONATYPE_PASSWORD environment variable"
     exit 1
   fi
 
+  TAG_NAME=`git describe ${TRAVIS_COMMIT} --tags`
+  echo "Tag associated with the current commit ${TRAVIS_COMMIT} is ${TAG_NAME}"
+  
   if [ ! -z "${TRAVIS_TAG}" ]; then
-    fix_git
     echo "travis tag is set -> updating pom.xml <version> attribute to ${TRAVIS_TAG}"
     ./mvnw --batch-mode --settings .travis/settings.xml -DskipTests=true -DreleaseVersion=${TRAVIS_TAG} release:clean release:prepare release:perform
     SUCCESS=$?
