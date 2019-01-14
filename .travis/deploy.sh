@@ -7,6 +7,15 @@ USERNAME=${SONATYPE_USERNAME}
 PASSWORD=${SONATYPE_PASSWORD}
 SHA=${TRAVIS_COMMIT}
 
+#!/usr/bin/env bash
+function fix_git {
+    echo "Fixing git setup for ${BRANCH}"
+    git checkout ${BRANCH}
+    git branch -u origin/${BRANCH}
+    git config branch.${BRANCH}.remote origin
+    git config branch.${BRANCH}.merge refs/heads/${BRANCH}
+}
+
 # Only if this is a master branch and it is not a PR - meaning, this commit
 # is from master branch most merge
 if [[ "${BRANCH}" == 'master' && "${PULL_REQUEST}" == 'false' ]]; then
@@ -22,6 +31,7 @@ if [[ "${BRANCH}" == 'master' && "${PULL_REQUEST}" == 'false' ]]; then
 
   if [[ ! -z "${TAG_NAME}" &&  ${TAG_NAME} =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
     echo "travis tag is set -> updating pom.xml <version> attribute to ${TAG_NAME}"
+    fix_git
     ./mvnw --batch-mode --settings .travis/settings.xml -DskipTests=true -DreleaseVersion=${TAG_NAME} release:clean release:prepare release:perform
     SUCCESS=$?
   else
