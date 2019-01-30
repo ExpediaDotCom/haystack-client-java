@@ -19,12 +19,10 @@ package com.expedia.www.haystack.client;
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
 import com.expedia.www.haystack.client.dispatchers.NoopDispatcher;
 import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
+import com.expedia.www.haystack.client.propagation.MapBackedTextMap;
 import io.opentracing.References;
 import io.opentracing.propagation.Format;
-import io.opentracing.propagation.TextMap;
 import io.opentracing.tag.Tags;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
@@ -217,23 +215,5 @@ public class SpanBuilderTest {
         Assert.assertEquals(false, tags.get("boolean-key"));
         Assert.assertTrue(tags.containsKey("number-key"));
         Assert.assertEquals(1l, tags.get("number-key"));
-    }
-
-    private class MapBackedTextMap implements TextMap {
-        private final Map<String, String> map = new HashMap<>();
-
-        @Override
-        public Iterator<Map.Entry<String, String>> iterator() {
-            return map.entrySet().iterator();
-        }
-
-        @Override
-        public void put(String key, String value) {
-            map.put(key, value);
-        }
-
-        public Map<String, String> getMap() {
-            return map;
-        }
     }
 }

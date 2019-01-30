@@ -18,10 +18,12 @@ package com.expedia.www.haystack.client.propagation;
 
 import com.expedia.www.haystack.client.SpanContext;
 import io.opentracing.propagation.TextMap;
+import java.util.Collection;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -50,17 +52,6 @@ public class TextMapPropagator implements Injector<TextMap>, Extractor<TextMap> 
         return String.format("%s%s", prefix, key);
     }
 
-    private String unprefixKey(String prefix, String key) {
-        if (prefix == null || prefix.isEmpty()) {
-            return key;
-        } else if (!key.startsWith(prefix)) {
-            return key;
-        }
-
-        return key.substring(prefix.length());
-    }
-
-
     private void put(TextMap carrier, String key, String value) {
         carrier.put(keyCodex.encode(key), valueCodex.encode(value));
     }
@@ -87,14 +78,17 @@ public class TextMapPropagator implements Injector<TextMap>, Extractor<TextMap> 
         final Map<String, String> baggage = new HashMap<>();
 
         for (Map.Entry<String, String> entry : carrier) {
-            final String key = entry.getKey();
-            if (keyCodex.decode(key).startsWith(convention.baggagePrefix())) {
-                baggage.put(unprefixKey(convention.baggagePrefix(), keyCodex.decode(key)), valueCodex.decode(entry.getValue()));
-            } else if (convention.traceIdKeyAliases().contains(keyCodex.decode(key))) {
+            final String decodedKey = keyCodex.decode(entry.getKey());
+            final String decodedKeyLowerCase = decodedKey.toLowerCase();
+
+            if (decodedKeyLowerCase.startsWith(convention.baggagePrefix().toLowerCase(Locale.ROOT))) {
+                baggage.put(decodedKey.substring(convention.baggagePrefix().length()),
+                            valueCodex.decode(entry.getValue()));
+            } else if (containsIgnoreCase(convention.traceIdKeyAliases(), decodedKeyLowerCase)) {
                 traceId = valueCodex.decode(entry.getValue());
-            } else if (convention.parentIdKeyAliases().contains(keyCodex.decode(key))) {
+            } else if (containsIgnoreCase(convention.parentIdKeyAliases(), decodedKeyLowerCase)) {
                 parentId = valueCodex.decode(entry.getValue());
-            } else if (convention.spanIdKeyAliases().contains(keyCodex.decode(key))) {
+            } else if (containsIgnoreCase(convention.spanIdKeyAliases(), decodedKeyLowerCase)) {
                 spanId = valueCodex.decode(entry.getValue());
             }
         }
@@ -109,6 +103,10 @@ public class TextMapPropagator implements Injector<TextMap>, Extractor<TextMap> 
                                               parentId == null ? null : UUID.fromString(parentId),
                                               true);
         return context.addBaggage(baggage);
+    }
+
+    private boolean containsIgnoreCase(Collection<String> strings, String string) {
+        return strings.stream().anyMatch(s -> s.equalsIgnoreCase(string));
     }
 
 
@@ -129,9 +127,7 @@ public class TextMapPropagator implements Injector<TextMap>, Extractor<TextMap> 
         }
 
         public Builder withCodex(TextMapCodex codex) {
-            this.keyCodex = codex;
-            this.valueCodex = codex;
-            return this;
+            return this.withKeyCodex(codex).withValueCodex(codex);
         }
 
         public Builder withKeyCodex(TextMapCodex codex) {
