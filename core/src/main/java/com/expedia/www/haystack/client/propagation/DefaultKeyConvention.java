@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
-public class DefaultKeyConvention implements KeyConvention {
+public final class DefaultKeyConvention implements KeyConvention {
 
     private static final String BAGGAGE_PREFIX = "Baggage-";
 
