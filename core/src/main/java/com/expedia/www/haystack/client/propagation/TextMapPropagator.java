@@ -78,16 +78,17 @@ public class TextMapPropagator implements Injector<TextMap>, Extractor<TextMap> 
         final Map<String, String> baggage = new HashMap<>();
 
         for (Map.Entry<String, String> entry : carrier) {
-            final String decodedKey = keyCodex.decode(entry.getKey()).toLowerCase();
+            final String decodedKey = keyCodex.decode(entry.getKey());
+            final String decodedKeyLowerCase = decodedKey.toLowerCase();
 
-            if (decodedKey.startsWith(convention.baggagePrefix().toLowerCase(Locale.ROOT))) {
+            if (decodedKeyLowerCase.startsWith(convention.baggagePrefix().toLowerCase(Locale.ROOT))) {
                 baggage.put(decodedKey.substring(convention.baggagePrefix().length()),
                             valueCodex.decode(entry.getValue()));
-            } else if (containsIgnoreCase(convention.traceIdKeyAliases(), decodedKey)) {
+            } else if (containsIgnoreCase(convention.traceIdKeyAliases(), decodedKeyLowerCase)) {
                 traceId = valueCodex.decode(entry.getValue());
-            } else if (containsIgnoreCase(convention.parentIdKeyAliases(), decodedKey)) {
+            } else if (containsIgnoreCase(convention.parentIdKeyAliases(), decodedKeyLowerCase)) {
                 parentId = valueCodex.decode(entry.getValue());
-            } else if (containsIgnoreCase(convention.spanIdKeyAliases(), decodedKey)) {
+            } else if (containsIgnoreCase(convention.spanIdKeyAliases(), decodedKeyLowerCase)) {
                 spanId = valueCodex.decode(entry.getValue());
             }
         }
