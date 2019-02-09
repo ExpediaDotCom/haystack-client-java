@@ -42,9 +42,6 @@
         <module>dropwizard</module>
         <module>dropwizard-metrics</module>
         <module>micrometer</module>
-        <module>opentracing-spring-haystack-starter</module>
-        <module>opentracing-spring-haystack-web-starter</module>
-        <module>opentracing-spring-haystack-cloud-starter</module>
         <module>opencensus</module>
     </modules>
 </project>
