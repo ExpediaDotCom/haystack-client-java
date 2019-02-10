@@ -42,6 +42,5 @@
         <module>dropwizard</module>
         <module>dropwizard-metrics</module>
         <module>micrometer</module>
-        <module>opencensus</module>
     </modules>
 </project>
