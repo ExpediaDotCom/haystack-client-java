@@ -99,18 +99,14 @@ public final class Span implements io.opentracing.Span {
    * @return the endTime
    */
   public Long getStartTime() {
-    synchronized (this) {
       return startTime;
-    }
   }
 
   /**
    * @return the tracer
    */
   public Tracer getTracer() {
-    synchronized (this) {
-      return this.tracer;
-    }
+    return this.tracer;
   }
 
   @Override
@@ -172,23 +168,17 @@ public final class Span implements io.opentracing.Span {
 
   @Override
   public Span setTag(String key, Number value) {
-    synchronized (this) {
-      return addTag(key, value);
-    }
+    return addTag(key, value);
   }
 
   @Override
   public Span setTag(String key, boolean value) {
-    synchronized (this) {
-      return addTag(key, value);
-    }
+    return addTag(key, value);
   }
 
   @Override
   public Span setTag(String key, String value) {
-    synchronized (this) {
-      return addTag(key, value);
-    }
+    return addTag(key, value);
   }
 
   public Map<String, Object> getTags() {
@@ -210,13 +200,6 @@ public final class Span implements io.opentracing.Span {
   }
 
   @Override
-  public Span log(Map<String, ?> fields) {
-    synchronized (this) {
-      return log(System.nanoTime(), fields);
-    }
-  }
-
-  @Override
   public Span log(long timestampMicroseconds, String event) {
     synchronized (this) {
       if (event == null) {
@@ -229,10 +212,14 @@ public final class Span implements io.opentracing.Span {
   }
 
   @Override
+  public Span log(Map<String, ?> fields) {
+    return log(System.nanoTime(), fields);
+  }
+
+
+  @Override
   public Span log(String event) {
-    synchronized (this) {
-      return log(System.nanoTime(), event);
-    }
+    return log(System.nanoTime(), event);
   }
 
   public List<LogData> getLogs() {
@@ -256,13 +243,14 @@ public final class Span implements io.opentracing.Span {
 
 
   private Span addTag(String key, Object value) {
-    if (key == null || value == null) {
+    synchronized (this) {
+      if (key == null || value == null) {
+        return this;
+      }
+      finishedCheck("Setting a tag (%s:%s) on a finished span", key, value);
+      tags.put(key, value);
       return this;
     }
-
-    finishedCheck("Setting a tag (%s:%s) on a finished span", key, value);
-    tags.put(key, value);
-    return this;
   }
 
   private void finishTrace(long finishMicros) {
