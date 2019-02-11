@@ -34,7 +34,7 @@ public class SpanBuilderTest {
     private Tracer tracer;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         dispatcher = new NoopDispatcher();
         tracer = new Tracer.Builder(new NoopMetricsRegistry(), "TestService", dispatcher).build();
     }
@@ -43,7 +43,7 @@ public class SpanBuilderTest {
     public void testBasic() {
         Span span = tracer.buildSpan("test-operation").start();
 
-        Assert.assertEquals("test-operation", span.getOperatioName());
+        Assert.assertEquals("test-operation", span.getOperationName());
     }
 
 
@@ -203,7 +203,7 @@ public class SpanBuilderTest {
         Span child = tracer.buildSpan("child")
                 .withTag("string-key", "string-value")
                 .withTag("boolean-key", false)
-                .withTag("number-key", 1l)
+                .withTag("number-key", 1L)
                 .start();
 
         Map<String, ?> tags = child.getTags();
@@ -214,6 +214,6 @@ public class SpanBuilderTest {
         Assert.assertTrue(tags.containsKey("boolean-key"));
         Assert.assertEquals(false, tags.get("boolean-key"));
         Assert.assertTrue(tags.containsKey("number-key"));
-        Assert.assertEquals(1l, tags.get("number-key"));
+        Assert.assertEquals(1L, tags.get("number-key"));
     }
 }
