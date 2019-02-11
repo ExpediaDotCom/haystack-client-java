@@ -40,7 +40,7 @@ public final class Span implements io.opentracing.Span {
     this.operationName = operationName;
     this.context = context;
     this.startTime = startTime;
-    this.tags = new HashMap<>();
+    this.tags = tags;
     finished = false;
 
     if (references == null) {
