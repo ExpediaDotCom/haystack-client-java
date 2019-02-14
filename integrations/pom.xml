@@ -39,7 +39,6 @@
     </dependencyManagement>
 
     <modules>
-        <module>dropwizard</module>
         <module>dropwizard-metrics</module>
         <module>micrometer</module>
     </modules>
