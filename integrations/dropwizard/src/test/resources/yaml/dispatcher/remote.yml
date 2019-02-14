@@ -1,4 +1,0 @@
-type: remote
-client:
-  type: agent
-  port: 13345

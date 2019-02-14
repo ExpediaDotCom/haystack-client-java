@@ -1,4 +1,0 @@
-com.expedia.haystack.dropwizard.configuration.MetricsFactory
-com.expedia.haystack.dropwizard.configuration.FormatFactory
-com.expedia.haystack.dropwizard.configuration.ClientFactory
-com.expedia.haystack.dropwizard.configuration.DispatcherFactory
