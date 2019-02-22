@@ -16,11 +16,7 @@
  */
 package com.expedia.www.haystack.client.dispatchers.clients;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 
 import org.slf4j.Logger;
@@ -50,9 +46,9 @@ public class InMemoryClient implements Client<Span> {
 
     public InMemoryClient(Metrics metrics, int limit) {
         limiter = new Semaphore(limit);
-        total = new ArrayList<>();
-        received = new ArrayList<>();
-        flushed = new ArrayList<>();
+        total = new LinkedList<>();
+        received = new LinkedList<>();
+        flushed = new LinkedList<>();
 
         this.sendTimer = Timer.builder("send").register(metrics);
         this.sendExceptionCounter = Counter.builder("send").tag(new Tag("state", "exception")).register(metrics);
@@ -72,6 +68,7 @@ public class InMemoryClient implements Client<Span> {
             limiter.acquire();
             total.add(span);
             received.add(span);
+            limiter.release();
             return true;
         } catch (InterruptedException e) {
             sendExceptionCounter.increment();
@@ -92,7 +89,7 @@ public class InMemoryClient implements Client<Span> {
         try (Sample timer = flushTimer.start()) {
             LOGGER.info("Client flushed");
             flushed.addAll(received);
-            received.clear();
+            received = new LinkedList<>();
         }
     }
 

@@ -17,10 +17,7 @@
 package com.expedia.www.haystack.client.dispatchers;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 
 import com.expedia.www.haystack.client.Span;
@@ -44,9 +41,9 @@ public class InMemoryDispatcher implements Dispatcher {
 
     public InMemoryDispatcher(Metrics metrics, int limit) {
         limiter = new Semaphore(limit);
-        reported = new ArrayList<>();
-        received = new ArrayList<>();
-        flushed = new ArrayList<>();
+        reported = new LinkedList<>();
+        received = new LinkedList<>();
+        flushed = new LinkedList<>();
 
         // held in the registry a reference; but we don't need a local reference
         Gauge.builder("reported", reported, Collection::size).register(metrics);
@@ -75,6 +72,7 @@ public class InMemoryDispatcher implements Dispatcher {
 
                 reported.add(span);
                 received.add(span);
+                limiter.release();
             }
         }
     }
@@ -84,7 +82,7 @@ public class InMemoryDispatcher implements Dispatcher {
         synchronized (this) {
             try (Sample timer = flushTimer.start()) {
                 flushed.addAll(reported);
-                reported.clear();
+                reported = new LinkedList<>();
             }
         }
     }
