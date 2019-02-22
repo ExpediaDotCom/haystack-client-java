@@ -17,7 +17,10 @@
 package com.expedia.www.haystack.client.dispatchers;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 import com.expedia.www.haystack.client.Span;

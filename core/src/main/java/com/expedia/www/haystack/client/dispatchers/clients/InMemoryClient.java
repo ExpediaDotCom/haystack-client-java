@@ -16,7 +16,11 @@
  */
 package com.expedia.www.haystack.client.dispatchers.clients;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 import org.slf4j.Logger;
