@@ -7,7 +7,7 @@
     <parent>
       <groupId>com.expedia.www</groupId>
       <artifactId>haystack-client-java-parent</artifactId>
-      <version>0.2.5-SNAPSHOT</version>
+      <version>0.2.6-SNAPSHOT</version>
     </parent>
 
     <artifactId>haystack-client-java-integrations</artifactId>
@@ -39,7 +39,6 @@
     </dependencyManagement>
 
     <modules>
-        <module>dropwizard</module>
         <module>dropwizard-metrics</module>
         <module>micrometer</module>
     </modules>

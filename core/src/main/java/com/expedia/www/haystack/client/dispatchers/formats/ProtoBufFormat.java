@@ -22,13 +22,9 @@ import com.expedia.open.tracing.Tag.TagType;
 import com.expedia.www.haystack.client.LogData;
 import com.expedia.www.haystack.client.Span;
 import com.expedia.www.haystack.client.SpanContext;
-import com.google.protobuf.ByteString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.stream.Collectors;
 
 public class ProtoBufFormat implements Format<com.expedia.open.tracing.Span> {
@@ -47,7 +43,7 @@ public class ProtoBufFormat implements Format<com.expedia.open.tracing.Span> {
         }
 
         builder.setServiceName(span.getServiceName())
-                .setOperationName(span.getOperatioName())
+                .setOperationName(span.getOperationName())
                 .setStartTime(span.getStartTime());
 
         if (span.getDuration() != null) {
@@ -67,7 +63,7 @@ public class ProtoBufFormat implements Format<com.expedia.open.tracing.Span> {
         return builder.build();
     }
 
-    protected Log buildLog(final LogData log) {
+    private Log buildLog(final LogData log) {
         final Log.Builder builder = Log.newBuilder()
             .setTimestamp(log.getTimestamp());
 
@@ -79,7 +75,7 @@ public class ProtoBufFormat implements Format<com.expedia.open.tracing.Span> {
         return builder.build();
     }
 
-    protected Tag buildTag(String key, Object value) {
+    private Tag buildTag(String key, Object value) {
         Tag.Builder builder = Tag.newBuilder().setKey(key);
 
         if (value == null) {
