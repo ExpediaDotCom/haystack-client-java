@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 public interface Timer {
-    public static Builder builder(String name) {
+    static Builder builder(String name) {
         return new Builder(name);
     }
 
@@ -29,7 +29,7 @@ public interface Timer {
      * Updates the statistics kept by the counter with the specified
      * amount in nanoseconds.
      *
-     * @param amount Duration of a single event being measured by this timer.
+     * @param duration Duration of a single event being measured by this timer.
      */
     default void record(long duration) {
         record(duration, TimeUnit.NANOSECONDS);
@@ -38,7 +38,7 @@ public interface Timer {
     /**
      * Updates the statistics kept by the counter with the specified amount.
      *
-     * @param amount Duration of a single event being measured by this timer.
+     * @param duration Duration of a single event being measured by this timer.
      * @param unit   Time unit for the amount being recorded.
      */
     void record(long duration, TimeUnit unit);

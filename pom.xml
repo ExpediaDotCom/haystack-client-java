@@ -34,9 +34,8 @@
   </developers>
 
   <modules>
-    <module>commons</module>
+    <module>metrics</module>
     <module>core</module>
-    <module>integrations</module>
   </modules>
 
   <properties>
