@@ -8,12 +8,13 @@ PASSWORD=${SONATYPE_PASSWORD}
 SHA=${TRAVIS_COMMIT}
 TAG_NAME=${TRAVIS_TAG}
 
-if [[ -z "${USERNAME}" || -z "${PASSWORD}" ]]; then
-    echo "ERROR! Please set SONATYPE_USERNAME and SONATYPE_PASSWORD environment variable"
-    exit 1
-fi
 
 if [[ "${BRANCH}" == 'master' && "${PULL_REQUEST}" == 'false' ]] || [[ -n "${TAG_NAME}" ]]; then
+
+  if [[ -z "${USERNAME}" || -z "${PASSWORD}" ]]; then
+    echo "ERROR! Please set SONATYPE_USERNAME and SONATYPE_PASSWORD environment variable"
+    exit 1
+  fi
   if [[ ! -z "${TAG_NAME}" ]]; then
     echo "Ensuring that pom <version> matches ${TAG_NAME}"
     ./mvnw org.codehaus.mojo:versions-maven-plugin:2.5:set -DnewVersion=${TAG_NAME}
