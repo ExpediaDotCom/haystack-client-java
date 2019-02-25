@@ -9,9 +9,9 @@
         <version>0.2.6-SNAPSHOT</version>
     </parent>
 
-    <artifactId>haystack-client-dropwizard-metrics</artifactId>
+    <artifactId>haystack-client-metrics-dropwizard</artifactId>
     <packaging>jar</packaging>
-    <name>haystack-client-dropwizard-metrics</name>
+    <name>haystack-client-metrics-dropwizard</name>
     <description>Dropwizard metrics for the haystack library</description>
 
     <properties>
