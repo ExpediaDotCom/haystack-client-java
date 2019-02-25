@@ -10,6 +10,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>haystack-client-metrics-api</artifactId>
-
+    <packaging>jar</packaging>
+    <name>haystack-client-dropwizard-api</name>
+    <description>Metrics api consumed by the haystack client library to generate performance metrics for the client integration code</description>
 
 </project>
