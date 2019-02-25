@@ -232,5 +232,4 @@ public class RemoteDispatcher implements Dispatcher {
             return new RemoteDispatcher(metrics, client, acceptQueue, flushInterval, shutdownTimeout, executor);
         }
     }
-
 }
