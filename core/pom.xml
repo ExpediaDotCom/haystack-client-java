@@ -16,7 +16,7 @@
   <dependencies>
     <dependency>
       <groupId>com.expedia.www</groupId>
-      <artifactId>haystack-client-commons</artifactId>
+      <artifactId>haystack-client-metrics-api</artifactId>
       <version>${project.version}</version>
     </dependency>
 

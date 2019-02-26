@@ -2,44 +2,61 @@
 [![codecov](https://codecov.io/gh/ExpediaDotCom/haystack-client-java/branch/master/graph/badge.svg)](https://codecov.io/gh/ExpediaDotCom/haystack-client-java)
 [![License](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg)](https://github.com/ExpediaDotCom/haystack/blob/master/LICENSE)
 
-# haystack-client-java
+# Haystack Client Java 
 
-Haystack bindings for the OpenTracing API. Clients use this library to send trace data to a Haystack server.
+Haystack client java is an [OpenTracing](https://github.com/opentracing/opentracing-java) compatible library which is used to capture information about distributed operations and report them to [haystack](https://expediadotcom.github.io/haystack)
+
 
 Opentracing API usage has been documented at [https://github.com/opentracing/opentracing-java](https://github.com/opentracing/opentracing-java). 
 
-`haystack-client-core` library provides an implementation of `io.opentracing.Tracer` that sends spans to `Haystack` server. 
 
-Integrations for common frameworks are available @ 
+You can look at our sample projects for how to trace a simple web application
 
-* [Dropwizard](integrations/dropwizard/README.md)
-* [Spring Boot and Web](integrations/opentracing-spring-haystack-web-starter/README.md)
-* [Opencencus](integrations/opencensus/README.md)
+* [SpringBoot Example](https://github.com/ExpediaDotCom/opentracing-spring-haystack-example)
+* [Dropwizard Example](https://github.com/ExpediaDotCom/haystack-dropwizard-example) 
+
+## Contributing and Developing
+Please see [CONTRIBUTING.md](CONTRIBUTING.md)
 
 
-## How to build the code
+## Core Modules
 
-### Prerequisites
+[haystack-client-core](./core) -  library provides an implementation of `io.opentracing.Tracer` that sends spans to `Haystack` server. 
 
-* Make sure you have Java 1.8
+## Addon Modules
 
-### Building
+[haystack-client-metrics-micrometer](./metrics/micrometer): metrics provider backed by [micrometer](https://micrometer.io/), to report internal Haystack Client metrics to third-party backends, such as Prometheus
 
-For a full build, including unit tests you can run the following
+[haystack-client-metrics-dropwizard](./metrics/dropwizard-metrics): metrics provider backed by [dropwizard-metrics](https://metrics.dropwizard.io/4.0.0/), to report internal Haystack Client metrics to third-party backends, such as Graphite
 
-```
-./mvnw clean package
-```
+[haystack-client-metrics-api](./metrics/api): metrics api consumed by haystack-client-core to report internal Haystack Client metrics. By default its bundled with a NoOp metrics dispatcher, add any of the obove dependencies to push the client metrics.
 
-### Releases
 
-Latest releases of this library are available in [Maven central](https://mvnrepository.com/search?q=Haystack&d=com.expedia)
+## Importing Dependencies
 
-1. Create a pull request with your changes.
-2. Ask for a review of the pull request; when it is approved, the Travis CI build will upload the resulting SNAPSHOT jar file
-to the [SonaType Staging Repository](https://oss.sonatype.org/#stagingRepositories)
-3. Once merged to master, one can use github https://github.com/ExpediaDotCom/haystack-client-java/releases or manual tagging to the next semantic version
-4. This will cause the build to run for the new tagged version. This will cause the jar files to be released to the 
-[SonaType Release Repository](https://oss.sonatype.org/#nexus-search;quick~haystack-client-java).
-5. Now, update the POM version to next snapshot version for development
-6. Create another pull request with the change from step 5 and get it merged.
+All artifacts are published to Maven Central. Snapshot artifacts are also published to [Sonatype][sonatype].
+Follow these [instructions][sonatype-snapshot-instructions] to add the snapshot repository to your build system.
+
+**Please use the latest version:** [![Released Version][maven-img]][maven]
+
+In the usual case, you just need to include the following dependency to your project:
+```xml
+<dependency>
+  <groupId>com.expedia.www</groupId>
+  <artifactId>haystack-client-java-core</artifactId>
+  <version>$latestClientVersion</version>
+  <type>pom</type>
+</dependency>
+``` 
+
+## Integrations 
+
+In case your apps are already wired in with some kind of instrumentation library other than OpenTracing you could refer to the below links based on your usecase
+
+* [Opencencus](https://github.com/ExpediaDotCom/haystack-opencensus-exporter-java)
+* [Brave-Zipkin](https://github.com/HotelsDotCom/pitchfork)
+
+
+## License
+This project is licensed under the Apache License v2.0 - see the LICENSE.txt file for details.
+

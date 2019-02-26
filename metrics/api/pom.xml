@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>haystack-client-metrics</artifactId>
+        <groupId>com.expedia.www</groupId>
+        <version>0.2.6-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>haystack-client-metrics-api</artifactId>
+    <packaging>jar</packaging>
+    <name>haystack-client-dropwizard-api</name>
+    <description>Metrics api consumed by the haystack client library to generate performance metrics for the client integration code</description>
+
+</project>
