@@ -116,7 +116,7 @@ abstract public class BaseGrpcClient<R> implements Client<R> {
         @Override
         public void onError(Throwable t) {
             onErrorCounter.increment();
-            LOGGER.error("Dispatching span failed with error: {}", t);
+            LOGGER.error("Dispatching span failed with error: " + t, t);
         }
 
         @Override
