@@ -52,7 +52,7 @@
     <grpc.version>1.9.0</grpc.version>
     <jaxrs.version>2.1</jaxrs.version>
     <micrometer.version>1.1.1</micrometer.version>
-    <haystack-commons.version>1.0.41</haystack-commons.version>
+    <haystack-idl-java.version>1.0.64</haystack-idl-java.version>
     <http-client.vesion>4.5.3</http-client.vesion>
 
     <!--Plugin Properties -->
@@ -132,8 +132,8 @@
 
       <dependency>
         <groupId>com.expedia.www</groupId>
-        <artifactId>haystack-commons</artifactId>
-        <version>${haystack-commons.version}</version>
+        <artifactId>haystack-idl-java</artifactId>
+        <version>${haystack-idl-java.version}</version>
       </dependency>
 
       <dependency>

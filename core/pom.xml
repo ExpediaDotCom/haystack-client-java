@@ -22,7 +22,7 @@
 
     <dependency>
       <groupId>com.expedia.www</groupId>
-      <artifactId>haystack-commons</artifactId>
+      <artifactId>haystack-idl-java</artifactId>
     </dependency>
 
     <dependency>
