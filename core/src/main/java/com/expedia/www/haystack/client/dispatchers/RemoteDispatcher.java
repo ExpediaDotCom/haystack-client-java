@@ -17,10 +17,10 @@
 package com.expedia.www.haystack.client.dispatchers;
 
 import com.expedia.www.haystack.client.Span;
-import com.expedia.www.haystack.client.dispatchers.clients.Client;
-import com.expedia.www.haystack.client.dispatchers.clients.ClientException;
 import com.expedia.www.haystack.client.metrics.*;
 import com.expedia.www.haystack.client.metrics.Timer.Sample;
+import com.expedia.www.haystack.remote.clients.Client;
+import com.expedia.www.haystack.remote.clients.ClientException;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;

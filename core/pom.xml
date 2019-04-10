@@ -22,6 +22,12 @@
 
     <dependency>
       <groupId>com.expedia.www</groupId>
+      <artifactId>haystack-remote-clients</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.expedia.www</groupId>
       <artifactId>haystack-idl-java</artifactId>
     </dependency>
 

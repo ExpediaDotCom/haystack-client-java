@@ -17,6 +17,7 @@
 package com.expedia.www.haystack.client.dispatchers.clients;
 
 import com.expedia.www.haystack.client.Span;
+import com.expedia.www.haystack.remote.clients.Client;
 
 public class NoopClient implements Client<Span> {
 

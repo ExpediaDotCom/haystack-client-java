@@ -35,6 +35,7 @@
 
   <modules>
     <module>metrics</module>
+    <module>haystack-remote-clients</module>
     <module>core</module>
   </modules>
 

@@ -14,7 +14,7 @@
  *       limitations under the License.
  *
  */
-package com.expedia.www.haystack.client.dispatchers.clients;
+package com.expedia.www.haystack.remote.clients;
 
 import java.io.Closeable;
 import java.io.Flushable;

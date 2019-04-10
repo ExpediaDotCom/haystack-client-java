@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
+import com.expedia.www.haystack.remote.clients.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
