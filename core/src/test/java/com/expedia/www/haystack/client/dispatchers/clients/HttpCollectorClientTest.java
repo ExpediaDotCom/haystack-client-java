@@ -22,6 +22,7 @@ import com.expedia.www.haystack.client.SpanContext;
 import com.expedia.www.haystack.client.Tracer;
 import com.expedia.www.haystack.client.dispatchers.InMemoryDispatcher;
 import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
+import com.expedia.www.haystack.remote.clients.ClientException;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;

@@ -19,6 +19,9 @@ package com.expedia.www.haystack.client.dispatchers.clients;
 import com.expedia.www.haystack.client.Span;
 import com.expedia.www.haystack.client.dispatchers.formats.Format;
 import com.expedia.www.haystack.client.dispatchers.formats.ProtoBufFormat;
+import com.expedia.www.haystack.remote.clients.BaseHttpClient;
+import com.expedia.www.haystack.remote.clients.Client;
+import com.expedia.www.haystack.remote.clients.ClientException;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.util.Collections;

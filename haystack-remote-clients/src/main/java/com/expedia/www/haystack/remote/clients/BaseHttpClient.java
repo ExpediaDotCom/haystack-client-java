@@ -15,7 +15,7 @@
  *
  */
 
-package com.expedia.www.haystack.client.dispatchers.clients;
+package com.expedia.www.haystack.remote.clients;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.http.Header;
@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-abstract class BaseHttpClient {
+public abstract class BaseHttpClient {
     private final String endpoint;
     private final BasicHeader[] headers;
     private final CloseableHttpClient httpClient;

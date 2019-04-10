@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.expedia.www</groupId>
     <artifactId>haystack-client-java-parent</artifactId>
-    <version>0.2.6-SNAPSHOT</version>
+    <version>0.2.7-SNAPSHOT</version>
   </parent>
 
   <artifactId>haystack-client-core</artifactId>
@@ -17,6 +17,12 @@
     <dependency>
       <groupId>com.expedia.www</groupId>
       <artifactId>haystack-client-metrics-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.expedia.www</groupId>
+      <artifactId>haystack-remote-clients</artifactId>
       <version>${project.version}</version>
     </dependency>
 

@@ -15,7 +15,7 @@
  *
  */
 
-package com.expedia.www.haystack.client.dispatchers.clients;
+package com.expedia.www.haystack.remote.clients;
 
 import com.expedia.open.tracing.agent.api.DispatchResult;
 import com.expedia.open.tracing.agent.api.SpanAgentGrpc;

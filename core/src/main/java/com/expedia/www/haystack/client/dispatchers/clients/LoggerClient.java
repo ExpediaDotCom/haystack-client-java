@@ -18,6 +18,7 @@ package com.expedia.www.haystack.client.dispatchers.clients;
 
 import java.util.Arrays;
 
+import com.expedia.www.haystack.remote.clients.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
