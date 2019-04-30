@@ -25,9 +25,9 @@ import java.util.Map.Entry;
 public class SpanContext implements io.opentracing.SpanContext {
 
     private final Map<String, String> baggage;
-    private final UUID traceId;
-    private final UUID spanId;
-    private final UUID parentId;
+    private final Object traceId;
+    private final Object spanId;
+    private final Object parentId;
     private boolean extractedContext;
 
     public SpanContext(UUID traceId, UUID spanId, UUID parentId) {
@@ -55,6 +55,22 @@ public class SpanContext implements io.opentracing.SpanContext {
         this.extractedContext = extractedContext;
     }
 
+
+    SpanContext(Object traceId, Object spanId, Object parentId, Map<String, String> baggage, boolean extractedContext) {
+        if (baggage == null) {
+            throw new NullPointerException();
+        }
+
+        this.traceId = traceId;
+        this.spanId = spanId;
+        this.parentId = parentId;
+        this.baggage = Collections.unmodifiableMap(baggage);
+        this.extractedContext = extractedContext;
+    }
+
+    public SpanContext(Object traceId, Object spanId, Object parentId, boolean extractedContext) {
+        this(traceId, spanId, parentId, Collections.emptyMap(), extractedContext);
+    }
     @Override
     public int hashCode() {
         return Objects.hash(traceId, spanId, parentId, baggage);
@@ -104,23 +120,23 @@ public class SpanContext implements io.opentracing.SpanContext {
     /**
      * @return the traceId
      */
-    public UUID getTraceId() {
+    public Object getTraceId() {//check whether we use these function outside our project
         return traceId;
     }
 
     /**
      * @return the spanId
      */
-    public UUID getSpanId() {
+    public Object getSpanId() {
         return spanId;
-    }
+    }//check whether we use these function outside our project
 
     /**
      * @return the parentId
      */
-    public UUID getParentId() {
+    public Object getParentId() {
         return parentId;
-    }
+    }//check whether we use these function outside our project
 
     boolean isExtractedContext() {
         return extractedContext;
