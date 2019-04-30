@@ -24,6 +24,7 @@ import com.expedia.www.haystack.client.propagation.Extractor;
 import com.expedia.www.haystack.client.propagation.Injector;
 import com.expedia.www.haystack.client.propagation.PropagationRegistry;
 import com.expedia.www.haystack.client.propagation.TextMapPropagator;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.opentracing.References;
 import io.opentracing.Scope;
 import io.opentracing.ScopeManager;
@@ -40,6 +41,7 @@ import java.util.*;
 
 public class Tracer implements io.opentracing.Tracer {
     private final Dispatcher dispatcher;
+    private final IdGenerator idGenerator;
     protected final Clock clock;
     protected final PropagationRegistry registry;
     private final String serviceName;
@@ -64,14 +66,23 @@ public class Tracer implements io.opentracing.Tracer {
 
     public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
                   Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics) {
-        this(serviceName, scopeManager, clock, dispatcher, registry, metrics, false);
-
+        this(serviceName, scopeManager, clock, new UUIDv4Generator(), dispatcher, registry, metrics);
     }
     public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
-                  Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics, boolean dualSpanMode) {
+                  Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics, Boolean dualSpanMode) {
+        this(serviceName, scopeManager, clock, new UUIDv4Generator(), dispatcher, registry, metrics, dualSpanMode);
+    }
+    public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
+                  IdGenerator idGenerator, Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics) {
+        this(serviceName, scopeManager, clock, idGenerator, dispatcher, registry, metrics, false);
+    }
+    public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
+                  IdGenerator idGenerator, Dispatcher dispatcher, PropagationRegistry registry,
+                  Metrics metrics, boolean dualSpanMode) {
         this.serviceName = serviceName;
         this.scopeManager = scopeManager;
         this.clock = clock;
+        this.idGenerator = idGenerator;
         this.dispatcher = dispatcher;
         this.registry = registry;
         this.dualSpanMode = dualSpanMode;
@@ -272,7 +283,8 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         protected SpanContext createNewContext() {
-            return createContext(UUID.randomUUID(), UUID.randomUUID(), null, Collections.emptyMap());
+
+            return createContext(tracer.idGenerator.generateId(), tracer.idGenerator.generateId(), null, Collections.emptyMap());
         }
 
         protected SpanContext createContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage) {
@@ -360,6 +372,7 @@ public class Tracer implements io.opentracing.Tracer {
         protected Dispatcher dispatcher;
         protected PropagationRegistry registry = new PropagationRegistry();
         protected Metrics metrics;
+        protected IdGenerator idGenerator;
         private boolean dualSpanMode;
 
         public Builder(MetricsRegistry registry, String serviceName, Dispatcher dispatcher) {
@@ -388,6 +401,10 @@ public class Tracer implements io.opentracing.Tracer {
         public Builder withClock(Clock clock) {
             this.clock = clock;
             return this;
+        }
+
+        public Builder withIdGenerator(IdGenerator idGenerator) {
+            this.idGenerator = idGenerator;
         }
 
         public <T> Builder withFormat(Format<T> format, Injector<T> injector) {
@@ -422,6 +439,9 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         public Tracer build() {
+            if (idGenerator != null) {
+                return new Tracer(serviceName, scopeManager, clock, idGenerator, dispatcher, registry, metrics, dualSpanMode);
+            }
             return new Tracer(serviceName, scopeManager, clock, dispatcher, registry, metrics, dualSpanMode);
         }
     }
