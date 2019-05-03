@@ -64,14 +64,6 @@ public class Tracer implements io.opentracing.Tracer {
     private final Counter extractFailureCounter;
 
     public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
-                  Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics) {
-        this(serviceName, scopeManager, clock, new UUIDv4Generator(), dispatcher, registry, metrics);
-    }
-    public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
-                  Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics, Boolean dualSpanMode) {
-        this(serviceName, scopeManager, clock, new UUIDv4Generator(), dispatcher, registry, metrics, dualSpanMode);
-    }
-    public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
                   IdGenerator idGenerator, Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics) {
         this(serviceName, scopeManager, clock, idGenerator, dispatcher, registry, metrics, false);
     }
@@ -283,7 +275,7 @@ public class Tracer implements io.opentracing.Tracer {
 
         protected SpanContext createNewContext() {
 
-            return createContext(tracer.idGenerator.generateId(), tracer.idGenerator.generateId(), null, Collections.emptyMap());
+            return createContext(tracer.idGenerator.generate(), tracer.idGenerator.generate(), null, Collections.emptyMap());
         }
         //remove
         protected SpanContext createContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage) {
@@ -444,10 +436,8 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         public Tracer build() {
-            if (idGenerator != null) {
-                return new Tracer(serviceName, scopeManager, clock, idGenerator, dispatcher, registry, metrics, dualSpanMode);
-            }
-            return new Tracer(serviceName, scopeManager, clock, dispatcher, registry, metrics, dualSpanMode);
+            idGenerator = idGenerator == null ? new LongIdGenerator() : idGenerator;
+            return new Tracer(serviceName, scopeManager, clock, idGenerator, dispatcher, registry, metrics, dualSpanMode);
         }
     }
 }

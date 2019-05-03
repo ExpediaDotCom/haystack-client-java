@@ -5,7 +5,7 @@ import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+
 
 public class TracerBuildTest {
 
@@ -28,7 +28,7 @@ public class TracerBuildTest {
 
     @Test
     public void testTracerBuildUUIDv3IdGenerator(){
-        IdGenerator idGenerator = new UUIDv3Generator();
+        IdGenerator idGenerator = new UUIDv3Generator("time");
         Tracer.Builder tracerBuild = new Tracer.Builder(new NoopMetricsRegistry(), "TestTracer", new NoopDispatcher());
         tracerBuild.withIdGenerator(idGenerator);
         Tracer tracer = tracerBuild.build();
