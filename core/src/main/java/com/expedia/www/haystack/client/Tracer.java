@@ -17,6 +17,8 @@
 package com.expedia.www.haystack.client;
 
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
+import com.expedia.www.haystack.client.idgenerators.IdGenerator;
+import com.expedia.www.haystack.client.idgenerators.LongIdGenerator;
 import com.expedia.www.haystack.client.metrics.*;
 import com.expedia.www.haystack.client.metrics.Timer;
 import com.expedia.www.haystack.client.metrics.Timer.Sample;
@@ -39,7 +41,12 @@ import java.io.IOException;
 import java.util.*;
 
 public class Tracer implements io.opentracing.Tracer {
+
+    private final static IdGenerator DEFAULT_ID_GENERATOR = new LongIdGenerator();
+    private final static Boolean DEFAULT_DUAL_SPAN_MODE = false;
+
     private final Dispatcher dispatcher;
+    private final IdGenerator idGenerator;
     protected final Clock clock;
     protected final PropagationRegistry registry;
     private final String serviceName;
@@ -64,14 +71,15 @@ public class Tracer implements io.opentracing.Tracer {
 
     public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
                   Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics) {
-        this(serviceName, scopeManager, clock, dispatcher, registry, metrics, false);
-
+        this(serviceName, scopeManager, clock, dispatcher, registry, metrics, DEFAULT_DUAL_SPAN_MODE, DEFAULT_ID_GENERATOR);
     }
     public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
-                  Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics, boolean dualSpanMode) {
+                  Dispatcher dispatcher, PropagationRegistry registry,
+                  Metrics metrics, boolean dualSpanMode, IdGenerator idGenerator) {
         this.serviceName = serviceName;
         this.scopeManager = scopeManager;
         this.clock = clock;
+        this.idGenerator = idGenerator;
         this.dispatcher = dispatcher;
         this.registry = registry;
         this.dualSpanMode = dualSpanMode;
@@ -272,10 +280,16 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         protected SpanContext createNewContext() {
-            return createContext(UUID.randomUUID(), UUID.randomUUID(), null, Collections.emptyMap());
+
+            return createContext(tracer.idGenerator.generate(), tracer.idGenerator.generate(), null, Collections.emptyMap());
         }
 
         protected SpanContext createContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage) {
+            return new SpanContext(traceId, spanId, parentId, baggage, false);
+        }
+
+
+        protected SpanContext createContext(Object traceId, Object spanId, Object parentId, Map<String, String> baggage) {//doubt parentId
             return new SpanContext(traceId, spanId, parentId, baggage, false);
         }
 
@@ -360,6 +374,7 @@ public class Tracer implements io.opentracing.Tracer {
         protected Dispatcher dispatcher;
         protected PropagationRegistry registry = new PropagationRegistry();
         protected Metrics metrics;
+        protected IdGenerator idGenerator;
         private boolean dualSpanMode;
 
         public Builder(MetricsRegistry registry, String serviceName, Dispatcher dispatcher) {
@@ -387,6 +402,11 @@ public class Tracer implements io.opentracing.Tracer {
 
         public Builder withClock(Clock clock) {
             this.clock = clock;
+            return this;
+        }
+
+        public Builder withIdGenerator(IdGenerator idGenerator) {
+            this.idGenerator = idGenerator;
             return this;
         }
 
@@ -422,7 +442,8 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         public Tracer build() {
-            return new Tracer(serviceName, scopeManager, clock, dispatcher, registry, metrics, dualSpanMode);
+            idGenerator = idGenerator == null ? DEFAULT_ID_GENERATOR : idGenerator;
+            return new Tracer(serviceName, scopeManager, clock, dispatcher, registry, metrics, dualSpanMode, idGenerator);
         }
     }
 }

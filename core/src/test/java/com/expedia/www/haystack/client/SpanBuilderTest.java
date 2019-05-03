@@ -18,6 +18,7 @@ package com.expedia.www.haystack.client;
 
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
 import com.expedia.www.haystack.client.dispatchers.NoopDispatcher;
+import com.expedia.www.haystack.client.idgenerators.RandomUUIDGenerator;
 import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 import com.expedia.www.haystack.client.propagation.MapBackedTextMap;
 import io.opentracing.References;
@@ -67,7 +68,7 @@ public class SpanBuilderTest {
         //create a client span
         final Tracer clientTracer = new Tracer.Builder(new NoopMetricsRegistry(),
                                                        "ClientService",
-                                                       dispatcher).withDualSpanMode().build();
+                                                       dispatcher).withDualSpanMode().withIdGenerator(new RandomUUIDGenerator()).build();
         final Span clientSpan = clientTracer.buildSpan("Api_call")
                 .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
                 .start();
@@ -77,7 +78,7 @@ public class SpanBuilderTest {
         //create a server
         final Tracer serverTracer = new Tracer.Builder(new NoopMetricsRegistry(),
                                                        "ServerService",
-                                                       dispatcher).withDualSpanMode().build();
+                                                       dispatcher).withDualSpanMode().withIdGenerator(new RandomUUIDGenerator()).build();
         final SpanContext wireContext = serverTracer.extract(Format.Builtin.TEXT_MAP, wireData);
         final Span serverSpan = serverTracer.buildSpan("Api")
                 .asChildOf(wireContext)
@@ -97,7 +98,7 @@ public class SpanBuilderTest {
         //create a client span
         final Tracer clientTracer = new Tracer.Builder(new NoopMetricsRegistry(),
                                                        "ClientService",
-                                                       dispatcher).build();
+                                                       dispatcher).withIdGenerator(new RandomUUIDGenerator()).build();
         final Span clientSpan = clientTracer.buildSpan("Api_call")
                 .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
                 .start();
@@ -107,7 +108,7 @@ public class SpanBuilderTest {
         //create a server
         final Tracer serverTracer = new Tracer.Builder(new NoopMetricsRegistry(),
                                                        "ServerService",
-                                                       dispatcher).build();
+                                                       dispatcher).withIdGenerator(new RandomUUIDGenerator()).build();
         final SpanContext wireContext = serverTracer.extract(Format.Builtin.TEXT_MAP, wireData);
         final Span serverSpan = serverTracer.buildSpan("Api")
                 .asChildOf(wireContext)
@@ -128,7 +129,8 @@ public class SpanBuilderTest {
         //create a client span
         final Tracer clientTracer = new Tracer.Builder(new NoopMetricsRegistry(),
                                                        "ClientService",
-                                                       dispatcher).build();
+                                                       dispatcher).withIdGenerator(new RandomUUIDGenerator()).build();
+
         final Span clientSpan = clientTracer.buildSpan("Api_call")
                 .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
                 .start();
@@ -157,7 +159,7 @@ public class SpanBuilderTest {
         //create a client span
         final Tracer clientTracer = new Tracer.Builder(new NoopMetricsRegistry(),
                                                        "ClientService",
-                                                       dispatcher).build();
+                                                       dispatcher).withIdGenerator(new RandomUUIDGenerator()).build();
         final Span clientSpan = clientTracer.buildSpan("Api_call")
                 .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)
                 .start();
@@ -167,7 +169,7 @@ public class SpanBuilderTest {
         //create a server
         final Tracer serverTracer = new Tracer.Builder(new NoopMetricsRegistry(),
                                                        "ServerService",
-                                                       dispatcher).build();
+                                                       dispatcher).withIdGenerator(new RandomUUIDGenerator()).build();
         final SpanContext wireContext = serverTracer.extract(Format.Builtin.TEXT_MAP, wireData);
         final Span serverSpan = serverTracer.buildSpan("Api")
                 .asChildOf(wireContext)
