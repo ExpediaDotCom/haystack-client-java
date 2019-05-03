@@ -14,14 +14,8 @@
  *       limitations under the License.
  *
  */
-package com.expedia.www.haystack.client;
+package com.expedia.www.haystack.client.idgenerators;
 
-import java.util.UUID;
-
-public class UUIDv4Generator implements IdGenerator {
-
-    @Override
-    public UUID generate() {
-        return UUID.randomUUID();
-    }
+public interface IdGenerator {
+    Object generate();
 }

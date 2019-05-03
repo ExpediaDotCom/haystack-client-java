@@ -17,6 +17,8 @@
 package com.expedia.www.haystack.client;
 
 import com.expedia.www.haystack.client.dispatchers.Dispatcher;
+import com.expedia.www.haystack.client.idgenerators.IdGenerator;
+import com.expedia.www.haystack.client.idgenerators.LongIdGenerator;
 import com.expedia.www.haystack.client.metrics.*;
 import com.expedia.www.haystack.client.metrics.Timer;
 import com.expedia.www.haystack.client.metrics.Timer.Sample;

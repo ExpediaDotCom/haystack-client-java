@@ -14,15 +14,15 @@
  *       limitations under the License.
  *
  */
-package com.expedia.www.haystack.client;
+package com.expedia.www.haystack.client.idgenerators;
 
 
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.UUID;
 
-public class LongIdGenerator implements IdGenerator {
+public class RandomUUIDGenerator implements IdGenerator {
 
     @Override
-    public Long generate() {
-        return ThreadLocalRandom.current().nextLong(Long.MAX_VALUE);
+    public UUID generate() {
+        return UUID.randomUUID();
     }
 }

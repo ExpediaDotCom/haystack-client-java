@@ -17,6 +17,10 @@
 package com.expedia.www.haystack.client;
 
 import com.expedia.www.haystack.client.dispatchers.NoopDispatcher;
+import com.expedia.www.haystack.client.idgenerators.IdGenerator;
+import com.expedia.www.haystack.client.idgenerators.LongIdGenerator;
+import com.expedia.www.haystack.client.idgenerators.RandomUUIDGenerator;
+import com.expedia.www.haystack.client.idgenerators.TimeBasedUUIDGenerator;
 import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 import org.junit.Assert;
 import org.junit.Test;
@@ -44,7 +48,7 @@ public class TracerBuildTest {
 
     @Test
     public void testTracerBuildUUIDv3IdGenerator(){
-        IdGenerator idGenerator = new UUIDv3Generator("time");
+        IdGenerator idGenerator = new TimeBasedUUIDGenerator();
         Tracer.Builder tracerBuild = new Tracer.Builder(new NoopMetricsRegistry(), "TestTracer", new NoopDispatcher());
         tracerBuild.withIdGenerator(idGenerator);
         Tracer tracer = tracerBuild.build();
@@ -53,7 +57,7 @@ public class TracerBuildTest {
 
     @Test
     public void testTracerBuildUUIDv4IdGenerator(){
-        IdGenerator idGenerator = new UUIDv4Generator();
+        IdGenerator idGenerator = new RandomUUIDGenerator();
         Tracer.Builder tracerBuild = new Tracer.Builder(new NoopMetricsRegistry(), "TestTracer", new NoopDispatcher());
         tracerBuild.withIdGenerator(idGenerator);
         Tracer tracer = tracerBuild.build();

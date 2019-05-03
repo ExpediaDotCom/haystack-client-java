@@ -14,8 +14,17 @@
  *       limitations under the License.
  *
  */
-package com.expedia.www.haystack.client;
+package com.expedia.www.haystack.client.idgenerators;
 
-public interface IdGenerator {
-    Object generate();
+
+import com.expedia.www.haystack.client.idgenerators.IdGenerator;
+
+import java.util.concurrent.ThreadLocalRandom;
+
+public class LongIdGenerator implements IdGenerator {
+
+    @Override
+    public Long generate() {
+        return ThreadLocalRandom.current().nextLong(Long.MAX_VALUE);
+    }
 }

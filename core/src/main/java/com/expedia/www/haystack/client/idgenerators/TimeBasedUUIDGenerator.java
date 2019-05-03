@@ -14,21 +14,16 @@
  *       limitations under the License.
  *
  */
-package com.expedia.www.haystack.client;
+package com.expedia.www.haystack.client.idgenerators;
+
 
 import com.fasterxml.uuid.Generators;
-import com.fasterxml.uuid.NoArgGenerator;
 
-public class UUIDv3Generator implements IdGenerator {
 
-    private final NoArgGenerator generator ;
-
-    UUIDv3Generator(String type){
-        generator = type.equals("time")? Generators.timeBasedGenerator(): Generators.randomBasedGenerator();
-    }
+public class TimeBasedUUIDGenerator implements IdGenerator {
 
     @Override
     public Object generate() {
-        return generator.generate();
+        return Generators.timeBasedGenerator().generate();
     }
 }
