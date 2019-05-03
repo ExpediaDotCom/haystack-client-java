@@ -68,6 +68,10 @@ public class SpanContext implements io.opentracing.SpanContext {
         this.extractedContext = extractedContext;
     }
 
+    public SpanContext(Object traceId, Object spanId, Object parentId) {
+        this(traceId, spanId, parentId, false);
+    }
+
     public SpanContext(Object traceId, Object spanId, Object parentId, boolean extractedContext) {
         this(traceId, spanId, parentId, Collections.emptyMap(), extractedContext);
     }
@@ -120,7 +124,7 @@ public class SpanContext implements io.opentracing.SpanContext {
     /**
      * @return the traceId
      */
-    public Object getTraceId() {//check whether we use these function outside our project
+    public Object getTraceId() {
         return traceId;
     }
 
@@ -129,14 +133,14 @@ public class SpanContext implements io.opentracing.SpanContext {
      */
     public Object getSpanId() {
         return spanId;
-    }//check whether we use these function outside our project
+    }
 
     /**
      * @return the parentId
      */
     public Object getParentId() {
         return parentId;
-    }//check whether we use these function outside our project
+    }
 
     boolean isExtractedContext() {
         return extractedContext;
