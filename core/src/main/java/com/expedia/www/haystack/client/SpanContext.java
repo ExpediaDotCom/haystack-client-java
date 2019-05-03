@@ -16,6 +16,7 @@
  */
 package com.expedia.www.haystack.client;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -44,9 +45,7 @@ public class SpanContext implements io.opentracing.SpanContext {
     }
 
     SpanContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage, boolean extractedContext) {
-        if (baggage == null) {
-            throw new NullPointerException();
-        }
+        Validate.notNull(baggage);
 
         this.traceId = traceId;
         this.spanId = spanId;
@@ -57,9 +56,7 @@ public class SpanContext implements io.opentracing.SpanContext {
 
 
     SpanContext(Object traceId, Object spanId, Object parentId, Map<String, String> baggage, boolean extractedContext) {
-        if (baggage == null) {
-            throw new NullPointerException();
-        }
+        Validate.notNull(baggage);
 
         this.traceId = traceId;
         this.spanId = spanId;
