@@ -24,7 +24,6 @@ import com.expedia.www.haystack.client.propagation.Extractor;
 import com.expedia.www.haystack.client.propagation.Injector;
 import com.expedia.www.haystack.client.propagation.PropagationRegistry;
 import com.expedia.www.haystack.client.propagation.TextMapPropagator;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.opentracing.References;
 import io.opentracing.Scope;
 import io.opentracing.ScopeManager;
