@@ -21,17 +21,10 @@ import com.fasterxml.uuid.NoArgGenerator;
 
 public class UUIDv3Generator implements IdGenerator {
 
-    private NoArgGenerator generator ;
+    private final NoArgGenerator generator ;
 
     UUIDv3Generator(String type){
-        generator = getGeneratorByString(type);
-    }
-
-    public NoArgGenerator getGeneratorByString(String type){
-        if(type == "time"){
-            return Generators.timeBasedGenerator();
-        }
-        return Generators.randomBasedGenerator();
+        generator = type.equals("time")? Generators.timeBasedGenerator(): Generators.randomBasedGenerator();
     }
 
     @Override
