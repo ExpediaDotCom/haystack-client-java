@@ -41,6 +41,10 @@ import java.io.IOException;
 import java.util.*;
 
 public class Tracer implements io.opentracing.Tracer {
+
+    private final static IdGenerator DEFAULT_ID_GENERATOR = new LongIdGenerator();
+    private final static Boolean DEFAULT_DUAL_SPAN_MODE = false;
+
     private final Dispatcher dispatcher;
     private final IdGenerator idGenerator;
     protected final Clock clock;
@@ -66,12 +70,12 @@ public class Tracer implements io.opentracing.Tracer {
     private final Counter extractFailureCounter;
 
     public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
-                  IdGenerator idGenerator, Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics) {
-        this(serviceName, scopeManager, clock, idGenerator, dispatcher, registry, metrics, false);
+                  Dispatcher dispatcher, PropagationRegistry registry, Metrics metrics) {
+        this(serviceName, scopeManager, clock, dispatcher, registry, metrics, DEFAULT_DUAL_SPAN_MODE, DEFAULT_ID_GENERATOR);
     }
     public Tracer(String serviceName, ScopeManager scopeManager, Clock clock,
-                  IdGenerator idGenerator, Dispatcher dispatcher, PropagationRegistry registry,
-                  Metrics metrics, boolean dualSpanMode) {
+                  Dispatcher dispatcher, PropagationRegistry registry,
+                  Metrics metrics, boolean dualSpanMode, IdGenerator idGenerator) {
         this.serviceName = serviceName;
         this.scopeManager = scopeManager;
         this.clock = clock;
@@ -438,8 +442,8 @@ public class Tracer implements io.opentracing.Tracer {
         }
 
         public Tracer build() {
-            idGenerator = idGenerator == null ? new LongIdGenerator() : idGenerator;
-            return new Tracer(serviceName, scopeManager, clock, idGenerator, dispatcher, registry, metrics, dualSpanMode);
+            idGenerator = idGenerator == null ? DEFAULT_ID_GENERATOR : idGenerator;
+            return new Tracer(serviceName, scopeManager, clock, dispatcher, registry, metrics, dualSpanMode, idGenerator);
         }
     }
 }
