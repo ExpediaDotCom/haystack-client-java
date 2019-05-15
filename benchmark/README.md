@@ -5,13 +5,13 @@ One of the deciding factor for performance of haystack client is the Id Generati
 We have benchmark the performance of client with each Id Generator Implementations:
 
 ### Using Long-ID Implementation
-![Long-ID Implementation](longIDjmhvisulaizer.png)
+![Long-ID Implementation](images/longIDjmhvisulaizer.png)
 
 ### Using Random-UUID-ID Implementation
-![Long-ID Implementation](randomuuid.png)
+![Long-ID Implementation](images/randomuuid.png)
 
 ### Using TimeBased-UUID-ID Implementation
-![Long-ID Implementation](timebaseduuid.png)
+![Long-ID Implementation](images/timebaseduuid.png)
 
 
 ## To Measure Performance of client
