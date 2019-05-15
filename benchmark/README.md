@@ -1,4 +1,4 @@
-#Benchmarks
+# Benchmarks
 
 
 Using Long-ID Implementation
@@ -11,7 +11,7 @@ Using TimeBased-UUID-ID Implementation
 ![Long-ID Implementation](timebaseduuid.png)
 
 
-##To Measure Performance of your custom ID Implementation
+## To Measure Performance of your custom ID Implementation
 
 
 There are more than one way to implement the Id generator for traces and span. There are three default implementations : LongId Generator, RandomUUID Generator, TimeBasedUUID Generator. The Id Generators were implemented based on the uniqueness and performance.For eg.Long ID Generator will not be able to give uniqueness as compared to UUID implementations, while the performance of Long ID generator is better.You are free to add your own ID generator implementations.

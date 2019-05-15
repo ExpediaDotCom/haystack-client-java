@@ -60,3 +60,5 @@ In case your apps are already wired in with some kind of instrumentation library
 ## License
 This project is licensed under the Apache License v2.0 - see the LICENSE.txt file for details.
 
+## Benchmarks
+We have published our benchmarks [here](benchmark/README.md)
