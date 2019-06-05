@@ -324,7 +324,7 @@ public class Tracer implements io.opentracing.Tracer {
             }
 
             return createContext(parent.getContext().getTraceId(),
-                    UUID.randomUUID(),
+                    tracer.idGenerator.generate(),
                     parent.getContext().getSpanId(),
                     baggage);
         }
