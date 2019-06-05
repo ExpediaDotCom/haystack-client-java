@@ -36,7 +36,7 @@ public class TracerPropagationTest {
     private Tracer tracer;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         tracer = new Tracer.Builder(new NoopMetricsRegistry(), "TestTracer", new NoopDispatcher()).build();
     }
 
@@ -46,7 +46,7 @@ public class TracerPropagationTest {
         UUID spanId = UUID.randomUUID();
         UUID parentId = UUID.randomUUID();
 
-        String carrier = new String();
+        String carrier = "";
 
         SpanContext context = new SpanContext(traceId, spanId, parentId).addBaggage("TEST", "TEXT");
 
@@ -112,9 +112,9 @@ public class TracerPropagationTest {
 
         SpanContext context = tracer.extract(Format.Builtin.TEXT_MAP, carrier);
 
-        Assert.assertEquals(context.getTraceId(), traceId);
-        Assert.assertEquals(context.getSpanId(), spanId);
-        Assert.assertEquals(context.getParentId(), parentId);
+        Assert.assertEquals(context.getTraceId(), traceId.toString());
+        Assert.assertEquals(context.getSpanId(), spanId.toString());
+        Assert.assertEquals(context.getParentId(), parentId.toString());
         Assert.assertEquals(context.getBaggage().size(), 1);
         Assert.assertEquals(context.getBaggageItem("TEST"), "TEXT");
     }
@@ -137,9 +137,9 @@ public class TracerPropagationTest {
 
         SpanContext context = tracer.extract(Format.Builtin.HTTP_HEADERS, carrier);
 
-        Assert.assertEquals(context.getTraceId(), traceId);
-        Assert.assertEquals(context.getSpanId(), spanId);
-        Assert.assertEquals(context.getParentId(), parentId);
+        Assert.assertEquals(context.getTraceId(), traceId.toString());
+        Assert.assertEquals(context.getSpanId(), spanId.toString());
+        Assert.assertEquals(context.getParentId(), parentId.toString());
         Assert.assertEquals(context.getBaggage().size(), 0);
     }
 
@@ -176,9 +176,9 @@ public class TracerPropagationTest {
 
         SpanContext context = tracer.extract(Format.Builtin.HTTP_HEADERS, carrier);
 
-        Assert.assertEquals(context.getTraceId(), traceId);
-        Assert.assertEquals(context.getSpanId(), spanId);
-        Assert.assertEquals(context.getParentId(), parentId);
+        Assert.assertEquals(context.getTraceId(), traceId.toString());
+        Assert.assertEquals(context.getSpanId(), spanId.toString());
+        Assert.assertEquals(context.getParentId(), parentId.toString());
         Assert.assertEquals(context.getBaggage().size(), 2);
         Assert.assertEquals(context.getBaggageItem("TEST"), "!@##*^ %^&&(*");
         Assert.assertEquals(context.getBaggageItem("!@##*^ %^&&(*"), "TEST");

@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class TextMapPropagatorTest {
+
     @Test
     public void propagatorExtractsSpanContextIdentitiesAsExpected() {
         final KeyConvention keyConvention = new DefaultKeyConvention();
@@ -24,6 +25,56 @@ public class TextMapPropagatorTest {
                             "30898bb0-f836-43fb-ad69-44969f15e52d", spanContext.getSpanId().toString());
         Assert.assertEquals("parent-id was not extracted correctly",
                             "3a0bc1c1-504f-4f5d-907b-9b4522453bcf", spanContext.getParentId().toString());
+    }
+
+    @Test
+    public void propagatorExtractsNonUUIDSpanContextIdentitiesAsExpected() {
+        final KeyConvention keyConvention = new DefaultKeyConvention();
+        final TextMapPropagator propagator = new TextMapPropagator.Builder().withKeyConvention(keyConvention).build();
+        final MapBackedTextMap carrier = new MapBackedTextMap();
+
+        carrier.put(keyConvention.traceIdKey(), "1234");
+        carrier.put(keyConvention.spanIdKey(), "5678");
+        carrier.put(keyConvention.parentIdKey(), "9012");
+
+        final SpanContext spanContext = propagator.extract(carrier);
+
+        Assert.assertEquals("trace-id was not extracted correctly",
+                "1234", spanContext.getTraceId().toString());
+        Assert.assertEquals("span-id was not extracted correctly",
+                "5678", spanContext.getSpanId().toString());
+        Assert.assertEquals("parent-id was not extracted correctly",
+                "9012", spanContext.getParentId().toString());
+    }
+
+    @Test
+    public void nullSpanContextIsReturnedIfTraceIdIsNull() {
+        final KeyConvention keyConvention = new DefaultKeyConvention();
+        final TextMapPropagator propagator = new TextMapPropagator.Builder().withKeyConvention(keyConvention).build();
+        final MapBackedTextMap carrier = new MapBackedTextMap();
+
+        carrier.put(keyConvention.traceIdKey(), null);
+        carrier.put(keyConvention.spanIdKey(), "5678");
+        carrier.put(keyConvention.parentIdKey(), "9012");
+
+        final SpanContext spanContext = propagator.extract(carrier);
+
+        Assert.assertNull("Expected a null spanContext", spanContext);
+    }
+
+    @Test
+    public void nullSpanContextIsReturnedIfSpanIdIsNull() {
+        final KeyConvention keyConvention = new DefaultKeyConvention();
+        final TextMapPropagator propagator = new TextMapPropagator.Builder().withKeyConvention(keyConvention).build();
+        final MapBackedTextMap carrier = new MapBackedTextMap();
+
+        carrier.put(keyConvention.traceIdKey(), "1234");
+        carrier.put(keyConvention.spanIdKey(), null);
+        carrier.put(keyConvention.parentIdKey(), "9012");
+
+        final SpanContext spanContext = propagator.extract(carrier);
+
+        Assert.assertNull("Expected a null spanContext", spanContext);
     }
 
     @Test
