@@ -18,11 +18,8 @@ package com.expedia.www.haystack.client;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 import com.expedia.www.haystack.client.idgenerators.IdGenerator;
-import com.expedia.www.haystack.client.idgenerators.LongIdGenerator;
 import com.expedia.www.haystack.client.idgenerators.RandomUUIDGenerator;
 import org.junit.Assert;
 import org.junit.Before;
