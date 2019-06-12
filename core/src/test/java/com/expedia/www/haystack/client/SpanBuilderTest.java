@@ -25,6 +25,8 @@ import io.opentracing.References;
 import io.opentracing.propagation.Format;
 import io.opentracing.tag.Tags;
 import java.util.Map;
+import java.util.UUID;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +48,6 @@ public class SpanBuilderTest {
 
         Assert.assertEquals("test-operation", span.getOperationName());
     }
-
 
     @Test
     public void testReferences() {
@@ -217,5 +218,16 @@ public class SpanBuilderTest {
         Assert.assertEquals(false, tags.get("boolean-key"));
         Assert.assertTrue(tags.containsKey("number-key"));
         Assert.assertEquals(1L, tags.get("number-key"));
+    }
+
+    @Test
+    public void testLongIdPropagationThroughoutTheTrace() {
+        Span parent = tracer.buildSpan("parent").start();
+        Span following = tracer.buildSpan("following").start();
+        Span child = tracer.buildSpan("child")
+                .asChildOf(parent)
+                .addReference(References.FOLLOWS_FROM, following.context())
+                .start();
+        Assert.assertTrue(child.context().getSpanId().getClass() == Long.class);
     }
 }

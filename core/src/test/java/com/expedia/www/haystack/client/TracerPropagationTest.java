@@ -18,8 +18,9 @@ package com.expedia.www.haystack.client;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
+import com.expedia.www.haystack.client.idgenerators.IdGenerator;
+import com.expedia.www.haystack.client.idgenerators.RandomUUIDGenerator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,9 +43,10 @@ public class TracerPropagationTest {
 
     @Test(expected=IllegalArgumentException.class)
     public void testInjectInvalidFormat() {
-        UUID traceId = UUID.randomUUID();
-        UUID spanId = UUID.randomUUID();
-        UUID parentId = UUID.randomUUID();
+        IdGenerator idGenerator = new RandomUUIDGenerator();
+        Object traceId = idGenerator.generate();
+        Object spanId = idGenerator.generate();
+        Object parentId = idGenerator.generate();
 
         String carrier = "";
 
@@ -53,11 +55,13 @@ public class TracerPropagationTest {
         tracer.inject(context, new Format<String>() {}, carrier);
     }
 
+
     @Test
     public void testInject() {
-        UUID traceId = UUID.randomUUID();
-        UUID spanId = UUID.randomUUID();
-        UUID parentId = UUID.randomUUID();
+        IdGenerator idGenerator = new RandomUUIDGenerator();
+        Object traceId = idGenerator.generate();
+        Object spanId = idGenerator.generate();
+        Object parentId = idGenerator.generate();
 
         Map<String, String> carrierValues = new HashMap<>();
         TextMap carrier = new TextMapInjectAdapter(carrierValues);
@@ -76,9 +80,10 @@ public class TracerPropagationTest {
 
     @Test
     public void testInjectURLEncoded() {
-        UUID traceId = UUID.randomUUID();
-        UUID spanId = UUID.randomUUID();
-        UUID parentId = UUID.randomUUID();
+        IdGenerator idGenerator = new RandomUUIDGenerator();
+        Object traceId = idGenerator.generate();
+        Object spanId = idGenerator.generate();
+        Object parentId = idGenerator.generate();
 
         Map<String, String> carrierValues = new HashMap<>();
         TextMap carrier = new TextMapInjectAdapter(carrierValues);
@@ -98,9 +103,10 @@ public class TracerPropagationTest {
 
     @Test
     public void testExtract() {
-        UUID traceId = UUID.randomUUID();
-        UUID spanId = UUID.randomUUID();
-        UUID parentId = UUID.randomUUID();
+        IdGenerator idGenerator = new RandomUUIDGenerator();
+        Object traceId = idGenerator.generate();
+        Object spanId = idGenerator.generate();
+        Object parentId = idGenerator.generate();
 
         Map<String, String> carrierValues = new HashMap<>();
         carrierValues.put("Baggage-TEST", "TEXT");
@@ -119,11 +125,13 @@ public class TracerPropagationTest {
         Assert.assertEquals(context.getBaggageItem("TEST"), "TEXT");
     }
 
+
     @Test
     public void testExtractIgnoreUnknowns() {
-        UUID traceId = UUID.randomUUID();
-        UUID spanId = UUID.randomUUID();
-        UUID parentId = UUID.randomUUID();
+        IdGenerator idGenerator = new RandomUUIDGenerator();
+        Object traceId = idGenerator.generate();
+        Object spanId = idGenerator.generate();
+        Object parentId = idGenerator.generate();
 
         Map<String, String> carrierValues = new HashMap<>();
         carrierValues.put("Trace-ID", traceId.toString());
@@ -145,8 +153,9 @@ public class TracerPropagationTest {
 
     @Test
     public void testExtractInvalid() {
-        UUID spanId = UUID.randomUUID();
-        UUID parentId = UUID.randomUUID();
+        IdGenerator idGenerator = new RandomUUIDGenerator();
+        Object spanId = idGenerator.generate();
+        Object parentId = idGenerator.generate();
 
         Map<String, String> carrierValues = new HashMap<>();
         carrierValues.put("Span-ID", spanId.toString());
@@ -159,11 +168,13 @@ public class TracerPropagationTest {
         Assert.assertEquals(context, null);
     }
 
+
     @Test
     public void testExtractURLEncoded() {
-        UUID traceId = UUID.randomUUID();
-        UUID spanId = UUID.randomUUID();
-        UUID parentId = UUID.randomUUID();
+        IdGenerator idGenerator = new RandomUUIDGenerator();
+        Object traceId = idGenerator.generate();
+        Object spanId = idGenerator.generate();
+        Object parentId = idGenerator.generate();
 
         Map<String, String> carrierValues = new HashMap<>();
         carrierValues.put("Baggage-TEST", "!%40%23%23*%5E%20%25%5E%26%26(*");

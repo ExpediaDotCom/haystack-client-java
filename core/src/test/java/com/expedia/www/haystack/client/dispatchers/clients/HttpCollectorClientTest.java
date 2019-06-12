@@ -21,6 +21,7 @@ import com.expedia.www.haystack.client.Span;
 import com.expedia.www.haystack.client.SpanContext;
 import com.expedia.www.haystack.client.Tracer;
 import com.expedia.www.haystack.client.dispatchers.InMemoryDispatcher;
+import com.expedia.www.haystack.client.idgenerators.RandomUUIDGenerator;
 import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 import com.expedia.www.haystack.remote.clients.ClientException;
 import org.apache.http.ProtocolVersion;
@@ -46,8 +47,8 @@ public class HttpCollectorClientTest {
 
     private Tracer tracer;
     private final static String serviceName = "dummy-service";
-    private final static UUID traceId = UUID.randomUUID();
-    private final static UUID spanId = UUID.randomUUID();
+    private final static Object traceId = new RandomUUIDGenerator().generate();
+    private final static Object spanId = new RandomUUIDGenerator().generate();
     private final static SpanContext spanContext = new SpanContext(traceId, spanId, null);
 
     @Before
