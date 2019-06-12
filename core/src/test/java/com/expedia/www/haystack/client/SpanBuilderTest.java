@@ -220,7 +220,7 @@ public class SpanBuilderTest {
         Assert.assertEquals(1L, tags.get("number-key"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testLongIdPropagationThroughoutTheTrace() {
         Span parent = tracer.buildSpan("parent").start();
         Span following = tracer.buildSpan("following").start();
@@ -228,7 +228,6 @@ public class SpanBuilderTest {
                 .asChildOf(parent)
                 .addReference(References.FOLLOWS_FROM, following.context())
                 .start();
-        Object IdString  = child.context().getSpanId();
-        UUID.fromString(IdString.toString());
+        Assert.assertTrue(child.context().getSpanId().getClass() == Long.class);
     }
 }
