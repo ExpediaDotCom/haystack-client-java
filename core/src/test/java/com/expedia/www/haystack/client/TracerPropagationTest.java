@@ -30,8 +30,7 @@ import com.expedia.www.haystack.client.metrics.NoopMetricsRegistry;
 
 import io.opentracing.propagation.Format;
 import io.opentracing.propagation.TextMap;
-import io.opentracing.propagation.TextMapExtractAdapter;
-import io.opentracing.propagation.TextMapInjectAdapter;
+import io.opentracing.propagation.TextMapAdapter;
 
 public class TracerPropagationTest {
     private Tracer tracer;
@@ -64,7 +63,7 @@ public class TracerPropagationTest {
         Object parentId = idGenerator.generate();
 
         Map<String, String> carrierValues = new HashMap<>();
-        TextMap carrier = new TextMapInjectAdapter(carrierValues);
+        TextMapAdapter carrier = new TextMapAdapter(carrierValues);
 
         SpanContext context = new SpanContext(traceId, spanId, parentId).addBaggage("TEST", "TEXT");
 
@@ -86,7 +85,7 @@ public class TracerPropagationTest {
         Object parentId = idGenerator.generate();
 
         Map<String, String> carrierValues = new HashMap<>();
-        TextMap carrier = new TextMapInjectAdapter(carrierValues);
+        TextMap carrier = new TextMapAdapter(carrierValues);
 
         SpanContext context = new SpanContext(traceId, spanId, parentId).addBaggage("TEST", "!@##*^ %^&&(*").addBaggage("!@##*^ %^&&(*", "TEXT");
 
@@ -114,7 +113,7 @@ public class TracerPropagationTest {
         carrierValues.put("Span-ID", spanId.toString());
         carrierValues.put("Parent-ID", parentId.toString());
 
-        TextMap carrier = new TextMapExtractAdapter(carrierValues);
+        TextMap carrier = new TextMapAdapter(carrierValues);
 
         SpanContext context = tracer.extract(Format.Builtin.TEXT_MAP, carrier);
 
@@ -141,7 +140,7 @@ public class TracerPropagationTest {
         carrierValues.put("JunkKey", parentId.toString());
         carrierValues.put("JunkKey2", parentId.toString());
 
-        TextMap carrier = new TextMapExtractAdapter(carrierValues);
+        TextMap carrier = new TextMapAdapter(carrierValues);
 
         SpanContext context = tracer.extract(Format.Builtin.HTTP_HEADERS, carrier);
 
@@ -161,7 +160,7 @@ public class TracerPropagationTest {
         carrierValues.put("Span-ID", spanId.toString());
         carrierValues.put("Parent-ID", parentId.toString());
 
-        TextMap carrier = new TextMapExtractAdapter(carrierValues);
+        TextMap carrier = new TextMapAdapter(carrierValues);
 
         SpanContext context = tracer.extract(Format.Builtin.HTTP_HEADERS, carrier);
 
@@ -183,7 +182,7 @@ public class TracerPropagationTest {
         carrierValues.put("Span-ID", spanId.toString());
         carrierValues.put("Parent-ID", parentId.toString());
 
-        TextMap carrier = new TextMapExtractAdapter(carrierValues);
+        TextMap carrier = new TextMapAdapter(carrierValues);
 
         SpanContext context = tracer.extract(Format.Builtin.HTTP_HEADERS, carrier);
 

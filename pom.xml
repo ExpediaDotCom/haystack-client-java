@@ -43,7 +43,7 @@
     <java-version>1.8</java-version>
     <encoding>UTF-8</encoding>
 
-    <opentracing.version>0.31.0</opentracing.version>
+    <opentracing.version>0.33.0</opentracing.version>
     <protobuf.version>3.3.1</protobuf.version>
     <slf4j.version>1.7.25</slf4j.version>
     <junit.version>4.12</junit.version>
@@ -52,7 +52,7 @@
     <commonslang3.version>3.0</commonslang3.version>
     <grpc.version>1.9.0</grpc.version>
     <jaxrs.version>2.1</jaxrs.version>
-    <micrometer.version>1.1.1</micrometer.version>
+    <micrometer.version>1.3.1</micrometer.version>
     <haystack-idl-java.version>1.0.64</haystack-idl-java.version>
     <http-client.vesion>4.5.3</http-client.vesion>
 

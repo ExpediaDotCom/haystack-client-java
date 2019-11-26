@@ -29,6 +29,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import io.opentracing.tag.StringTag;
+import io.opentracing.tag.Tag;
+
 public class SpanTest {
 
   private Tracer tracer;
@@ -106,14 +109,23 @@ public class SpanTest {
   }
 
   @Test
+  public void testTagForTagType() {
+    String key = "typed-key-name";
+    String value = "typed-tag-value-value";
+    StringTag stringTag = new StringTag(key);
+    stringTag.set(span, value);
+    Assert.assertEquals(value, span.getTags().get(key));
+  }
+
+  @Test
   public void testTagForEmptyConditons() {
     String key = "key-name";
     String stringValue = "value-value";
     Long longValue = 3L;
     final boolean boolValue = false;
 
-    span.setTag(null, stringValue);
-    span.setTag(null, longValue);
+    span.setTag((Tag<String>) null, stringValue);
+    span.setTag((Tag<Long>) null, longValue);
     span.setTag(null, boolValue);
     span.setTag(key, (Number) null);
     span.setTag(key, (String) null);

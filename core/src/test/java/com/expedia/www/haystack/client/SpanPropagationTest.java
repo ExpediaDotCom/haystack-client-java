@@ -43,25 +43,29 @@ public class SpanPropagationTest {
     @Test
     public void testActiveSpan() {
         Assert.assertNull(tracer.activeSpan());
-
-        try (Scope scope = tracer.buildSpan("active-span").startActive(true)) {
-            Assert.assertEquals(tracer.scopeManager().active().span(), tracer.activeSpan());
-            Assert.assertEquals(scope.span(), tracer.activeSpan());
+        Span span = tracer.buildSpan("active-span").start();
+        try (Scope scope = tracer.scopeManager().activate(span)) {
+            Assert.assertEquals(tracer.scopeManager().activeSpan(), tracer.activeSpan());
+            Assert.assertEquals(span, tracer.activeSpan());
+        }finally {
+            //auto-close behavior based on the scope has been removed in 0.33
+            span.finish();
         }
-
         Assert.assertNull(tracer.activeSpan());
     }
 
     @Test
     public void testActiveSpanPropagation() {
         Assert.assertNull(tracer.activeSpan());
-
-        try (Scope scope = tracer.buildSpan("active-span").startActive(true)) {
+        Span span = tracer.buildSpan("active-span").start();
+        try (Scope scope = tracer.scopeManager().activate(span)) {
             tracer.buildSpan("child-active-span").start().finish();
-
-            Assert.assertEquals(tracer.scopeManager().active().span(), tracer.activeSpan());
-            Assert.assertEquals(scope.span(), tracer.activeSpan());
+            Assert.assertEquals(tracer.scopeManager().activeSpan(), tracer.activeSpan());
+            Assert.assertEquals(span, tracer.activeSpan());
             Assert.assertEquals("Haven't closed the parent", 1, dispatcher.getReportedSpans().size());
+        }finally {
+            //auto-close behavior based on the scope has been removed in 0.33
+            span.finish();
         }
 
         Assert.assertEquals("Parent closed", 2, dispatcher.getReportedSpans().size());
@@ -77,9 +81,12 @@ public class SpanPropagationTest {
 
     @Test
     public void testActiveSpanIgnorePropagation() {
-        try (Scope scope = tracer.buildSpan("active-span").startActive(true)) {
+        Span span = tracer.buildSpan("active-span").start();
+        try (Scope scope = tracer.scopeManager().activate(span)) {
             Span seperateSpan = tracer.buildSpan("independent-active-span").ignoreActiveSpan().start();
             seperateSpan.finish();
+        }finally {
+            span.finish();
         }
 
         Assert.assertEquals(2, dispatcher.getReportedSpans().size());
@@ -96,10 +103,11 @@ public class SpanPropagationTest {
     @Test
     public void testActiveSpanPreSeeded() {
         Span parentSpan = tracer.buildSpan("parent").start();
-
-        try (Scope scope = tracer.buildSpan("active").startActive(true)) {
+        Span activeSpan = tracer.buildSpan("active").start();
+        try (Scope scope = tracer.scopeManager().activate(activeSpan)) {
             tracer.buildSpan("child").asChildOf(parentSpan).start().finish();
         }
+        activeSpan.finish();
         parentSpan.finish();
 
         Assert.assertEquals("All spans closed", 3, dispatcher.getReportedSpans().size());

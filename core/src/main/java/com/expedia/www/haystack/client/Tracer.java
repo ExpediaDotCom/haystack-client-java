@@ -98,11 +98,7 @@ public class Tracer implements io.opentracing.Tracer {
         this.extractFailureCounter = Counter.builder("extract").tag(new Tag("state", "exception")).register(metrics);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
                 Tracer.this.close();
-            } catch (IOException e) {
-                /* skip logging any error */
-            }
         }));
     }
 
@@ -113,12 +109,11 @@ public class Tracer implements io.opentracing.Tracer {
                 .toString();
     }
 
-    public void close() throws IOException {
+    public void close(){
         try (Sample timer = closeTimer.start()) {
             dispatcher.close();
         } catch (IOException e) {
             closeExceptionCounter.increment();
-            throw e;
         }
     }
 
@@ -188,8 +183,12 @@ public class Tracer implements io.opentracing.Tracer {
 
     @Override
     public Span activeSpan() {
-        final Scope scope = scopeManager.active();
-        return (scope == null ? null : scope.span());
+        return scopeManager.activeSpan();
+    }
+
+    @Override
+    public Scope activateSpan(Span span) {
+        return scopeManager.activate(span);
     }
 
     @Override
@@ -266,6 +265,14 @@ public class Tracer implements io.opentracing.Tracer {
         @Override
         public SpanBuilder withTag(String key, Number value) {
             this.tags.put(key, value);
+            return this;
+        }
+
+        @Override
+        public <T> io.opentracing.Tracer.SpanBuilder withTag(io.opentracing.tag.Tag<T> tag, T value) {
+            if (tag != null && tag.getKey() != null) {
+                this.tags.put(tag.getKey(), value);
+            }
             return this;
         }
 
@@ -347,17 +354,6 @@ public class Tracer implements io.opentracing.Tracer {
                 return clock.microTime();
             }
             return startTime;
-        }
-
-        @Override
-        public Scope startActive(boolean finishSpanOnClose) {
-            return tracer.scopeManager().activate(start(), finishSpanOnClose);
-        }
-
-        @Override
-        @Deprecated
-        public com.expedia.www.haystack.client.Span startManual() {
-            return start();
         }
 
         @Override
