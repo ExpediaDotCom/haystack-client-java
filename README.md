@@ -9,6 +9,12 @@ Haystack client java is an [OpenTracing](https://github.com/opentracing/opentrac
 
 Opentracing API usage has been documented at [https://github.com/opentracing/opentracing-java](https://github.com/opentracing/opentracing-java). 
 
+### OpenTracing version compatibility
+
+The current OpenTracing version 0.33 has introduced backwards incompatible changes with all previous versions. Please make sure 
+that your dependencies on OpenTracing align to the 0.33 version to avoid runtime issues. 
+
+## Examples
 
 You can look at our sample projects for how to trace a simple web application
 
@@ -53,7 +59,7 @@ In the usual case, you just need to include the following dependency to your pro
 
 In case your apps are already wired in with some kind of instrumentation library other than OpenTracing you could refer to the below links based on your usecase
 
-* [Opencencus](https://github.com/ExpediaDotCom/haystack-opencensus-exporter-java)
+* [Opencensus](https://github.com/ExpediaDotCom/haystack-opencensus-exporter-java)
 * [Brave-Zipkin](https://github.com/HotelsDotCom/pitchfork)
 
 
