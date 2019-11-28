@@ -21,6 +21,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.*;
 
+import io.opentracing.tag.Tag;
+
 public final class Span implements io.opentracing.Span {
   private final Tracer tracer;
   private final Clock clock;
@@ -169,6 +171,14 @@ public final class Span implements io.opentracing.Span {
   @Override
   public Span setTag(String key, Number value) {
     return addTag(key, value);
+  }
+
+  @Override
+  public <T> io.opentracing.Span setTag(Tag<T> tag, T value) {
+    if (tag != null) {
+      return addTag(tag.getKey(), value);
+    }
+    return this;
   }
 
   @Override
