@@ -38,7 +38,6 @@ import org.mockito.Mockito;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
@@ -47,8 +46,8 @@ public class HttpCollectorClientTest {
 
     private Tracer tracer;
     private final static String serviceName = "dummy-service";
-    private final static Object traceId = new RandomUUIDGenerator().generate();
-    private final static Object spanId = new RandomUUIDGenerator().generate();
+    private final static Object traceId = new RandomUUIDGenerator().generateTraceId();
+    private final static Object spanId = new RandomUUIDGenerator().generateSpanId();
     private final static SpanContext spanContext = new SpanContext(traceId, spanId, null);
 
     @Before

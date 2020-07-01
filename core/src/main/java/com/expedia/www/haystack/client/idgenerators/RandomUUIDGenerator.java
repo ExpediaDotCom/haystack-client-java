@@ -22,7 +22,12 @@ import java.util.UUID;
 public class RandomUUIDGenerator implements IdGenerator {
 
     @Override
-    public UUID generate() {
+    public UUID generateTraceId() {
         return UUID.randomUUID();
+    }
+
+    @Override
+    public UUID generateSpanId() {
+        return new UUID(0, UUID.randomUUID().getLeastSignificantBits());
     }
 }

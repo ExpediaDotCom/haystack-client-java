@@ -21,11 +21,15 @@ import com.fasterxml.uuid.Generators;
 
 import java.util.UUID;
 
-
 public class TimeBasedUUIDGenerator implements IdGenerator {
 
     @Override
-    public UUID generate() {
+    public UUID generateTraceId() {
+        return Generators.timeBasedGenerator().generate();
+    }
+
+    @Override
+    public Object generateSpanId() {
         return Generators.timeBasedGenerator().generate();
     }
 }

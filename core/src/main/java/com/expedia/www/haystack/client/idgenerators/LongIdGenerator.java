@@ -24,7 +24,12 @@ import java.util.concurrent.ThreadLocalRandom;
 public class LongIdGenerator implements IdGenerator {
 
     @Override
-    public Long generate() {
+    public Long generateTraceId() {
+        return ThreadLocalRandom.current().nextLong(Long.MAX_VALUE);
+    }
+
+    @Override
+    public Long generateSpanId() {
         return ThreadLocalRandom.current().nextLong(Long.MAX_VALUE);
     }
 }

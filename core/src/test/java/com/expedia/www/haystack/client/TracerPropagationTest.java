@@ -43,9 +43,9 @@ public class TracerPropagationTest {
     @Test(expected=IllegalArgumentException.class)
     public void testInjectInvalidFormat() {
         IdGenerator idGenerator = new RandomUUIDGenerator();
-        Object traceId = idGenerator.generate();
-        Object spanId = idGenerator.generate();
-        Object parentId = idGenerator.generate();
+        Object traceId = idGenerator.generateTraceId();
+        Object spanId = idGenerator.generateSpanId();
+        Object parentId = idGenerator.generateTraceId();
 
         String carrier = "";
 
@@ -58,9 +58,9 @@ public class TracerPropagationTest {
     @Test
     public void testInject() {
         IdGenerator idGenerator = new RandomUUIDGenerator();
-        Object traceId = idGenerator.generate();
-        Object spanId = idGenerator.generate();
-        Object parentId = idGenerator.generate();
+        Object traceId = idGenerator.generateTraceId();
+        Object spanId = idGenerator.generateSpanId();
+        Object parentId = idGenerator.generateTraceId();
 
         Map<String, String> carrierValues = new HashMap<>();
         TextMapAdapter carrier = new TextMapAdapter(carrierValues);
@@ -80,9 +80,9 @@ public class TracerPropagationTest {
     @Test
     public void testInjectURLEncoded() {
         IdGenerator idGenerator = new RandomUUIDGenerator();
-        Object traceId = idGenerator.generate();
-        Object spanId = idGenerator.generate();
-        Object parentId = idGenerator.generate();
+        Object traceId = idGenerator.generateTraceId();
+        Object spanId = idGenerator.generateSpanId();
+        Object parentId = idGenerator.generateTraceId();
 
         Map<String, String> carrierValues = new HashMap<>();
         TextMap carrier = new TextMapAdapter(carrierValues);
@@ -103,9 +103,9 @@ public class TracerPropagationTest {
     @Test
     public void testExtract() {
         IdGenerator idGenerator = new RandomUUIDGenerator();
-        Object traceId = idGenerator.generate();
-        Object spanId = idGenerator.generate();
-        Object parentId = idGenerator.generate();
+        Object traceId = idGenerator.generateTraceId();
+        Object spanId = idGenerator.generateSpanId();
+        Object parentId = idGenerator.generateTraceId();
 
         Map<String, String> carrierValues = new HashMap<>();
         carrierValues.put("Baggage-TEST", "TEXT");
@@ -128,9 +128,9 @@ public class TracerPropagationTest {
     @Test
     public void testExtractIgnoreUnknowns() {
         IdGenerator idGenerator = new RandomUUIDGenerator();
-        Object traceId = idGenerator.generate();
-        Object spanId = idGenerator.generate();
-        Object parentId = idGenerator.generate();
+        Object traceId = idGenerator.generateTraceId();
+        Object spanId = idGenerator.generateSpanId();
+        Object parentId = idGenerator.generateTraceId();
 
         Map<String, String> carrierValues = new HashMap<>();
         carrierValues.put("Trace-ID", traceId.toString());
@@ -153,8 +153,8 @@ public class TracerPropagationTest {
     @Test
     public void testExtractInvalid() {
         IdGenerator idGenerator = new RandomUUIDGenerator();
-        Object spanId = idGenerator.generate();
-        Object parentId = idGenerator.generate();
+        Object spanId = idGenerator.generateSpanId();
+        Object parentId = idGenerator.generateTraceId();
 
         Map<String, String> carrierValues = new HashMap<>();
         carrierValues.put("Span-ID", spanId.toString());
@@ -171,9 +171,9 @@ public class TracerPropagationTest {
     @Test
     public void testExtractURLEncoded() {
         IdGenerator idGenerator = new RandomUUIDGenerator();
-        Object traceId = idGenerator.generate();
-        Object spanId = idGenerator.generate();
-        Object parentId = idGenerator.generate();
+        Object traceId = idGenerator.generateTraceId();
+        Object spanId = idGenerator.generateSpanId();
+        Object parentId = idGenerator.generateTraceId();
 
         Map<String, String> carrierValues = new HashMap<>();
         carrierValues.put("Baggage-TEST", "!%40%23%23*%5E%20%25%5E%26%26(*");

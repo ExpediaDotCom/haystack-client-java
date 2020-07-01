@@ -17,5 +17,7 @@
 package com.expedia.www.haystack.client.idgenerators;
 
 public interface IdGenerator {
-    Object generate();
+    Object generateTraceId();
+
+    Object generateSpanId();
 }
