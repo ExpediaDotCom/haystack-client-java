@@ -16,20 +16,15 @@
  */
 package com.expedia.www.haystack.client.idgenerators;
 
-
-import com.expedia.www.haystack.client.idgenerators.IdGenerator;
-
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Generates random and unique Longs as ids for Traces and Spans.
+ */
 public class LongIdGenerator implements IdGenerator {
 
     @Override
-    public Long generateTraceId() {
-        return ThreadLocalRandom.current().nextLong(Long.MAX_VALUE);
-    }
-
-    @Override
-    public Long generateSpanId() {
+    public Long generate() {
         return ThreadLocalRandom.current().nextLong(Long.MAX_VALUE);
     }
 }

@@ -19,10 +19,20 @@ package com.expedia.www.haystack.client.idgenerators;
 
 import java.util.UUID;
 
+/**
+ * Generates UUIDs as ids for Traces and Spans.
+ * <p/>
+ * Given that the span only needs to be unique within a trace, the UUID for spans will only contain the least
+ * significant bits and will be left padded with zeroes.
+ * <p/>
+ * Consider using the TimeBasedUUIDGenerator which is more performant.
+ * <p/>
+ * @see com.expedia.www.haystack.client.idgenerators.TimeBasedUUIDGenerator
+ */
 public class RandomUUIDGenerator implements IdGenerator {
 
     @Override
-    public UUID generateTraceId() {
+    public UUID generate() {
         return UUID.randomUUID();
     }
 
