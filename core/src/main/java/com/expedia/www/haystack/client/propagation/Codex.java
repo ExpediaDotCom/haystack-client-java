@@ -40,4 +40,19 @@ public interface Codex<R,T> {
      */
     T decode(R value);
 
+    default T decodeTraceId(R value) {
+        return decode(value);
+    }
+
+    default T decodeSpanId(R value) {
+        return decode(value);
+    }
+
+    default T decodeBaggage(R value) {
+        return decode(value);
+    }
+
+    default T decodeKey(R value) {
+        return decode(value);
+    }
 }
