@@ -78,18 +78,18 @@ public class TextMapPropagator implements Injector<TextMap>, Extractor<TextMap> 
         final Map<String, String> baggage = new HashMap<>();
 
         for (Map.Entry<String, String> entry : carrier) {
-            final String decodedKey = keyCodex.decode(entry.getKey());
+            final String decodedKey = keyCodex.decodeKey(entry.getKey());
             final String decodedKeyLowerCase = decodedKey.toLowerCase();
 
             if (decodedKeyLowerCase.startsWith(convention.baggagePrefix().toLowerCase(Locale.ROOT))) {
                 baggage.put(decodedKey.substring(convention.baggagePrefix().length()),
-                            valueCodex.decode(entry.getValue()));
+                            valueCodex.decodeBaggage(entry.getValue()));
             } else if (containsIgnoreCase(convention.traceIdKeyAliases(), decodedKeyLowerCase)) {
-                traceId = valueCodex.decode(entry.getValue());
+                traceId = valueCodex.decodeTraceId(entry.getValue());
             } else if (containsIgnoreCase(convention.parentIdKeyAliases(), decodedKeyLowerCase)) {
-                parentId = valueCodex.decode(entry.getValue());
+                parentId = valueCodex.decodeSpanId(entry.getValue());
             } else if (containsIgnoreCase(convention.spanIdKeyAliases(), decodedKeyLowerCase)) {
-                spanId = valueCodex.decode(entry.getValue());
+                spanId = valueCodex.decodeSpanId(entry.getValue());
             }
         }
 

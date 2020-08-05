@@ -288,7 +288,7 @@ public class Tracer implements io.opentracing.Tracer {
 
         protected SpanContext createNewContext() {
 
-            return createContext(tracer.idGenerator.generate(), tracer.idGenerator.generate(), null, Collections.emptyMap());
+            return createContext(tracer.idGenerator.generateTraceId(), tracer.idGenerator.generateSpanId(), null, Collections.emptyMap());
         }
 
         protected SpanContext createContext(UUID traceId, UUID spanId, UUID parentId, Map<String, String> baggage) {
@@ -331,7 +331,7 @@ public class Tracer implements io.opentracing.Tracer {
             }
 
             return createContext(parent.getContext().getTraceId(),
-                    tracer.idGenerator.generate(),
+                    tracer.idGenerator.generateSpanId(),
                     parent.getContext().getSpanId(),
                     baggage);
         }

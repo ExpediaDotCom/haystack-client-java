@@ -17,5 +17,25 @@
 package com.expedia.www.haystack.client.idgenerators;
 
 public interface IdGenerator {
+
+    /**
+     * Generates a unique id
+     * @deprecated This method was deprecated in 0.3.1. Use {@link #generateTraceId()}  and {@link #generateSpanId()} instead
+     */
+    @Deprecated
     Object generate();
+
+    /**
+     * Generates a random unique identifier for a trace.
+     */
+    default Object generateTraceId() {
+        return generate();
+    }
+
+    /**
+     * Generates a random identifier for a span. It should be unique within a trace.
+     */
+    default Object generateSpanId() {
+        return generate();
+    }
 }

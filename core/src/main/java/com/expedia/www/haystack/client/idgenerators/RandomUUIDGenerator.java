@@ -19,6 +19,13 @@ package com.expedia.www.haystack.client.idgenerators;
 
 import java.util.UUID;
 
+/**
+ * Generates UUIDs as ids for Traces and Spans.
+ * <p/>
+ * Consider using the TimeBasedUUIDGenerator which is more performant.
+ *
+ * @see com.expedia.www.haystack.client.idgenerators.TimeBasedUUIDGenerator
+ */
 public class RandomUUIDGenerator implements IdGenerator {
 
     @Override

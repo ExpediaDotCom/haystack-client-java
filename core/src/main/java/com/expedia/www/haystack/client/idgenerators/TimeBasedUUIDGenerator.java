@@ -16,16 +16,17 @@
  */
 package com.expedia.www.haystack.client.idgenerators;
 
-
-import com.fasterxml.uuid.Generators;
-
 import java.util.UUID;
 
+import static com.fasterxml.uuid.Generators.timeBasedGenerator;
 
+/**
+ * Generates UUIDs as ids for Traces and Spans.
+ */
 public class TimeBasedUUIDGenerator implements IdGenerator {
 
     @Override
     public UUID generate() {
-        return Generators.timeBasedGenerator().generate();
+        return timeBasedGenerator().generate();
     }
 }
