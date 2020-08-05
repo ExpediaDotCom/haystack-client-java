@@ -17,6 +17,7 @@
 package com.expedia.www.haystack.client;
 
 import com.expedia.www.haystack.client.dispatchers.NoopDispatcher;
+import com.expedia.www.haystack.client.idgenerators.HexcharIdGenerator;
 import com.expedia.www.haystack.client.idgenerators.IdGenerator;
 import com.expedia.www.haystack.client.idgenerators.LongIdGenerator;
 import com.expedia.www.haystack.client.idgenerators.RandomUUIDGenerator;
@@ -64,5 +65,13 @@ public class TracerBuildTest {
         Assert.assertNotNull(tracer);
     }
 
+    @Test
+    public void testTracerBuildHexcharIdGenerator(){
+        IdGenerator idGenerator = new HexcharIdGenerator();
+        Tracer.Builder tracerBuild = new Tracer.Builder(new NoopMetricsRegistry(), "TestTracer", new NoopDispatcher());
+        tracerBuild.withIdGenerator(idGenerator);
+        Tracer tracer = tracerBuild.build();
+        Assert.assertNotNull(tracer);
+    }
 
 }
