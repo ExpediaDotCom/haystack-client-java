@@ -43,9 +43,9 @@ public class HexcharIdGenerator implements IdGenerator {
      * Generates a new 64-bit id, taking care to dodge zero which can be confused with absent
      */
     private long nextRandomLong() {
-        long nextId = ThreadLocalRandom.current().nextLong();
+        long nextId = ThreadLocalRandom.current().nextLong(Long.MAX_VALUE);
         while (nextId == 0L) {
-            nextId = ThreadLocalRandom.current().nextLong();
+            nextId = ThreadLocalRandom.current().nextLong(Long.MAX_VALUE);
         }
         return nextId;
     }
