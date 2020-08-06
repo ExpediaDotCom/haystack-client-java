@@ -16,14 +16,13 @@
  */
 package com.expedia.www.haystack.client.idgenerators;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Generates random and unique B3 compatible hexchar ids.
  * Note that traceId will be in 128 bit while spanId and parentSpanId will be 64 bit.
  */
 public class HexcharIdGenerator implements IdGenerator {
-    private final Random random = new Random();
 
     @Override
     public String generateTraceId() {
@@ -44,9 +43,9 @@ public class HexcharIdGenerator implements IdGenerator {
      * Generates a new 64-bit id, taking care to dodge zero which can be confused with absent
      */
     private long nextRandomLong() {
-        long nextId = random.nextLong();
+        long nextId = ThreadLocalRandom.current().nextLong();
         while (nextId == 0L) {
-            nextId = random.nextLong();
+            nextId = ThreadLocalRandom.current().nextLong();
         }
         return nextId;
     }
