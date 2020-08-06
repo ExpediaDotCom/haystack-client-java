@@ -27,12 +27,12 @@ public class HexcharIdGenerator implements IdGenerator {
 
     @Override
     public String generateTraceId() {
-        return String.format("%016X", random.nextLong()).concat(String.format("%016X", random.nextLong()));
+        return String.format("%016X", nextRandomLong()).concat(String.format("%016X", nextRandomLong()));
     }
 
     @Override
     public String generateSpanId() {
-        return String.format("%016X", next64BitId());
+        return String.format("%016X", nextRandomLong());
     }
 
     @Override
@@ -43,7 +43,7 @@ public class HexcharIdGenerator implements IdGenerator {
     /**
      * Generates a new 64-bit id, taking care to dodge zero which can be confused with absent
      */
-    private long next64BitId() {
+    private long nextRandomLong() {
         long nextId = random.nextLong();
         while (nextId == 0L) {
             nextId = random.nextLong();
