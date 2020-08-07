@@ -36,7 +36,7 @@ public class HexcharIdGenerator implements IdGenerator {
 
     @Override
     public Object generate() {
-        return null;
+        return String.format("%016X", nextRandomLong()).concat(String.format("%016X", nextRandomLong()));
     }
 
     /**
