@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.expedia.www</groupId>
         <artifactId>haystack-client-metrics</artifactId>
-        <version>0.4.0-SNAPSHOT</version>
+        <version>0.4.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>haystack-client-metrics-dropwizard</artifactId>
