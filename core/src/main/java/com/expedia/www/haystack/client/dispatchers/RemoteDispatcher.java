@@ -82,7 +82,7 @@ public class RemoteDispatcher implements Dispatcher {
             while (running.get() || !(acceptQueue.isEmpty())) {
 
                 try (Sample timer = sendTimer.start()) {
-                    Span span = acceptQueue.take();
+                    Span span = acceptQueue.poll(1000, TimeUnit.MILLISECONDS);
                     try {
                         client.send(span);
                     } catch (ClientException e) {
